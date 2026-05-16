@@ -18,8 +18,10 @@ body{background:#07091a;font-family:'Outfit',sans-serif;color:#e2e8f0}
 button,input,textarea{font-family:'Outfit',sans-serif}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes bounceIn{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .fi{animation:fadeIn .35s ease both}
 .bi{animation:bounceIn .4s ease both}
+.shake{animation:shake .3s ease}
 </style>
 </head>
 <body>
@@ -29,166 +31,362 @@ var h = React.createElement;
 var useState = React.useState;
 var useEffect = React.useEffect;
 var useRef = React.useRef;
+var useMemo = React.useMemo;
 
-// ── CORES
+// ═══════════════════════════════════════════════════════
+// CORES
+// ═══════════════════════════════════════════════════════
 var C = {
   bg:"#07091a", surface:"#0d1127", card:"#111729", border:"#1e2d4a",
   accent:"#22d3a0", green:"#4ade80", red:"#f87171", yellow:"#fbbf24",
-  blue:"#60a5fa", purple:"#a78bfa", text:"#e2e8f0", muted:"#64748b"
+  blue:"#60a5fa", purple:"#a78bfa", orange:"#fb923c",
+  text:"#e2e8f0", muted:"#64748b"
 };
 
-// ── DADOS
+// ═══════════════════════════════════════════════════════
+// PONTUAÇÃO REAL (começa do 0, meta ~2200 XP = 60 pts)
+// ═══════════════════════════════════════════════════════
+function estScore(xp){
+  if(xp===0) return 0;
+  var score = Math.round(Math.pow(xp, 0.65) * 0.35);
+  return Math.min(score, 110);
+}
+function detLevel(score){
+  if(score<35)return"A1"; if(score<55)return"A2";
+  if(score<75)return"B1"; if(score<95)return"B2";
+  if(score<115)return"C1"; return"C2";
+}
+function xpToReach60(){
+  // inverse: 60 = 0.35 * xp^0.65 => xp = (60/0.35)^(1/0.65) ≈ 2250
+  return 2250;
+}
+
+// ═══════════════════════════════════════════════════════
+// DADOS — READ & SELECT
+// ═══════════════════════════════════════════════════════
 var RS_ROUNDS = [
-  [
-    {w:"absent",r:1},{w:"abcent",r:0},{w:"benefit",r:1},{w:"benfit",r:0},
-    {w:"concept",r:1},{w:"concapt",r:0},{w:"develop",r:1},{w:"develob",r:0},
-    {w:"evidence",r:1},{w:"evidance",r:0},{w:"function",r:1},{w:"functon",r:0},
-    {w:"general",r:1},{w:"generel",r:0},{w:"history",r:1},{w:"histary",r:0},
-    {w:"impact",r:1},{w:"impcat",r:0},{w:"justify",r:1},{w:"justidy",r:0}
-  ],
-  [
-    {w:"achieve",r:1},{w:"acheve",r:0},{w:"balance",r:1},{w:"balence",r:0},
-    {w:"capable",r:1},{w:"capadle",r:0},{w:"discuss",r:1},{w:"discuse",r:0},
-    {w:"efficient",r:1},{w:"eficient",r:0},{w:"global",r:1},{w:"globle",r:0},
-    {w:"human",r:1},{w:"humun",r:0},{w:"involve",r:1},{w:"invove",r:0},
-    {w:"knowledge",r:1},{w:"knowlege",r:0},{w:"language",r:1},{w:"lanquage",r:0}
-  ],
-  [
-    {w:"maintain",r:1},{w:"maintan",r:0},{w:"network",r:1},{w:"netwerk",r:0},
-    {w:"observe",r:1},{w:"obsirve",r:0},{w:"process",r:1},{w:"procces",r:0},
-    {w:"quality",r:1},{w:"qualety",r:0},{w:"research",r:1},{w:"resarch",r:0},
-    {w:"society",r:1},{w:"socyety",r:0},{w:"theory",r:1},{w:"therry",r:0},
-    {w:"unique",r:1},{w:"uniqe",r:0},{w:"various",r:1},{w:"vareus",r:0}
-  ]
+  [{w:"absent",r:1},{w:"abcent",r:0},{w:"benefit",r:1},{w:"benfit",r:0},
+   {w:"concept",r:1},{w:"concapt",r:0},{w:"develop",r:1},{w:"develob",r:0},
+   {w:"evidence",r:1},{w:"evidance",r:0},{w:"function",r:1},{w:"functon",r:0},
+   {w:"general",r:1},{w:"generel",r:0},{w:"history",r:1},{w:"histary",r:0},
+   {w:"impact",r:1},{w:"impcat",r:0},{w:"justify",r:1},{w:"justidy",r:0}],
+  [{w:"achieve",r:1},{w:"acheve",r:0},{w:"balance",r:1},{w:"balence",r:0},
+   {w:"capable",r:1},{w:"capadle",r:0},{w:"discuss",r:1},{w:"discuse",r:0},
+   {w:"efficient",r:1},{w:"eficient",r:0},{w:"global",r:1},{w:"globle",r:0},
+   {w:"human",r:1},{w:"humun",r:0},{w:"involve",r:1},{w:"invove",r:0},
+   {w:"knowledge",r:1},{w:"knowlege",r:0},{w:"language",r:1},{w:"lanquage",r:0}],
+  [{w:"maintain",r:1},{w:"maintan",r:0},{w:"network",r:1},{w:"netwerk",r:0},
+   {w:"observe",r:1},{w:"obsirve",r:0},{w:"process",r:1},{w:"procces",r:0},
+   {w:"quality",r:1},{w:"qualety",r:0},{w:"research",r:1},{w:"resarch",r:0},
+   {w:"society",r:1},{w:"socyety",r:0},{w:"theory",r:1},{w:"therry",r:0},
+   {w:"unique",r:1},{w:"uniqe",r:0},{w:"various",r:1},{w:"vareus",r:0}],
+  [{w:"accurate",r:1},{w:"accurete",r:0},{w:"behavior",r:1},{w:"behaviur",r:0},
+   {w:"consider",r:1},{w:"conseder",r:0},{w:"demand",r:1},{w:"demend",r:0},
+   {w:"establish",r:1},{w:"establesh",r:0},{w:"feature",r:1},{w:"featur",r:0},
+   {w:"generate",r:1},{w:"generete",r:0},{w:"identify",r:1},{w:"identefy",r:0},
+   {w:"primary",r:1},{w:"primery",r:0},{w:"require",r:1},{w:"requere",r:0}],
+  [{w:"achieve",r:1},{w:"acheive",r:0},{w:"challenge",r:1},{w:"chalenge",r:0},
+   {w:"complex",r:1},{w:"compleks",r:0},{w:"define",r:1},{w:"defene",r:0},
+   {w:"element",r:1},{w:"elemant",r:0},{w:"figure",r:1},{w:"figur",r:0},
+   {w:"growth",r:1},{w:"growht",r:0},{w:"include",r:1},{w:"inclood",r:0},
+   {w:"produce",r:1},{w:"produse",r:0},{w:"region",r:1},{w:"regon",r:0}]
 ];
 
+// ═══════════════════════════════════════════════════════
+// DADOS — READ & COMPLETE
+// ═══════════════════════════════════════════════════════
 var RC_DATA = [
-  {answer:"concept",  missing:[1,3]},
-  {answer:"develop",  missing:[1,3]},
-  {answer:"evidence", missing:[0,2]},
-  {answer:"function", missing:[1,6]},
-  {answer:"history",  missing:[0,4]},
-  {answer:"knowledge",missing:[2,4]},
-  {answer:"maintain", missing:[1,5]},
-  {answer:"observe",  missing:[0,2]},
-  {answer:"research", missing:[1,4]},
-  {answer:"society",  missing:[1,4]}
+  {answer:"concept",   missing:[1,3]},  {answer:"develop",   missing:[1,3]},
+  {answer:"evidence",  missing:[0,2]},  {answer:"function",  missing:[1,6]},
+  {answer:"history",   missing:[0,4]},  {answer:"knowledge", missing:[2,4]},
+  {answer:"maintain",  missing:[1,5]},  {answer:"observe",   missing:[0,2]},
+  {answer:"research",  missing:[1,4]},  {answer:"society",   missing:[1,4]},
+  {answer:"efficient", missing:[0,3]},  {answer:"identify",  missing:[2,5]},
+  {answer:"balance",   missing:[1,4]},  {answer:"primary",   missing:[2,5]},
+  {answer:"language",  missing:[1,4]},  {answer:"consider",  missing:[2,5]},
+  {answer:"approach",  missing:[0,4]},  {answer:"benefit",   missing:[3,5]},
+  {answer:"require",   missing:[2,5]},  {answer:"feature",   missing:[3,6]}
 ];
 
+// ═══════════════════════════════════════════════════════
+// DADOS — VOCABULARY
+// ═══════════════════════════════════════════════════════
 var VOC_DATA = [
-  {q:"The scientist provided _____ to support her claim.",   word:"evidence",    opts:["evidence","opinion","feeling","question"],   def:"Proof that helps confirm something is true"},
-  {q:"We need to _____ the data before drawing conclusions.",word:"analyze",     opts:["analyze","ignore","forget","damage"],        def:"Examine in detail to understand better"},
-  {q:"The new policy will _____ thousands of people.",       word:"affect",      opts:["affect","delay","observe","create"],         def:"Have an influence on something or someone"},
-  {q:"She had to _____ her position after new evidence.",    word:"revise",      opts:["revise","repeat","remove","reject"],         def:"Change something to improve or correct it"},
-  {q:"The report _____ the main challenges in the sector.",  word:"highlights",  opts:["highlights","ignores","follows","replaces"], def:"Draws attention to the most important parts"},
-  {q:"The results were not _____; they surprised everyone.", word:"anticipated", opts:["anticipated","forgotten","created","avoided"],def:"Expected or predicted in advance"},
-  {q:"His argument was _____ by logic and clear examples.",  word:"supported",   opts:["supported","weakened","replaced","ignored"], def:"Backed up by reasoning or proof"},
-  {q:"The two methods are _____; they cannot work together.",word:"incompatible",opts:["incompatible","identical","flexible","optional"],def:"Unable to exist or work together"}
+  {q:"The scientist provided _____ to support her claim.",    word:"evidence",    opts:["evidence","opinion","feeling","question"],    def:"Proof that helps confirm something is true"},
+  {q:"We need to _____ the data before drawing conclusions.", word:"analyze",     opts:["analyze","ignore","forget","damage"],         def:"Examine in detail to understand better"},
+  {q:"The new policy will _____ thousands of people.",        word:"affect",      opts:["affect","delay","observe","create"],          def:"Have an influence on something or someone"},
+  {q:"She had to _____ her position after new evidence.",     word:"revise",      opts:["revise","repeat","remove","reject"],          def:"Change something to improve or correct it"},
+  {q:"The report _____ the main challenges in the sector.",   word:"highlights",  opts:["highlights","ignores","follows","replaces"],  def:"Draws attention to the most important parts"},
+  {q:"The results were not _____; they surprised everyone.",  word:"anticipated", opts:["anticipated","forgotten","created","avoided"],def:"Expected or predicted in advance"},
+  {q:"His argument was _____ by logic and clear examples.",   word:"supported",   opts:["supported","weakened","replaced","ignored"],  def:"Backed up by reasoning or proof"},
+  {q:"The two methods are _____; they cannot work together.", word:"incompatible",opts:["incompatible","identical","flexible","optional"],def:"Unable to exist or work together"},
+  {q:"The team worked hard to _____ its original goals.",     word:"achieve",     opts:["achieve","avoid","define","create"],         def:"Successfully reach a desired result"},
+  {q:"Please _____ your essay before submitting it.",         word:"proofread",   opts:["proofread","delete","rewrite","replace"],     def:"Read carefully to check for errors"},
+  {q:"The graph shows a _____ in sales during winter.",       word:"decline",     opts:["decline","growth","success","pattern"],      def:"A gradual decrease in something"},
+  {q:"She made a _____ decision based on the available data.",word:"rational",    opts:["rational","random","rapid","recent"],        def:"Based on clear reasoning and logic"},
+  {q:"The new law will _____ drivers to wear seatbelts.",     word:"require",     opts:["require","allow","prevent","enable"],        def:"Make something necessary or obligatory"},
+  {q:"The company _____ a new strategy to increase profits.", word:"implemented", opts:["implemented","removed","forgotten","avoided"],def:"Put a plan or system into effect"},
+  {q:"His explanation was very _____ and easy to understand.",word:"clear",       opts:["clear","vague","complex","rapid"],           def:"Easy to understand; not confusing"}
 ];
 
+// ═══════════════════════════════════════════════════════
+// DADOS — SENTENCE COMPLETION (gramática em contexto)
+// ═══════════════════════════════════════════════════════
+var SC_DATA = [
+  {sentence:"She _____ English for three years when she moved abroad.",
+   answer:"had been studying", opts:["studied","had been studying","has studied","was studying"],
+   explanation:"Past perfect continuous: ação em progresso antes de outra no passado."},
+  {sentence:"The report _____ by the team before the meeting started.",
+   answer:"had been written", opts:["was written","had been written","has been written","wrote"],
+   explanation:"Past perfect passive: relatório foi escrito antes da reunião."},
+  {sentence:"If I _____ more time, I would study harder.",
+   answer:"had", opts:["have","had","would have","will have"],
+   explanation:"Conditional tipo 2: situação hipotética no presente."},
+  {sentence:"He suggested _____ the meeting to next week.",
+   answer:"postponing", opts:["postpone","postponing","to postpone","postponed"],
+   explanation:"'Suggest' é seguido de gerúndio (-ing)."},
+  {sentence:"The data _____ that climate change is accelerating.",
+   answer:"suggests", opts:["suggest","suggests","suggested","is suggesting"],
+   explanation:"'Data' como sujeito singular (formal) usa verbo singular."},
+  {sentence:"Neither the manager nor the employees _____ aware of the problem.",
+   answer:"were", opts:["was","were","are","is"],
+   explanation:"Com 'neither...nor', o verbo concorda com o sujeito mais próximo (employees)."},
+  {sentence:"By the time she arrives, we _____ the project.",
+   answer:"will have finished", opts:["finish","finished","will finish","will have finished"],
+   explanation:"Future perfect: ação completa antes de um momento futuro."},
+  {sentence:"The number of students _____ increased significantly this year.",
+   answer:"has", opts:["have","has","had","having"],
+   explanation:"'The number of' usa verbo singular."},
+  {sentence:"I wish I _____ harder when I was younger.",
+   answer:"had studied", opts:["studied","study","had studied","would study"],
+   explanation:"'Wish' + past perfect expressa arrependimento sobre o passado."},
+  {sentence:"Despite _____ hard, she didn't pass the exam.",
+   answer:"studying", opts:["study","studied","to study","studying"],
+   explanation:"'Despite' é seguido de gerúndio (-ing)."},
+  {sentence:"The results were _____ surprising than expected.",
+   answer:"more", opts:["most","more","much","very"],
+   explanation:"Comparativo de 'surprising' (adjetivo longo) usa 'more'."},
+  {sentence:"She is used to _____ early every morning.",
+   answer:"waking up", opts:["wake up","woke up","waking up","waken up"],
+   explanation:"'Be used to' é seguido de gerúndio, não infinitivo."}
+];
+
+// ═══════════════════════════════════════════════════════
+// DADOS — ERROR CORRECTION
+// ═══════════════════════════════════════════════════════
+var EC_DATA = [
+  {sentence:["She","don't","know","the","answer","to","the","question","."],
+   errorIdx:1, correct:"doesn't",
+   explanation:"Com 'she/he/it', usamos 'doesn't' (não 'don't')."},
+  {sentence:["He","has","went","to","the","store","already","."],
+   errorIdx:2, correct:"gone",
+   explanation:"Present perfect: 'has gone' — particípio passado de 'go' é 'gone', não 'went'."},
+  {sentence:["They","have","been","living","here","since","ten","years","."],
+   errorIdx:6, correct:"for",
+   explanation:"'Since' indica ponto no tempo; 'for' indica duração ('for ten years')."},
+  {sentence:["The","informations","about","the","event","are","incorrect","."],
+   errorIdx:1, correct:"information",
+   explanation:"'Information' é incontável em inglês — sem plural."},
+  {sentence:["I","am","very","agree","with","your","opinion","."],
+   errorIdx:3, correct:"agree",
+   explanation:"'Agree' é verbo, não adjetivo — diga 'I agree', não 'I am agree'."},
+  {sentence:["She","explained","me","the","instructions","clearly","."],
+   errorIdx:1, correct:"explained",
+   explanation:"'Explain' não precisa de objeto indireto direto: 'explained the instructions to me'."},
+  {sentence:["The","number","of","students","have","increased","this","year","."],
+   errorIdx:4, correct:"has",
+   explanation:"'The number of' usa verbo singular: 'has increased'."},
+  {sentence:["I","look","forward","to","meet","you","next","week","."],
+   errorIdx:4, correct:"meeting",
+   explanation:"'Look forward to' é seguido de gerúndio: 'to meeting'."},
+  {sentence:["Despite","of","the","rain,","they","continued","the","match","."],
+   errorIdx:1, correct:"Despite",
+   explanation:"'Despite' não é seguido de 'of' — use apenas 'despite' ou 'in spite of'."},
+  {sentence:["She","is","more","taller","than","her","sister","."],
+   errorIdx:2, correct:"taller",
+   explanation:"Não use 'more' com comparativos curtos: 'taller', não 'more taller'."},
+  {sentence:["If","I","would","know","the","answer,","I","would","tell","you","."],
+   errorIdx:2, correct:"knew",
+   explanation:"No 'if' do 2º condicional, use passado simples: 'If I knew'."},
+  {sentence:["He","suggested","to","postpone","the","meeting","."],
+   errorIdx:2, correct:"postponing",
+   explanation:"'Suggest' é seguido de gerúndio: 'suggested postponing'."}
+];
+
+// ═══════════════════════════════════════════════════════
+// DADOS — WORD ORDER
+// ═══════════════════════════════════════════════════════
+var WO_DATA = [
+  {words:["been","I","studying","have","English"],
+   answer:"I have been studying English",
+   tip:"Present perfect continuous: sujeito + have/has + been + verbo-ing"},
+  {words:["by","was","report","written","the","team","the"],
+   answer:"The report was written by the team",
+   tip:"Voz passiva: sujeito + was/were + particípio + by + agente"},
+  {words:["forward","to","I","look","you","meeting"],
+   answer:"I look forward to meeting you",
+   tip:"'Look forward to' + gerúndio (-ing)"},
+  {words:["had","she","arrived","when","left","already","I"],
+   answer:"I had already left when she arrived",
+   tip:"Past perfect: ação anterior usa 'had + particípio'"},
+  {words:["the","results","were","than","more","expected","surprising"],
+   answer:"The results were more surprising than expected",
+   tip:"Comparativo com adjetivos longos: more + adjetivo + than"},
+  {words:["studied","wish","I","harder","had","I"],
+   answer:"I wish I had studied harder",
+   tip:"Wish + past perfect para arrependimentos"},
+  {words:["despite","rain","continued","they","the","the","match"],
+   answer:"Despite the rain they continued the match",
+   tip:"'Despite' + substantivo/gerúndio (sem 'of')"},
+  {words:["number","of","has","the","students","increased"],
+   answer:"The number of students has increased",
+   tip:"'The number of' → verbo singular"},
+  {words:["suggested","he","the","postponing","meeting"],
+   answer:"He suggested postponing the meeting",
+   tip:"'Suggest' + gerúndio (-ing)"},
+  {words:["neither","nor","aware","were","manager","the","employees","the"],
+   answer:"Neither the manager nor the employees were aware",
+   tip:"Neither...nor: verbo concorda com o sujeito mais próximo"}
+];
+
+// ═══════════════════════════════════════════════════════
+// WRITING PROMPTS
+// ═══════════════════════════════════════════════════════
 var PROMPTS = [
   "Do you think technology has made people more or less connected to each other? Explain your view.",
   "Describe a challenge you faced and how you overcame it.",
   "Should universities focus more on practical skills or academic knowledge? Give reasons.",
   "What is the most important invention of the past 50 years and why?",
-  "Is working from home better or worse than working in an office? Explain your perspective."
+  "Is working from home better or worse than working in an office? Explain your perspective.",
+  "Do you think social media has a positive or negative impact on society? Explain.",
+  "Should people be required to learn a second language in school? Give your opinion.",
+  "Describe a person who has had a major influence on your life and explain why."
 ];
 
 var TIPS = [
-  {icon:"⚡",title:"Read & Select",tip:"Você tem ~15s. Clique RÁPIDO nas palavras que reconhece. Não pense demais — sua intuição é boa para palavras comuns.",col:C.blue},
-  {icon:"🔤",title:"Read & Complete",tip:"Pense no som da palavra. Se parece estranho dizer em voz alta, provavelmente está errado. Foque em prefixos e sufixos.",col:C.purple},
-  {icon:"✍️",title:"Writing",tip:"Use conectivos: Furthermore, However, In contrast. O avaliador valoriza variedade de vocabulário e estruturas complexas.",col:C.accent},
-  {icon:"🗣️",title:"Fale com Clareza",tip:"No Read Aloud, fale com ritmo natural. Pausas nos lugares certos e pronúncia clara valem mais do que velocidade.",col:C.yellow},
-  {icon:"🎯",title:"Meta: 60 pontos",tip:"60 pts no DET = nível B2. Foque em vocabulário acadêmico, gramática consistente e ideias bem organizadas na escrita.",col:C.green}
+  {icon:"⚡",title:"Read & Select",tip:"Clique RÁPIDO. Procure sufixos reais: -tion, -ment, -ence, -ity. Palavras falsas têm combinações impossíveis como -dp- ou -tb-.",col:C.blue},
+  {icon:"🔤",title:"Read & Complete",tip:"Pense no som da palavra completa. Foque nos padrões: 'kn-', 'wr-', '-ough', '-ight'. Elimine pelo contexto.",col:C.purple},
+  {icon:"📝",title:"Sentence Completion",tip:"Identifique o tempo verbal da oração principal. Palavras-chave como 'since', 'for', 'by the time' indicam o tempo correto.",col:C.yellow},
+  {icon:"🔍",title:"Error Correction",tip:"Leia a frase toda antes de escolher. Verifique: concordância sujeito-verbo, tempo verbal, preposição e forma do verbo após 'to'.",col:C.orange},
+  {icon:"🔀",title:"Word Order",tip:"Em inglês: Sujeito + Verbo + Objeto. Advérbios de frequência ficam antes do verbo principal mas depois do 'be'.",col:"#e879f9"},
+  {icon:"✍️",title:"Writing",tip:"Use conectivos (Furthermore, However, In contrast). Varie o vocabulário. Evite repetir as mesmas palavras. Mínimo 50 palavras.",col:C.accent},
+  {icon:"🎯",title:"Estratégia Geral",tip:"60 pts no DET = B2. Você precisa de ~2250 XP nesta plataforma. São cerca de 12 dias de prática diária completa.",col:C.green}
 ];
 
-// ── UTILIDADES
+// ═══════════════════════════════════════════════════════
+// UTILIDADES
+// ═══════════════════════════════════════════════════════
 function shuffle(arr){ return arr.slice().sort(function(){ return Math.random()-.5; }); }
 function rnd(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function estScore(xp){
-  if(xp<50)return 35; if(xp<100)return 42; if(xp<200)return 50;
-  if(xp<350)return 57; if(xp<500)return 62; if(xp<700)return 68; return 75;
-}
 
-// ── ESTILOS BASE
+// ═══════════════════════════════════════════════════════
+// ESTILOS COMPARTILHADOS
+// ═══════════════════════════════════════════════════════
 var CARD = {background:C.card,borderRadius:16,padding:24,border:"1px solid "+C.border,marginBottom:16};
 var ST   = {fontSize:12,fontWeight:700,color:C.accent,letterSpacing:1.5,marginBottom:14,textTransform:"uppercase"};
 
 function Btn(props){
-  var v = props.variant || "primary";
-  var base = {
-    padding:"12px 26px", borderRadius:12, border:"none", cursor:"pointer",
-    fontWeight:700, fontSize:15, transition:"all .2s", outline:"none",
-    background: v==="primary" ? C.accent : v==="ghost" ? "transparent" : C.border,
-    color: v==="primary" ? "#07091a" : C.text
-  };
-  if(v==="ghost") base.border = "1px solid "+C.border;
-  var style = Object.assign({}, base, props.style||{});
-  return h("button", {style:style, onClick:props.onClick, disabled:props.disabled}, props.children);
+  var v=props.variant||"primary";
+  var base={padding:"12px 26px",borderRadius:12,border:"none",cursor:"pointer",
+    fontWeight:700,fontSize:15,transition:"all .2s",outline:"none",
+    background:v==="primary"?C.accent:v==="ghost"?"transparent":C.border,
+    color:v==="primary"?"#07091a":C.text};
+  if(v==="ghost") base.border="1px solid "+C.border;
+  return h("button",{style:Object.assign({},base,props.style||{}),onClick:props.onClick,disabled:props.disabled||false},props.children);
 }
 
-function ProgBar(pct, col){
-  col = col||C.accent;
+function PBar(pct,col){
+  col=col||C.accent;
   return h("div",{style:{height:8,borderRadius:4,background:C.border,overflow:"hidden",marginBottom:14}},
-    h("div",{style:{height:"100%",width:pct+"%",background:col,borderRadius:4,transition:"width .5s"}}));
+    h("div",{style:{height:"100%",width:Math.min(pct,100)+"%",background:col,borderRadius:4,transition:"width .6s"}}));
 }
 
-// ── DASHBOARD
+function ResultCard(correct,total,onContinue,xpReward){
+  var ok=correct>=total*.7;
+  return h("div",{className:"bi"},
+    h("div",{style:Object.assign({},CARD,{background:ok?"#16a34a22":"#dc262622",
+      border:"1px solid "+(ok?C.green:C.red),textAlign:"center",marginBottom:16})},
+      h("div",{style:{fontSize:40,marginBottom:8}},ok?"🎯":"📚"),
+      h("div",{style:{fontSize:22,fontWeight:800,color:ok?C.green:C.red}},correct+"/"+total+" corretas"),
+      h("div",{style:{fontSize:13,color:C.muted,marginTop:4}},
+        ok?"Ótimo trabalho! Continue assim.":"Revise os erros e tente novamente.")
+    ),
+    h(Btn,{onClick:onContinue},"+"+xpReward+" XP · Continuar →")
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════
 function Dashboard(props){
-  var score = estScore(props.xp);
-  var pct   = Math.min((score/60)*100, 100);
-  var exs = [
-    {id:"read-select",  label:"Read & Select",    icon:"👁",  desc:"Identifique palavras reais em inglês",  xpR:20, time:"~1 min", col:C.blue},
-    {id:"read-complete",label:"Read & Complete",  icon:"✏️", desc:"Preencha as letras que faltam",          xpR:25, time:"~2 min", col:C.purple},
-    {id:"vocabulary",   label:"Vocabulary",       icon:"📖", desc:"Múltipla escolha — significados",        xpR:20, time:"~2 min", col:C.yellow},
-    {id:"writing",      label:"Writing Practice", icon:"🖊", desc:"Escreva e receba avaliação da IA",       xpR:50, time:"~5 min", col:C.accent},
-    {id:"tips",         label:"Estratégias DET",  icon:"💡", desc:"Técnicas para ir bem no teste",          xpR:0,  time:"~1 min", col:"#fb923c"}
+  var score=estScore(props.xp);
+  var pct=Math.min((props.xp/xpToReach60())*100,100);
+  var level=detLevel(score);
+  var exs=[
+    {id:"read-select",  label:"Read & Select",      icon:"👁",  desc:"Identifique palavras reais em inglês",  xpR:20, time:"~1 min", col:C.blue},
+    {id:"read-complete",label:"Read & Complete",    icon:"✏️", desc:"Preencha as letras que faltam",          xpR:25, time:"~2 min", col:C.purple},
+    {id:"vocabulary",   label:"Vocabulary",         icon:"📖", desc:"Múltipla escolha — significados",        xpR:20, time:"~2 min", col:C.yellow},
+    {id:"sentence",     label:"Sentence Completion",icon:"📝", desc:"Complete com a forma gramatical correta", xpR:25, time:"~3 min", col:C.orange},
+    {id:"error",        label:"Error Correction",   icon:"🔍", desc:"Encontre o erro gramatical na frase",    xpR:25, time:"~3 min", col:"#e879f9"},
+    {id:"wordorder",    label:"Word Order",         icon:"🔀", desc:"Ordene as palavras para formar a frase",  xpR:30, time:"~3 min", col:"#34d399"},
+    {id:"writing",      label:"Writing Practice",   icon:"🖊", desc:"Escreva e receba avaliação da IA",       xpR:50, time:"~5 min", col:C.accent},
+    {id:"tips",         label:"Estratégias DET",    icon:"💡", desc:"Técnicas para ir bem no teste",           xpR:0,  time:"~1 min", col:"#fb923c"}
   ];
+  var daysLeft=Math.max(0,Math.ceil((xpToReach60()-props.xp)/190));
   return h("div",{className:"fi"},
     // Score card
-    h("div",{style:Object.assign({},CARD,{background:"linear-gradient(135deg,#111a35,#0d1f3a)",border:"1px solid rgba(34,211,160,.25)"})},
+    h("div",{style:Object.assign({},CARD,{background:"linear-gradient(135deg,#0d1a35,#0d1f3a)",border:"1px solid rgba(34,211,160,.25)"})},
       h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:18}},
         h("div",null,
-          h("div",{style:ST},"Seu progresso DET"),
-          h("div",{style:{fontSize:56,fontWeight:900,color:C.accent,lineHeight:1}},score),
-          h("div",{style:{fontSize:13,color:C.muted,marginTop:4}},"estimado · Meta: ",
-            h("span",{style:{color:C.yellow,fontWeight:700}},"60 pts"))
+          h("div",{style:ST},"Sua pontuação estimada DET"),
+          h("div",{style:{fontSize:60,fontWeight:900,color:C.accent,lineHeight:1}},score),
+          h("div",{style:{fontSize:13,color:C.muted,marginTop:6}},
+            "Meta: ",h("span",{style:{color:C.yellow,fontWeight:700}},"60 pts"),
+            " · Faltam ~",h("span",{style:{color:C.text,fontWeight:600}},daysLeft+" dias")," de prática")
         ),
         h("div",{style:{textAlign:"right"}},
           h("div",{style:{fontSize:11,color:C.muted,fontWeight:600,letterSpacing:1}},"NÍVEL"),
-          h("div",{style:{fontSize:28,fontWeight:800,color:score>=60?C.green:C.yellow}},
-            score>=60?"B2":score>=45?"B1+":"B1"),
-          h("div",{style:{fontSize:11,color:C.muted}},score>=60?"Meta atingida! 🎉":"Continue praticando")
+          h("div",{style:{fontSize:30,fontWeight:800,color:score>=60?C.green:score>=45?C.yellow:C.muted}},level),
+          h("div",{style:{fontSize:11,color:C.muted,marginTop:4}},score>=60?"🎉 Meta atingida!":"Continue praticando")
         )
       ),
-      h("div",{style:{marginBottom:8}},
+      h("div",null,
         h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:6}},
-          h("span",{style:{fontSize:12,color:C.muted}},"Progresso até a meta (60 pts)"),
+          h("span",{style:{fontSize:12,color:C.muted}},"Progresso até 60 pts ("+props.xp+"/"+xpToReach60()+" XP)"),
           h("span",{style:{fontSize:12,color:C.accent,fontWeight:700}},Math.round(pct)+"%")
         ),
-        ProgBar(pct)
+        PBar(pct)
       ),
-      h("div",{style:{display:"flex",gap:20,flexWrap:"wrap"}},
-        [["XP",props.xp+"xp"],["Pontos",score+"/160"],["Feitos",props.completed.length+" ex"]].map(function(item){
+      h("div",{style:{display:"flex",gap:16,flexWrap:"wrap",marginTop:4}},
+        [["XP Total",props.xp+"xp"],["Pontos DET",score+"/160"],["Concluídos",props.completed.length+" ex"]].map(function(item){
           return h("div",{key:item[0]},
             h("div",{style:{fontSize:11,color:C.muted,fontWeight:600}},item[0]),
-            h("div",{style:{fontSize:18,fontWeight:800}},item[1]));
+            h("div",{style:{fontSize:17,fontWeight:800}},item[1]));
+        })
+      )
+    ),
+    // XP por dia info
+    h("div",{style:Object.assign({},CARD,{background:"#0a1020",border:"1px solid #1a2a45",padding:"14px 20px"})},
+      h("div",{style:{display:"flex",gap:20,flexWrap:"wrap",justifyContent:"center"}},
+        [["190 XP","por dia completo"],["2250 XP","para atingir 60"],["~12 dias","de prática diária"]].map(function(item){
+          return h("div",{key:item[0],style:{textAlign:"center",flex:1,minWidth:90}},
+            h("div",{style:{fontSize:18,fontWeight:800,color:C.accent}},item[0]),
+            h("div",{style:{fontSize:11,color:C.muted}},item[1]));
         })
       )
     ),
     h("div",{style:ST},"Exercícios de hoje"),
     exs.map(function(ex){
-      var done = props.completed.indexOf(ex.id)>=0;
-      return h("div",{key:ex.id,
-        className:"fi",
+      var done=props.completed.indexOf(ex.id)>=0;
+      return h("div",{key:ex.id,className:"fi",
         style:Object.assign({},CARD,{display:"flex",alignItems:"center",gap:16,
-          cursor:done?"default":"pointer",opacity:done?.6:1,
+          cursor:done?"default":"pointer",opacity:done?.55:1,
           borderLeft:"3px solid "+(done?C.green:ex.col)}),
-        onClick:function(){ if(!done) props.onStart(ex.id); },
-        onMouseEnter:function(e){ if(!done) e.currentTarget.style.background="#161f38"; },
-        onMouseLeave:function(e){ e.currentTarget.style.background=C.card; }
+        onClick:function(){if(!done)props.onStart(ex.id);},
+        onMouseEnter:function(e){if(!done)e.currentTarget.style.background="#161f38";},
+        onMouseLeave:function(e){e.currentTarget.style.background=C.card;}
       },
-        h("div",{style:{fontSize:26,width:44,height:44,display:"flex",alignItems:"center",
+        h("div",{style:{fontSize:24,width:44,height:44,display:"flex",alignItems:"center",
           justifyContent:"center",background:ex.col+"18",borderRadius:12,flexShrink:0}},ex.icon),
         h("div",{style:{flex:1}},
           h("div",{style:{display:"flex",alignItems:"center",gap:8}},
@@ -198,399 +396,562 @@ function Dashboard(props){
           ),
           h("div",{style:{fontSize:13,color:C.muted,marginTop:2}},ex.desc)
         ),
-        h("div",{style:{textAlign:"right"}},
+        h("div",{style:{textAlign:"right",flexShrink:0}},
           ex.xpR>0&&h("div",{style:{fontSize:14,fontWeight:700,color:ex.col}},"+"+ex.xpR+" xp"),
           h("div",{style:{fontSize:11,color:C.muted}},ex.time)
         )
       );
-    }),
-    h("div",{style:Object.assign({},CARD,{background:"#0d1a2e",border:"1px solid #1e3a5f"})},
-      h("div",{style:ST},"💡 Dica rápida"),
-      h("div",{style:{fontSize:14,lineHeight:1.7}},
-        "No Read & Select, procure sufixos como ",
-        h("code",{style:{background:"#1e3a5f",padding:"1px 6px",borderRadius:4,color:C.blue}},"-tion"),
-        ", ",h("code",{style:{background:"#1e3a5f",padding:"1px 6px",borderRadius:4,color:C.blue}},"-ment"),
-        ", ",h("code",{style:{background:"#1e3a5f",padding:"1px 6px",borderRadius:4,color:C.blue}},"-ence"),
-        ". Palavras falsas têm combinações como ",
-        h("em",{style:{color:C.red}},"-dp-")," ou ",h("em",{style:{color:C.red}},"-tb-"),"."
-      )
-    )
+    })
   );
 }
 
-// ── READ & SELECT
+// ═══════════════════════════════════════════════════════
+// READ & SELECT
+// ═══════════════════════════════════════════════════════
 function ReadSelect(props){
-  var initWords = React.useMemo(function(){ return shuffle(rnd(RS_ROUNDS)); },[]);
-  var _s1 = useState(initWords);   var words = _s1[0];
-  var _s2 = useState({});          var sel = _s2[0];  var setSel = _s2[1];
-  var _s3 = useState(false);       var done = _s3[0]; var setDone = _s3[1];
-  var _s4 = useState(47);          var time = _s4[0]; var setTime = _s4[1];
-  var timerRef = useRef(null);
-
+  var _w=useMemo(function(){return shuffle(rnd(RS_ROUNDS));},[]);
+  var _s1=useState(_w);       var words=_s1[0];
+  var _s2=useState({});       var sel=_s2[0];    var setSel=_s2[1];
+  var _s3=useState(false);    var done=_s3[0];   var setDone=_s3[1];
+  var _s4=useState(47);       var time=_s4[0];   var setTime=_s4[1];
+  var timer=useRef(null);
   useEffect(function(){
-    timerRef.current = setInterval(function(){
-      setTime(function(t){
-        if(t<=1){ clearInterval(timerRef.current); setDone(true); return 0; }
-        return t-1;
-      });
+    timer.current=setInterval(function(){
+      setTime(function(t){if(t<=1){clearInterval(timer.current);setDone(true);return 0;}return t-1;});
     },1000);
-    return function(){ clearInterval(timerRef.current); };
+    return function(){clearInterval(timer.current);};
   },[]);
-
-  function toggle(w){
-    if(done) return;
-    setSel(function(s){ var n=Object.assign({},s); n[w]=!n[w]; return n; });
-  }
-  function submit(){ clearInterval(timerRef.current); setDone(true); }
-
-  var correct = words.filter(function(x){ return x.r&&sel[x.w]; }).length;
-  var total   = words.filter(function(x){ return x.r; }).length;
-  var wrong   = words.filter(function(x){ return !x.r&&sel[x.w]; }).length;
-  var score   = Math.max(0, correct-wrong);
-  var ok      = score >= total*.7;
-
-  return h("div",{className:"fi"},
-    h("div",{style:CARD},
-      h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}},
-        h("div",null,
-          h("div",{style:ST},"👁 Read & Select"),
-          h("div",{style:{fontSize:14,color:C.muted}},
-            "Clique em todas as ",h("strong",null,"palavras reais")," em inglês")
+  function toggle(w){if(done)return;setSel(function(s){var n=Object.assign({},s);n[w]=!n[w];return n;});}
+  function submit(){clearInterval(timer.current);setDone(true);}
+  var correct=words.filter(function(x){return x.r&&sel[x.w];}).length;
+  var total=words.filter(function(x){return x.r;}).length;
+  var wrong=words.filter(function(x){return !x.r&&sel[x.w];}).length;
+  var score=Math.max(0,correct-wrong);
+  return h("div",{className:"fi"},h("div",{style:CARD},
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}},
+      h("div",null,h("div",{style:ST},"👁 Read & Select"),
+        h("div",{style:{fontSize:14,color:C.muted}},"Clique em todas as ",h("strong",null,"palavras reais")," em inglês")),
+      !done&&h("div",{style:{padding:"8px 14px",borderRadius:10,fontWeight:700,fontSize:22,
+        background:time<10?"#dc262622":"#1e2d4a",color:time<10?C.red:C.text,
+        fontFamily:"monospace",border:"1px solid "+(time<10?C.red:C.border)}},time+"s")
+    ),
+    h("div",{style:{display:"flex",flexWrap:"wrap",gap:10,marginBottom:24}},
+      words.map(function(item,i){
+        var s=sel[item.w];
+        var bg=s?C.accent+"22":C.surface,bo=s?C.accent:C.border,co=s?C.accent:C.text;
+        if(done){
+          if(item.r&&s){bg="#16a34a22";bo=C.green;co=C.green;}
+          else if(item.r&&!s){bg="#dc262622";bo=C.red;co=C.red;}
+          else if(!item.r&&s){bg="#dc262622";bo=C.red;co=C.red;}
+          else{bg=C.surface;bo=C.border;co=C.muted;}
+        }
+        return h("button",{key:item.w+i,onClick:function(){toggle(item.w);},
+          style:{padding:"10px 18px",borderRadius:10,border:"1.5px solid "+bo,
+            background:bg,color:co,fontWeight:600,fontSize:15,cursor:"pointer",transition:"all .15s"}},item.w);
+      })
+    ),
+    !done?h(Btn,{onClick:submit},"Verificar →")
+      :h("div",{className:"bi"},
+        h("div",{style:Object.assign({},CARD,{background:score>=total*.7?"#16a34a22":"#dc262622",
+          border:"1px solid "+(score>=total*.7?C.green:C.red),textAlign:"center",marginBottom:16})},
+          h("div",{style:{fontSize:36,marginBottom:8}},score>=total*.7?"🎯":"📚"),
+          h("div",{style:{fontSize:20,fontWeight:800,color:score>=total*.7?C.green:C.red}},score+"/"+total+" corretas"),
+          h("div",{style:{fontSize:13,color:C.muted,marginTop:4}},correct+" acertos · "+wrong+" erros")
         ),
-        !done&&h("div",{style:{padding:"8px 14px",borderRadius:10,fontWeight:700,fontSize:20,
-          background:time<10?"#dc262622":"#1e2d4a",color:time<10?C.red:C.text,
-          fontFamily:"monospace",border:"1px solid "+(time<10?C.red:C.border)}},time+"s")
-      ),
-      h("div",{style:{display:"flex",flexWrap:"wrap",gap:10,marginBottom:24}},
-        words.map(function(item,i){
-          var s=sel[item.w];
-          var bg=s?C.accent+"22":C.surface, bo=s?C.accent:C.border, co=s?C.accent:C.text;
-          if(done){
-            if(item.r&&s){bg="#16a34a22";bo=C.green;co=C.green;}
-            else if(item.r&&!s){bg="#dc262622";bo=C.red;co=C.red;}
-            else if(!item.r&&s){bg="#dc262622";bo=C.red;co=C.red;}
-            else{bg=C.surface;bo=C.border;co=C.muted;}
-          }
-          return h("button",{key:item.w+i,onClick:function(){toggle(item.w);},
-            style:{padding:"10px 18px",borderRadius:10,border:"1.5px solid "+bo,
-              background:bg,color:co,fontWeight:600,fontSize:15,cursor:"pointer",
-              transition:"all .15s"}},item.w);
-        })
-      ),
-      !done
-        ? h(Btn,{onClick:submit},"Verificar →")
-        : h("div",{className:"bi"},
-            h("div",{style:Object.assign({},CARD,{background:ok?"#16a34a22":"#dc262622",
-              border:"1px solid "+(ok?C.green:C.red),textAlign:"center",marginBottom:16})},
-              h("div",{style:{fontSize:32,marginBottom:8}},ok?"🎯":"📚"),
-              h("div",{style:{fontSize:20,fontWeight:800,color:ok?C.green:C.red}},score+"/"+total+" corretas"),
-              h("div",{style:{fontSize:13,color:C.muted,marginTop:4}},
-                correct+" acertos · "+wrong+" erros · "+(total-correct)+" perdidas")
-            ),
-            h(Btn,{onClick:function(){props.onDone(20);}},"+20 XP · Continuar →")
-          )
-    )
-  );
+        h(Btn,{onClick:function(){props.onDone(20);}},"+20 XP · Continuar →")
+      )
+  ));
 }
 
-// ── READ & COMPLETE
+// ═══════════════════════════════════════════════════════
+// READ & COMPLETE
+// ═══════════════════════════════════════════════════════
 function ReadComplete(props){
-  var _q = React.useMemo(function(){ return shuffle(RC_DATA).slice(0,6); },[]);
-  var _s1 = useState(_q);         var qs = _s1[0];
-  var _s2 = useState(0);          var idx = _s2[0];    var setIdx = _s2[1];
-  var _s3 = useState("");         var val = _s3[0];    var setVal = _s3[1];
-  var _s4 = useState([]);         var results = _s4[0]; var setResults = _s4[1];
-  var _s5 = useState(false);      var checked = _s5[0]; var setChecked = _s5[1];
-
-  var finished = idx >= qs.length;
-  var q = qs[idx] || {answer:"",missing:[]};
-
+  var _q=useMemo(function(){return shuffle(RC_DATA).slice(0,7);},[]);
+  var _s1=useState(_q);       var qs=_s1[0];
+  var _s2=useState(0);        var idx=_s2[0];     var setIdx=_s2[1];
+  var _s3=useState("");       var val=_s3[0];     var setVal=_s3[1];
+  var _s4=useState([]);       var results=_s4[0]; var setResults=_s4[1];
+  var _s5=useState(false);    var checked=_s5[0]; var setChecked=_s5[1];
+  var finished=idx>=qs.length;
+  var q=qs[idx]||{answer:"",missing:[]};
   function check(){
-    if(!val.trim()) return;
-    var ok = val.trim().toLowerCase() === q.answer.toLowerCase();
-    setResults(function(r){ return r.concat([{answer:q.answer,user:val,ok:ok}]); });
+    if(!val.trim())return;
+    var ok=val.trim().toLowerCase()===q.answer.toLowerCase();
+    setResults(function(r){return r.concat([{answer:q.answer,user:val,ok:ok}]);});
     setChecked(true);
   }
-  function next(){ setVal(""); setChecked(false); setIdx(function(i){return i+1;}); }
-
+  function next(){setVal("");setChecked(false);setIdx(function(i){return i+1;});}
   if(finished){
-    var okCount = results.filter(function(r){return r.ok;}).length;
+    var okCount=results.filter(function(r){return r.ok;}).length;
     return h("div",{className:"fi",style:CARD},
       h("div",{style:ST},"✏️ Resultado"),
-      h("div",{style:{textAlign:"center",marginBottom:24}},
-        h("div",{style:{fontSize:48,marginBottom:8}},okCount>=4?"✨":"📖"),
+      h("div",{style:{textAlign:"center",marginBottom:20}},
+        h("div",{style:{fontSize:48,marginBottom:8}},okCount>=5?"✨":"📖"),
         h("div",{style:{fontSize:28,fontWeight:800,color:C.accent}},okCount+"/"+qs.length),
         h("div",{style:{fontSize:14,color:C.muted}},"palavras corretas")
       ),
       results.map(function(r,i){
         return h("div",{key:i,style:{display:"flex",justifyContent:"space-between",
           padding:"10px 14px",borderRadius:10,marginBottom:8,
-          background:r.ok?"#16a34a18":"#dc262618",
-          border:"1px solid "+(r.ok?"#16a34a33":"#dc262633")}},
-          h("span",{style:{color:C.muted}},r.user),
+          background:r.ok?"#16a34a18":"#dc262618",border:"1px solid "+(r.ok?"#16a34a33":"#dc262633")}},
+          h("span",{style:{color:C.muted}},r.user||"(vazio)"),
           h("span",{style:{fontWeight:700,color:r.ok?C.green:C.red}},r.answer));
       }),
       h(Btn,{style:{marginTop:16},onClick:function(){props.onDone(25);}},"+25 XP · Continuar →")
     );
   }
-
-  var chars = q.answer.split("").map(function(ch,i){
-    return {ch:ch, blank: q.missing.indexOf(i)>=0};
-  });
-  var lastOk = results.length>0 ? results[results.length-1].ok : null;
-
-  return h("div",{className:"fi"},
-    h("div",{style:CARD},
-      h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},
-        h("div",{style:ST},"✏️ Read & Complete"),
-        h("span",{style:{fontSize:13,color:C.muted}},idx+1+"/"+qs.length)
+  var chars=q.answer.split("").map(function(ch,i){return{ch:ch,blank:q.missing.indexOf(i)>=0};});
+  var lastOk=results.length>0?results[results.length-1].ok:null;
+  return h("div",{className:"fi"},h("div",{style:CARD},
+    h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},
+      h("div",{style:ST},"✏️ Read & Complete"),
+      h("span",{style:{fontSize:13,color:C.muted}},idx+1+"/"+qs.length)
+    ),
+    PBar((idx/qs.length)*100),
+    h("div",{style:{textAlign:"center",padding:"28px 0"}},
+      h("div",{style:{fontSize:13,color:C.muted,marginBottom:14}},"Complete a palavra:"),
+      h("div",{style:{fontSize:38,letterSpacing:8,fontFamily:"monospace",marginBottom:8}},
+        chars.map(function(c,i){
+          return h("span",{key:i,style:{color:c.blank?C.accent:C.text,
+            borderBottom:c.blank?"3px solid "+C.accent:"none",paddingBottom:c.blank?2:0}},c.blank?"_":c.ch);
+        })
       ),
-      ProgBar((idx/qs.length)*100),
-      h("div",{style:{textAlign:"center",padding:"28px 0"}},
-        h("div",{style:{fontSize:13,color:C.muted,marginBottom:14}},"Complete a palavra:"),
-        h("div",{style:{fontSize:38,letterSpacing:8,fontFamily:"monospace",marginBottom:8}},
-          chars.map(function(c,i){
-            return h("span",{key:i,style:{color:c.blank?C.accent:C.text,
-              borderBottom:c.blank?"3px solid "+C.accent:"none",paddingBottom:c.blank?2:0}},
-              c.blank?"_":c.ch);
-          })
-        ),
-        h("div",{style:{fontSize:13,color:C.muted}},"("+q.answer.length+" letras)")
-      ),
-      h("input",{
-        value:val,
-        onChange:function(e){setVal(e.target.value);},
-        onKeyDown:function(e){if(e.key==="Enter"&&!checked) check();},
-        disabled:checked,
-        placeholder:"Digite a palavra completa...",
-        style:{width:"100%",padding:"14px 18px",borderRadius:12,background:C.surface,
-          border:"1.5px solid "+(checked?(lastOk?C.green:C.red):C.border),
-          color:C.text,fontSize:18,outline:"none",letterSpacing:3,
-          textAlign:"center",marginBottom:12}
-      }),
-      checked && h("div",{style:{padding:"12px",borderRadius:10,textAlign:"center",marginBottom:12,
-        background:lastOk?"#16a34a22":"#dc262622",
-        border:"1px solid "+(lastOk?C.green:C.red)}},
-        lastOk
-          ? h("span",{style:{color:C.green,fontWeight:700}},"✓ Correto!")
-          : h("span",{style:{color:C.red,fontWeight:700}},"✗ Resposta: ",
-              h("strong",{style:{fontFamily:"monospace"}},q.answer))
-      ),
-      !checked
-        ? h(Btn,{onClick:check},"Verificar")
-        : h(Btn,{onClick:next}, idx===qs.length-1?"Ver resultado →":"Próxima →")
-    )
-  );
+      h("div",{style:{fontSize:13,color:C.muted}},"("+q.answer.length+" letras)")
+    ),
+    h("input",{value:val,onChange:function(e){setVal(e.target.value);},
+      onKeyDown:function(e){if(e.key==="Enter"&&!checked)check();},
+      disabled:checked,placeholder:"Digite a palavra completa...",
+      style:{width:"100%",padding:"14px 18px",borderRadius:12,background:C.surface,
+        border:"1.5px solid "+(checked?(lastOk?C.green:C.red):C.border),
+        color:C.text,fontSize:18,outline:"none",letterSpacing:3,textAlign:"center",marginBottom:12}
+    }),
+    checked&&h("div",{style:{padding:"12px",borderRadius:10,textAlign:"center",marginBottom:12,
+      background:lastOk?"#16a34a22":"#dc262622",border:"1px solid "+(lastOk?C.green:C.red)}},
+      lastOk?h("span",{style:{color:C.green,fontWeight:700}},"✓ Correto!")
+        :h("span",{style:{color:C.red,fontWeight:700}},"✗ Resposta: ",h("strong",{style:{fontFamily:"monospace"}},q.answer))
+    ),
+    !checked?h(Btn,{onClick:check},"Verificar"):h(Btn,{onClick:next},idx===qs.length-1?"Ver resultado →":"Próxima →")
+  ));
 }
 
-// ── VOCABULARY
+// ═══════════════════════════════════════════════════════
+// VOCABULARY
+// ═══════════════════════════════════════════════════════
 function Vocabulary(props){
-  var _q = React.useMemo(function(){ return shuffle(VOC_DATA).slice(0,5); },[]);
-  var _s1 = useState(_q);       var qs = _s1[0];
-  var _s2 = useState(0);        var idx = _s2[0];    var setIdx = _s2[1];
-  var _s3 = useState(null);     var chosen = _s3[0]; var setChosen = _s3[1];
-  var _s4 = useState([]);       var results = _s4[0]; var setResults = _s4[1];
-  var finished = idx >= qs.length;
-  var q = qs[idx] || {q:"",word:"",opts:[],def:""};
-
-  function pick(opt){
-    if(chosen) return;
-    setChosen(opt);
-    setResults(function(r){ return r.concat([{ok:opt===q.word}]); });
-  }
-  function next(){ setChosen(null); setIdx(function(i){return i+1;}); }
-
+  var _q=useMemo(function(){return shuffle(VOC_DATA).slice(0,6);},[]);
+  var _s1=useState(_q);     var qs=_s1[0];
+  var _s2=useState(0);      var idx=_s2[0];     var setIdx=_s2[1];
+  var _s3=useState(null);   var chosen=_s3[0];  var setChosen=_s3[1];
+  var _s4=useState([]);     var results=_s4[0]; var setResults=_s4[1];
+  var finished=idx>=qs.length;
+  var q=qs[idx]||{q:"",word:"",opts:[],def:""};
+  function pick(opt){if(chosen)return;setChosen(opt);setResults(function(r){return r.concat([{ok:opt===q.word}]);});}
+  function next(){setChosen(null);setIdx(function(i){return i+1;});}
   if(finished){
-    var okCount = results.filter(function(r){return r.ok;}).length;
+    var okCount=results.filter(function(r){return r.ok;}).length;
     return h("div",{className:"fi",style:CARD},
       h("div",{style:ST},"📖 Resultado — Vocabulário"),
       h("div",{style:{textAlign:"center",margin:"24px 0"}},
-        h("div",{style:{fontSize:48}},okCount>=4?"🌟":"📚"),
+        h("div",{style:{fontSize:48}},okCount>=5?"🌟":"📚"),
         h("div",{style:{fontSize:32,fontWeight:900,color:C.accent,marginTop:8}},okCount+"/"+qs.length),
         h("div",{style:{fontSize:14,color:C.muted}},"questões corretas")
       ),
       h(Btn,{onClick:function(){props.onDone(20);}},"+20 XP · Continuar →")
     );
   }
-
-  return h("div",{className:"fi"},
-    h("div",{style:CARD},
-      h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},
-        h("div",{style:ST},"📖 Vocabulary"),
-        h("span",{style:{fontSize:13,color:C.muted}},idx+1+"/"+qs.length)
-      ),
-      ProgBar((idx/qs.length)*100, C.yellow),
-      h("div",{style:{padding:"20px 0 8px"}},
-        h("div",{style:{fontSize:11,color:C.muted,fontWeight:600,letterSpacing:1,marginBottom:10}},
-          "COMPLETE A FRASE:"),
-        h("div",{style:{fontSize:18,fontWeight:600,lineHeight:1.7}},q.q),
-        chosen && h("div",{style:{fontSize:13,color:C.muted,fontStyle:"italic",marginTop:10,
-          padding:"10px 14px",background:C.surface,borderRadius:8}},q.def)
-      ),
-      h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:16}},
-        q.opts.map(function(opt,i){
-          var bg=C.surface, bo=C.border, co=C.text;
-          if(chosen){
-            if(opt===q.word){bg="#16a34a22";bo=C.green;co=C.green;}
-            else if(opt===chosen){bg="#dc262622";bo=C.red;co=C.red;}
-            else co=C.muted;
-          }
-          return h("button",{key:opt,onClick:function(){pick(opt);},
-            style:{padding:"14px 16px",borderRadius:12,border:"1.5px solid "+bo,
-              background:bg,color:co,fontWeight:600,fontSize:15,textAlign:"left",
-              cursor:chosen?"default":"pointer",transition:"all .2s"}},
-            h("span",{style:{color:C.muted,fontSize:12,marginRight:8}},
-              ["A","B","C","D"][i]+"."),
-            opt);
-        })
-      ),
-      chosen && h(Btn,{style:{marginTop:16},onClick:next},
-        idx===qs.length-1?"Ver resultado →":"Próxima →")
-    )
-  );
+  return h("div",{className:"fi"},h("div",{style:CARD},
+    h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},
+      h("div",{style:ST},"📖 Vocabulary"),h("span",{style:{fontSize:13,color:C.muted}},idx+1+"/"+qs.length)
+    ),
+    PBar((idx/qs.length)*100,C.yellow),
+    h("div",{style:{padding:"20px 0 8px"}},
+      h("div",{style:{fontSize:11,color:C.muted,fontWeight:600,letterSpacing:1,marginBottom:10}},"COMPLETE A FRASE:"),
+      h("div",{style:{fontSize:18,fontWeight:600,lineHeight:1.7}},q.q),
+      chosen&&h("div",{style:{fontSize:13,color:C.muted,fontStyle:"italic",marginTop:10,
+        padding:"10px 14px",background:C.surface,borderRadius:8}},q.def)
+    ),
+    h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:16}},
+      q.opts.map(function(opt,i){
+        var bg=C.surface,bo=C.border,co=C.text;
+        if(chosen){if(opt===q.word){bg="#16a34a22";bo=C.green;co=C.green;}
+          else if(opt===chosen){bg="#dc262622";bo=C.red;co=C.red;}else co=C.muted;}
+        return h("button",{key:opt,onClick:function(){pick(opt);},
+          style:{padding:"14px 16px",borderRadius:12,border:"1.5px solid "+bo,
+            background:bg,color:co,fontWeight:600,fontSize:15,textAlign:"left",
+            cursor:chosen?"default":"pointer",transition:"all .2s"}},
+          h("span",{style:{color:C.muted,fontSize:12,marginRight:8}},["A","B","C","D"][i]+"."),opt);
+      })
+    ),
+    chosen&&h(Btn,{style:{marginTop:16},onClick:next},idx===qs.length-1?"Ver resultado →":"Próxima →")
+  ));
 }
 
-// ── WRITING
+// ═══════════════════════════════════════════════════════
+// SENTENCE COMPLETION (NOVO)
+// ═══════════════════════════════════════════════════════
+function SentenceCompletion(props){
+  var _q=useMemo(function(){return shuffle(SC_DATA).slice(0,6);},[]);
+  var _s1=useState(_q);     var qs=_s1[0];
+  var _s2=useState(0);      var idx=_s2[0];     var setIdx=_s2[1];
+  var _s3=useState(null);   var chosen=_s3[0];  var setChosen=_s3[1];
+  var _s4=useState([]);     var results=_s4[0]; var setResults=_s4[1];
+  var finished=idx>=qs.length;
+  var q=qs[idx]||{sentence:"",answer:"",opts:[],explanation:""};
+  function pick(opt){if(chosen)return;setChosen(opt);setResults(function(r){return r.concat([{ok:opt===q.answer}]);});}
+  function next(){setChosen(null);setIdx(function(i){return i+1;});}
+  if(finished){
+    var okCount=results.filter(function(r){return r.ok;}).length;
+    return h("div",{className:"fi",style:CARD},
+      h("div",{style:ST},"📝 Resultado — Sentence Completion"),
+      h("div",{style:{textAlign:"center",margin:"24px 0"}},
+        h("div",{style:{fontSize:48}},okCount>=5?"🌟":"📚"),
+        h("div",{style:{fontSize:32,fontWeight:900,color:C.orange,marginTop:8}},okCount+"/"+qs.length),
+        h("div",{style:{fontSize:14,color:C.muted}},"frases completadas corretamente")
+      ),
+      h(Btn,{onClick:function(){props.onDone(25);}},"+25 XP · Continuar →")
+    );
+  }
+  // Show sentence with blank
+  var parts=q.sentence.split("_____");
+  var display=chosen
+    ? [parts[0],h("span",{style:{color:chosen===q.answer?C.green:C.red,fontWeight:700,
+        background:(chosen===q.answer?"#16a34a":"#dc2626")+"22",padding:"2px 8px",borderRadius:6}},chosen),parts[1]]
+    : [parts[0],h("span",{style:{color:C.accent,fontWeight:700,
+        borderBottom:"2px solid "+C.accent,padding:"2px 12px"}},"_____"),parts[1]];
+  return h("div",{className:"fi"},h("div",{style:CARD},
+    h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},
+      h("div",{style:Object.assign({},ST,{color:C.orange})},"📝 Sentence Completion"),
+      h("span",{style:{fontSize:13,color:C.muted}},idx+1+"/"+qs.length)
+    ),
+    PBar((idx/qs.length)*100,C.orange),
+    h("div",{style:{padding:"24px 0"}},
+      h("div",{style:{fontSize:11,color:C.muted,fontWeight:600,letterSpacing:1,marginBottom:12}},"COMPLETE A FRASE COM A OPÇÃO CORRETA:"),
+      h("div",{style:{fontSize:18,lineHeight:1.9,fontWeight:500,color:C.text}},display),
+      chosen&&h("div",{style:{marginTop:16,padding:"12px 16px",background:"#1a2a45",borderRadius:10,
+        fontSize:13,color:C.blue,lineHeight:1.6}},
+        h("strong",null,"💡 Explicação: "),q.explanation)
+    ),
+    h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}},
+      q.opts.map(function(opt,i){
+        var bg=C.surface,bo=C.border,co=C.text;
+        if(chosen){if(opt===q.answer){bg="#16a34a22";bo=C.green;co=C.green;}
+          else if(opt===chosen){bg="#dc262622";bo=C.red;co=C.red;}else co=C.muted;}
+        return h("button",{key:opt,onClick:function(){pick(opt);},
+          style:{padding:"12px 14px",borderRadius:12,border:"1.5px solid "+bo,
+            background:bg,color:co,fontWeight:600,fontSize:14,textAlign:"left",
+            cursor:chosen?"default":"pointer",transition:"all .2s",fontFamily:"monospace"}},
+          h("span",{style:{color:C.muted,fontSize:11,marginRight:6}},["A","B","C","D"][i]+"."),opt);
+      })
+    ),
+    chosen&&h(Btn,{style:{marginTop:16},onClick:next},idx===qs.length-1?"Ver resultado →":"Próxima →")
+  ));
+}
+
+// ═══════════════════════════════════════════════════════
+// ERROR CORRECTION (NOVO)
+// ═══════════════════════════════════════════════════════
+function ErrorCorrection(props){
+  var _q=useMemo(function(){return shuffle(EC_DATA).slice(0,6);},[]);
+  var _s1=useState(_q);     var qs=_s1[0];
+  var _s2=useState(0);      var idx=_s2[0];     var setIdx=_s2[1];
+  var _s3=useState(null);   var chosen=_s3[0];  var setChosen=_s3[1];
+  var _s4=useState([]);     var results=_s4[0]; var setResults=_s4[1];
+  var finished=idx>=qs.length;
+  var q=qs[idx]||{sentence:[],errorIdx:0,correct:"",explanation:""};
+  function pick(i){
+    if(chosen!==null)return;
+    var ok=i===q.errorIdx;
+    setChosen(i);
+    setResults(function(r){return r.concat([{ok:ok}]);});
+  }
+  function next(){setChosen(null);setIdx(function(i){return i+1;});}
+  if(finished){
+    var okCount=results.filter(function(r){return r.ok;}).length;
+    return h("div",{className:"fi",style:CARD},
+      h("div",{style:ST},"🔍 Resultado — Error Correction"),
+      h("div",{style:{textAlign:"center",margin:"24px 0"}},
+        h("div",{style:{fontSize:48}},okCount>=5?"🌟":"📚"),
+        h("div",{style:{fontSize:32,fontWeight:900,color:"#e879f9",marginTop:8}},okCount+"/"+qs.length),
+        h("div",{style:{fontSize:14,color:C.muted}},"erros encontrados corretamente")
+      ),
+      h(Btn,{onClick:function(){props.onDone(25);}},"+25 XP · Continuar →")
+    );
+  }
+  var answered=chosen!==null;
+  return h("div",{className:"fi"},h("div",{style:CARD},
+    h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},
+      h("div",{style:Object.assign({},ST,{color:"#e879f9"})},"🔍 Error Correction"),
+      h("span",{style:{fontSize:13,color:C.muted}},idx+1+"/"+qs.length)
+    ),
+    PBar((idx/qs.length)*100,"#e879f9"),
+    h("div",{style:{padding:"20px 0"}},
+      h("div",{style:{fontSize:11,color:C.muted,fontWeight:600,letterSpacing:1,marginBottom:12}},
+        "CLIQUE NA PALAVRA COM ERRO:"),
+      h("div",{style:{display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}},
+        q.sentence.map(function(word,i){
+          if(word===".") return h("span",{key:i,style:{color:C.muted,fontSize:18}},word);
+          var isError=i===q.errorIdx;
+          var isChosen=chosen===i;
+          var bg=C.surface,bo=C.border,co=C.text;
+          if(answered){
+            if(isError){bg="#16a34a22";bo=C.green;co=C.green;}
+            else if(isChosen){bg="#dc262622";bo=C.red;co=C.red;}
+          } else if(isChosen){bg=C.accent+"22";bo=C.accent;co=C.accent;}
+          return h("button",{key:i,onClick:function(){pick(i);},
+            style:{padding:"8px 14px",borderRadius:8,border:"1.5px solid "+bo,
+              background:bg,color:co,fontWeight:600,fontSize:16,cursor:answered?"default":"pointer",
+              transition:"all .2s"}},word);
+        })
+      ),
+      answered&&h("div",{style:{marginTop:20}},
+        chosen===q.errorIdx
+          ? h("div",{style:{padding:"14px 16px",background:"#16a34a18",borderRadius:12,border:"1px solid #16a34a33"}},
+              h("div",{style:{color:C.green,fontWeight:700,marginBottom:6}},"✓ Correto!"),
+              h("div",{style:{fontSize:13,color:C.text}},"A correção é: ",
+                h("strong",{style:{color:C.accent,fontFamily:"monospace"}},'"'+q.correct+'"')),
+              h("div",{style:{fontSize:13,color:C.muted,marginTop:6}},q.explanation))
+          : h("div",{style:{padding:"14px 16px",background:"#dc262618",borderRadius:12,border:"1px solid #dc262633"}},
+              h("div",{style:{color:C.red,fontWeight:700,marginBottom:6}},"✗ Incorreto"),
+              h("div",{style:{fontSize:13,color:C.text}},"O erro era: ",
+                h("strong",{style:{color:C.red,fontFamily:"monospace"}},'"'+q.sentence[q.errorIdx]+'"'),
+                " → ",h("strong",{style:{color:C.green,fontFamily:"monospace"}},'"'+q.correct+'"')),
+              h("div",{style:{fontSize:13,color:C.muted,marginTop:6}},q.explanation))
+      )
+    ),
+    answered&&h(Btn,{onClick:next},idx===qs.length-1?"Ver resultado →":"Próxima →")
+  ));
+}
+
+// ═══════════════════════════════════════════════════════
+// WORD ORDER (NOVO)
+// ═══════════════════════════════════════════════════════
+function WordOrder(props){
+  var _q=useMemo(function(){return shuffle(WO_DATA).slice(0,5);},[]);
+  var _s1=useState(_q);       var qs=_s1[0];
+  var _s2=useState(0);        var idx=_s2[0];     var setIdx=_s2[1];
+  var _s3=useState([]);       var built=_s3[0];   var setBuilt=_s3[1];
+  var _s4=useState(null);     var bank=_s4[0];    var setBank=_s4[1];
+  var _s5=useState(false);    var checked=_s5[0]; var setChecked=_s5[1];
+  var _s6=useState([]);       var results=_s6[0]; var setResults=_s6[1];
+  var finished=idx>=qs.length;
+  var q=qs[idx]||{words:[],answer:"",tip:""};
+
+  // init bank on question change
+  useEffect(function(){
+    setBuilt([]);
+    setBank(shuffle(q.words));
+    setChecked(false);
+  },[idx,qs]);
+
+  function addWord(i){
+    if(checked||bank===null)return;
+    var w=bank[i];
+    setBuilt(function(b){return b.concat([w]);});
+    setBank(function(b){var n=b.slice();n.splice(i,1);return n;});
+  }
+  function removeWord(i){
+    if(checked)return;
+    var w=built[i];
+    setBuilt(function(b){var n=b.slice();n.splice(i,1);return n;});
+    setBank(function(b){return b.concat([w]);});
+  }
+  function checkAnswer(){
+    if(built.length===0)return;
+    var attempt=built.join(" ");
+    var ok=attempt.toLowerCase()===q.answer.toLowerCase();
+    setChecked(true);
+    setResults(function(r){return r.concat([{ok:ok,attempt:attempt,answer:q.answer}]);});
+  }
+  function next(){setIdx(function(i){return i+1;});}
+
+  if(finished||bank===null){
+    if(!finished) return h("div",null,"Carregando...");
+    var okCount=results.filter(function(r){return r.ok;}).length;
+    return h("div",{className:"fi",style:CARD},
+      h("div",{style:ST},"🔀 Resultado — Word Order"),
+      h("div",{style:{textAlign:"center",margin:"24px 0"}},
+        h("div",{style:{fontSize:48}},okCount>=4?"🌟":"📚"),
+        h("div",{style:{fontSize:32,fontWeight:900,color:"#34d399",marginTop:8}},okCount+"/"+qs.length),
+        h("div",{style:{fontSize:14,color:C.muted}},"frases ordenadas corretamente")
+      ),
+      results.map(function(r,i){
+        return h("div",{key:i,style:{marginBottom:10,padding:"12px 14px",borderRadius:10,
+          background:r.ok?"#16a34a18":"#dc262618",border:"1px solid "+(r.ok?"#16a34a33":"#dc262633")}},
+          !r.ok&&h("div",{style:{fontSize:12,color:C.red,marginBottom:4}},"✗ Sua resposta: "+r.attempt),
+          h("div",{style:{fontSize:13,color:r.ok?C.green:C.muted}},(r.ok?"✓ ":"")+r.answer));
+      }),
+      h(Btn,{style:{marginTop:16},onClick:function(){props.onDone(30);}},"+30 XP · Continuar →")
+    );
+  }
+
+  var isOk=checked&&results.length>0?results[results.length-1].ok:null;
+  return h("div",{className:"fi"},h("div",{style:CARD},
+    h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},
+      h("div",{style:Object.assign({},ST,{color:"#34d399"})},"🔀 Word Order"),
+      h("span",{style:{fontSize:13,color:C.muted}},idx+1+"/"+qs.length)
+    ),
+    PBar((idx/qs.length)*100,"#34d399"),
+    h("div",{style:{padding:"16px 0"}},
+      h("div",{style:{fontSize:11,color:C.muted,fontWeight:600,letterSpacing:1,marginBottom:12}},
+        "CLIQUE NAS PALAVRAS PARA MONTAR A FRASE:"),
+      // Built sentence
+      h("div",{style:{minHeight:56,padding:"12px 16px",borderRadius:12,marginBottom:16,
+        background:C.surface,border:"1.5px solid "+(checked?(isOk?C.green:C.red):C.border),
+        display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"}},
+        built.length===0?h("span",{style:{color:C.muted,fontSize:14}},"Clique nas palavras abaixo...")
+          :built.map(function(w,i){
+            return h("button",{key:w+i,onClick:function(){if(!checked)removeWord(i);},
+              style:{padding:"6px 12px",borderRadius:8,border:"1.5px solid "+C.accent,
+                background:C.accent+"22",color:C.accent,fontWeight:600,fontSize:15,
+                cursor:checked?"default":"pointer"}},w);
+          })
+      ),
+      // Word bank
+      !checked&&h("div",{style:{display:"flex",flexWrap:"wrap",gap:8,marginBottom:20}},
+        bank.map(function(w,i){
+          return h("button",{key:w+i,onClick:function(){addWord(i);},
+            style:{padding:"8px 16px",borderRadius:10,border:"1.5px solid "+C.border,
+              background:C.surface,color:C.text,fontWeight:600,fontSize:15,cursor:"pointer",
+              transition:"all .15s"}},w);
+        })
+      ),
+      checked&&h("div",{style:{marginBottom:16,padding:"14px 16px",borderRadius:12,
+        background:isOk?"#16a34a18":"#dc262618",border:"1px solid "+(isOk?"#16a34a33":"#dc262633")}},
+        isOk
+          ?h("span",{style:{color:C.green,fontWeight:700}},"✓ Perfeito! Frase correta!")
+          :h("div",null,
+            h("div",{style:{color:C.red,fontWeight:700,marginBottom:6}},"✗ Não foi dessa vez"),
+            h("div",{style:{fontSize:13,color:C.text}},"Correto: ",
+              h("strong",{style:{color:C.accent}},q.answer))
+          ),
+        h("div",{style:{fontSize:12,color:C.blue,marginTop:8}},"💡 "+q.tip)
+      )
+    ),
+    !checked
+      ?h(Btn,{onClick:checkAnswer,style:{opacity:built.length===0?.5:1,pointerEvents:built.length===0?"none":"auto"}},"Verificar")
+      :h(Btn,{onClick:next},idx===qs.length-1?"Ver resultado →":"Próxima →")
+  ));
+}
+
+// ═══════════════════════════════════════════════════════
+// WRITING
+// ═══════════════════════════════════════════════════════
 function Writing(props){
-  var _s1 = useState(rnd(PROMPTS));  var prompt = _s1[0];
-  var _s2 = useState("");            var text = _s2[0];    var setText = _s2[1];
-  var _s3 = useState(false);         var loading = _s3[0]; var setLoading = _s3[1];
-  var _s4 = useState(null);          var feedback = _s4[0]; var setFeedback = _s4[1];
-  var _s5 = useState(localStorage.getItem("det_key")||""); var apiKey = _s5[0]; var setApiKey = _s5[1];
-  var _s6 = useState(!localStorage.getItem("det_key"));    var showKey = _s6[0]; var setShowKey = _s6[1];
-  var wc = text.trim().split(/\s+/).filter(Boolean).length;
-
-  function saveKey(){ localStorage.setItem("det_key",apiKey); setShowKey(false); }
-
+  var _s1=useState(rnd(PROMPTS));  var prompt=_s1[0];
+  var _s2=useState("");            var text=_s2[0];    var setText=_s2[1];
+  var _s3=useState(false);         var loading=_s3[0]; var setLoading=_s3[1];
+  var _s4=useState(null);          var feedback=_s4[0];var setFeedback=_s4[1];
+  var _s5=useState(localStorage.getItem("det_key")||""); var apiKey=_s5[0]; var setApiKey=_s5[1];
+  var _s6=useState(!localStorage.getItem("det_key"));    var showKey=_s6[0]; var setShowKey=_s6[1];
+  var wc=text.trim().split(/\s+/).filter(Boolean).length;
+  function saveKey(){localStorage.setItem("det_key",apiKey);setShowKey(false);}
   function getFeedback(){
-    if(wc<30||!apiKey) return;
+    if(wc<30||!apiKey)return;
     setLoading(true);
     fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"Content-Type":"application/json","x-api-key":apiKey,
         "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514", max_tokens:900,
-        system:'Você é avaliador do DET (Duolingo English Test). Aluno brasileiro, meta 60 pts. Retorne SOMENTE JSON válido sem markdown: {"score":1-5,"level":"B1","summary":"2 frases em português","strengths":["s1","s2"],"improvements":["i1","i2","i3"],"corrected":"frase melhorada"}',
-        messages:[{role:"user",content:'Prompt: "'+prompt+'"\nResposta: "'+text+'"'}]
-      })
-    })
-    .then(function(r){return r.json();})
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:900,
+        system:'Avaliador DET. Aluno brasileiro, meta 60 pts. Retorne SOMENTE JSON: {"score":1-5,"level":"B1","summary":"2 frases em pt-br","strengths":["s1","s2"],"improvements":["i1","i2","i3"],"corrected":"frase melhorada"}',
+        messages:[{role:"user",content:'Prompt: "'+prompt+'"\nResposta: "'+text+'"'}]})
+    }).then(function(r){return r.json();})
     .then(function(d){
       var raw=(d.content||[]).find(function(b){return b.type==="text";});
-      raw = raw ? raw.text : "{}";
-      raw = raw.replace(/```json|```/g,"").trim();
-      setFeedback(JSON.parse(raw));
+      raw=raw?raw.text:"{}";
+      setFeedback(JSON.parse(raw.replace(/```json|```/g,"").trim()));
       setLoading(false);
-    })
-    .catch(function(){
+    }).catch(function(){
       setFeedback({score:2,level:"B1",summary:"Erro ao conectar. Verifique sua API key.",strengths:[],improvements:[],corrected:""});
       setLoading(false);
     });
   }
-
-  return h("div",{className:"fi"},
-    h("div",{style:CARD},
-      h("div",{style:ST},"🖊 Writing Practice"),
-      showKey && h("div",{style:Object.assign({},CARD,{background:"#1a1f2e",border:"1px solid "+C.yellow+"33",marginBottom:16})},
-        h("div",{style:{fontSize:13,color:C.yellow,fontWeight:700,marginBottom:6}},"🔑 API Key Anthropic (para feedback IA)"),
-        h("div",{style:{fontSize:12,color:C.muted,marginBottom:10}},
-          "Obtenha em ",
-          h("a",{href:"https://console.anthropic.com",target:"_blank",
-            style:{color:C.blue}},"console.anthropic.com"),
-          " → API Keys"),
-        h("div",{style:{display:"flex",gap:8}},
-          h("input",{value:apiKey,onChange:function(e){setApiKey(e.target.value);},
-            placeholder:"sk-ant-...",type:"password",
-            style:{flex:1,padding:"10px 14px",borderRadius:10,background:C.surface,
-              border:"1px solid "+C.border,color:C.text,fontSize:13,outline:"none"}}),
-          h(Btn,{style:{padding:"10px 16px",fontSize:13},onClick:saveKey},"Salvar")
-        ),
-        h(Btn,{variant:"ghost",style:{marginTop:8,padding:"6px 14px",fontSize:12},
-          onClick:function(){setShowKey(false);}},"Pular por agora")
+  return h("div",{className:"fi"},h("div",{style:CARD},
+    h("div",{style:ST},"🖊 Writing Practice"),
+    showKey&&h("div",{style:Object.assign({},CARD,{background:"#1a1f2e",border:"1px solid "+C.yellow+"44",marginBottom:16})},
+      h("div",{style:{fontSize:13,color:C.yellow,fontWeight:700,marginBottom:6}},"🔑 API Key Anthropic (para feedback de IA)"),
+      h("div",{style:{fontSize:12,color:C.muted,marginBottom:10}},"Obtenha em ",
+        h("a",{href:"https://console.anthropic.com",target:"_blank",style:{color:C.blue}},"console.anthropic.com"),
+        " → API Keys"),
+      h("div",{style:{display:"flex",gap:8}},
+        h("input",{value:apiKey,onChange:function(e){setApiKey(e.target.value);},
+          placeholder:"sk-ant-...",type:"password",
+          style:{flex:1,padding:"10px 14px",borderRadius:10,background:C.surface,
+            border:"1px solid "+C.border,color:C.text,fontSize:13,outline:"none"}}),
+        h(Btn,{style:{padding:"10px 16px",fontSize:13},onClick:saveKey},"Salvar")
       ),
-      h("div",{style:Object.assign({},CARD,{background:"#0d1a2e",border:"1px solid #1e3a5f",marginBottom:16})},
-        h("div",{style:{fontSize:11,color:C.blue,fontWeight:700,letterSpacing:1,marginBottom:8}},"PROMPT"),
-        h("div",{style:{fontSize:16,lineHeight:1.7,fontStyle:"italic"}},'"'+prompt+'"')
-      ),
-      !feedback
-        ? h("div",null,
-            h("textarea",{value:text,onChange:function(e){setText(e.target.value);},
-              placeholder:"Escreva sua resposta em inglês aqui... (mínimo 50 palavras)",
-              style:{width:"100%",minHeight:160,padding:"14px 16px",background:C.surface,
-                border:"1.5px solid "+C.border,borderRadius:12,color:C.text,fontSize:15,
-                lineHeight:1.7,outline:"none",resize:"vertical",marginBottom:8}}),
-            h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
-              h("div",{style:{display:"flex",gap:12,alignItems:"center"}},
-                h("span",{style:{fontSize:12,color:wc>=50?C.green:C.muted}},
-                  wc+" palavras"+(wc>=50?" ✓":"")),
-                !showKey&&h("button",{onClick:function(){setShowKey(true);},
-                  style:{background:"none",border:"1px solid "+C.border,color:C.muted,
-                    padding:"4px 10px",borderRadius:8,fontSize:11,cursor:"pointer"}},"🔑 API Key")
-              ),
-              h(Btn,{onClick:getFeedback,
-                style:{opacity:wc<30||loading?.5:1,pointerEvents:wc<30||loading?"none":"auto"}},
-                loading?"Analisando...":"Avaliar com IA →")
-            )
+      h(Btn,{variant:"ghost",style:{marginTop:8,padding:"6px 14px",fontSize:12},onClick:function(){setShowKey(false);}},"Pular")
+    ),
+    h("div",{style:Object.assign({},CARD,{background:"#0d1a2e",border:"1px solid #1e3a5f",marginBottom:16})},
+      h("div",{style:{fontSize:11,color:C.blue,fontWeight:700,letterSpacing:1,marginBottom:8}},"PROMPT"),
+      h("div",{style:{fontSize:16,lineHeight:1.7,fontStyle:"italic"}},'"'+prompt+'"')
+    ),
+    !feedback
+      ?h("div",null,
+          h("textarea",{value:text,onChange:function(e){setText(e.target.value);},
+            placeholder:"Escreva sua resposta em inglês aqui... (mínimo 50 palavras)",
+            style:{width:"100%",minHeight:160,padding:"14px 16px",background:C.surface,
+              border:"1.5px solid "+C.border,borderRadius:12,color:C.text,fontSize:15,
+              lineHeight:1.7,outline:"none",resize:"vertical",marginBottom:8}}),
+          h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+            h("div",{style:{display:"flex",gap:12,alignItems:"center"}},
+              h("span",{style:{fontSize:12,color:wc>=50?C.green:C.muted}},wc+" palavras"+(wc>=50?" ✓":"")),
+              !showKey&&h("button",{onClick:function(){setShowKey(true);},
+                style:{background:"none",border:"1px solid "+C.border,color:C.muted,
+                  padding:"4px 10px",borderRadius:8,fontSize:11,cursor:"pointer"}},"🔑 API Key")
+            ),
+            h(Btn,{onClick:getFeedback,style:{opacity:wc<30||loading?.5:1,pointerEvents:wc<30||loading?"none":"auto"}},
+              loading?"Analisando...":"Avaliar com IA →")
           )
-        : h("div",{className:"fi"},
-            h("div",{style:Object.assign({},CARD,{background:"linear-gradient(135deg,#0d1a2e,#111a35)",
-              border:"1px solid rgba(34,211,160,.2)",textAlign:"center",marginBottom:16})},
-              h("div",{style:{fontSize:36,marginBottom:8}},["","😕","🙂","👍","🌟","🚀"][feedback.score||3]),
-              h("div",{style:{fontSize:28,fontWeight:900,color:C.accent}},feedback.level),
-              h("div",{style:{display:"flex",justifyContent:"center",gap:4,margin:"6px 0"}},
-                [1,2,3,4,5].map(function(n){
-                  return h("span",{key:n,style:{fontSize:20,opacity:n<=(feedback.score||3)?1:.2}},"★");
-                })
-              ),
-              h("div",{style:{fontSize:14,lineHeight:1.6,maxWidth:480,margin:"0 auto"}},feedback.summary)
-            ),
-            h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}},
-              h("div",{style:Object.assign({},CARD,{background:"#16a34a18",border:"1px solid #16a34a33"})},
-                h("div",{style:{fontSize:11,color:C.green,fontWeight:700,letterSpacing:1,marginBottom:10}},"✓ PONTOS FORTES"),
-                (feedback.strengths||[]).map(function(s,i){
-                  return h("div",{key:i,style:{fontSize:13,marginBottom:6}},"• "+s);
-                })
-              ),
-              h("div",{style:Object.assign({},CARD,{background:"#dc262618",border:"1px solid #dc262633"})},
-                h("div",{style:{fontSize:11,color:C.red,fontWeight:700,letterSpacing:1,marginBottom:10}},"↑ MELHORAR"),
-                (feedback.improvements||[]).map(function(s,i){
-                  return h("div",{key:i,style:{fontSize:13,marginBottom:6}},"• "+s);
-                })
-              )
-            ),
-            feedback.corrected && h("div",{style:Object.assign({},CARD,{background:"#1a1f2e",marginBottom:16})},
-              h("div",{style:{fontSize:11,color:C.purple,fontWeight:700,letterSpacing:1,marginBottom:8}},"✏️ FRASE MELHORADA"),
-              h("div",{style:{fontSize:14,fontStyle:"italic",lineHeight:1.6}},'"'+feedback.corrected+'"')
-            ),
-            h("div",{style:{display:"flex",gap:12}},
-              h(Btn,{variant:"ghost",onClick:function(){setText("");setFeedback(null);}},"Tentar novamente"),
-              h(Btn,{onClick:function(){props.onDone(50);}},"+50 XP · Concluir →")
-            )
+        )
+      :h("div",{className:"fi"},
+          h("div",{style:Object.assign({},CARD,{background:"linear-gradient(135deg,#0d1a2e,#111a35)",
+            border:"1px solid rgba(34,211,160,.2)",textAlign:"center",marginBottom:16})},
+            h("div",{style:{fontSize:36,marginBottom:8}},["","😕","🙂","👍","🌟","🚀"][feedback.score||3]),
+            h("div",{style:{fontSize:28,fontWeight:900,color:C.accent}},feedback.level),
+            h("div",{style:{display:"flex",justifyContent:"center",gap:4,margin:"6px 0"}},
+              [1,2,3,4,5].map(function(n){return h("span",{key:n,style:{fontSize:20,opacity:n<=(feedback.score||3)?1:.2}},"★");})),
+            h("div",{style:{fontSize:14,lineHeight:1.6,maxWidth:480,margin:"0 auto"}},feedback.summary)
+          ),
+          h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}},
+            h("div",{style:Object.assign({},CARD,{background:"#16a34a18",border:"1px solid #16a34a33"})},
+              h("div",{style:{fontSize:11,color:C.green,fontWeight:700,letterSpacing:1,marginBottom:10}},"✓ PONTOS FORTES"),
+              (feedback.strengths||[]).map(function(s,i){return h("div",{key:i,style:{fontSize:13,marginBottom:6}},"• "+s);})),
+            h("div",{style:Object.assign({},CARD,{background:"#dc262618",border:"1px solid #dc262633"})},
+              h("div",{style:{fontSize:11,color:C.red,fontWeight:700,letterSpacing:1,marginBottom:10}},"↑ MELHORAR"),
+              (feedback.improvements||[]).map(function(s,i){return h("div",{key:i,style:{fontSize:13,marginBottom:6}},"• "+s);}))
+          ),
+          feedback.corrected&&h("div",{style:Object.assign({},CARD,{background:"#1a1f2e",marginBottom:16})},
+            h("div",{style:{fontSize:11,color:C.purple,fontWeight:700,letterSpacing:1,marginBottom:8}},"✏️ FRASE MELHORADA"),
+            h("div",{style:{fontSize:14,fontStyle:"italic",lineHeight:1.6}},'"'+feedback.corrected+'"')
+          ),
+          h("div",{style:{display:"flex",gap:12}},
+            h(Btn,{variant:"ghost",onClick:function(){setText("");setFeedback(null);}},"Tentar novamente"),
+            h(Btn,{onClick:function(){props.onDone(50);}},"+50 XP · Concluir →")
           )
-    )
-  );
+        )
+  ));
 }
 
-// ── TIPS
+// ═══════════════════════════════════════════════════════
+// TIPS
+// ═══════════════════════════════════════════════════════
 function Tips(props){
   return h("div",{className:"fi"},
     h("div",{style:Object.assign({},CARD,{marginBottom:16})},
       h("div",{style:ST},"💡 Estratégias para o DET"),
       h("div",{style:{fontSize:14,color:C.muted,lineHeight:1.7}},
-        "O DET testa ",h("strong",null,"rapidez de reconhecimento")," e ",
-        h("strong",null,"profundidade de vocabulário"),". Técnicas essenciais:")
+        "O DET testa rapidez, gramática e vocabulário. Use estas técnicas para maximizar sua pontuação:")
     ),
     TIPS.map(function(tip,i){
-      return h("div",{key:i,className:"fi",
-        style:Object.assign({},CARD,{borderLeft:"3px solid "+tip.col})},
+      return h("div",{key:i,className:"fi",style:Object.assign({},CARD,{borderLeft:"3px solid "+tip.col})},
         h("div",{style:{display:"flex",gap:14,alignItems:"flex-start"}},
           h("div",{style:{fontSize:24,width:42,height:42,display:"flex",alignItems:"center",
             justifyContent:"center",background:tip.col+"18",borderRadius:10,flexShrink:0}},tip.icon),
           h("div",null,
             h("div",{style:{fontSize:15,fontWeight:700,color:tip.col,marginBottom:6}},tip.title),
-            h("div",{style:{fontSize:14,lineHeight:1.7}},tip.tip)
-          )
+            h("div",{style:{fontSize:14,lineHeight:1.7}},tip.tip))
         )
       );
     }),
@@ -598,63 +959,63 @@ function Tips(props){
   );
 }
 
-// ── APP PRINCIPAL
+// ═══════════════════════════════════════════════════════
+// APP PRINCIPAL
+// ═══════════════════════════════════════════════════════
 function App(){
-  var _s1 = useState("dash");  var screen = _s1[0]; var setScreen = _s1[1];
-  var _s2 = useState(null);    var ex = _s2[0];     var setEx = _s2[1];
-  var _s3 = useState(0);       var xp = _s3[0];     var setXP = _s3[1];
-  var _s4 = useState([]);      var done = _s4[0];   var setDone = _s4[1];
-
-  function start(id){ setEx(id); setScreen("ex"); }
+  var _s1=useState("dash");  var screen=_s1[0]; var setScreen=_s1[1];
+  var _s2=useState(null);    var ex=_s2[0];     var setEx=_s2[1];
+  var _s3=useState(0);       var xp=_s3[0];     var setXP=_s3[1];
+  var _s4=useState([]);      var done=_s4[0];   var setDone=_s4[1];
+  function start(id){setEx(id);setScreen("ex");}
   function finish(gained){
     setXP(function(x){return x+gained;});
     setDone(function(d){return d.concat([ex]);});
-    setScreen("dash"); setEx(null);
+    setScreen("dash");setEx(null);
   }
-
-  var names = {
+  var names={
     "read-select":"👁 Read & Select","read-complete":"✏️ Read & Complete",
-    "vocabulary":"📖 Vocabulary","writing":"🖊 Writing Practice","tips":"💡 Estratégias"
+    "vocabulary":"📖 Vocabulary","sentence":"📝 Sentence Completion",
+    "error":"🔍 Error Correction","wordorder":"🔀 Word Order",
+    "writing":"🖊 Writing Practice","tips":"💡 Estratégias"
   };
-
-  var score = estScore(xp);
-
+  var score=estScore(xp);
   return h("div",{style:{minHeight:"100vh",background:C.bg,paddingBottom:80}},
     // Header
-    h("div",{style:{background:"linear-gradient(135deg,#0d1127,#111a35)",
-      borderBottom:"1px solid "+C.border,padding:"14px 24px",display:"flex",
-      alignItems:"center",justifyContent:"space-between",
+    h("div",{style:{background:"linear-gradient(135deg,#0d1127,#111a35)",borderBottom:"1px solid "+C.border,
+      padding:"14px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",
       position:"sticky",top:0,zIndex:100}},
       h("div",null,
         h("div",{style:{fontSize:20,fontWeight:900,color:C.accent,letterSpacing:-.5}},"DET·Study"),
-        h("div",{style:{fontSize:10,color:C.muted,fontWeight:600,letterSpacing:1}},
-          "DUOLINGO ENGLISH TEST PREP")
+        h("div",{style:{fontSize:10,color:C.muted,fontWeight:600,letterSpacing:1}},"DUOLINGO ENGLISH TEST PREP")
       ),
       h("div",{style:{display:"flex",gap:10}},
-        [[xp+"xp","XP",C.accent],[score,"DET",C.yellow],[done.length,"FEITOS",C.blue]].map(function(item){
+        [[xp+"xp","XP",C.accent],[score+" pts","DET",score>=60?C.green:C.yellow],[done.length,"FEITOS",C.blue]].map(function(item){
           return h("div",{key:item[1],style:{padding:"4px 12px",borderRadius:10,textAlign:"center",
             background:item[2]+"10",border:"1px solid "+item[2]+"25"}},
-            h("div",{style:{fontSize:18,fontWeight:800,color:item[2],lineHeight:1}},item[0]),
+            h("div",{style:{fontSize:16,fontWeight:800,color:item[2],lineHeight:1}},item[0]),
             h("div",{style:{fontSize:10,color:C.muted,fontWeight:600}},item[1]));
         })
       )
     ),
     // Barra voltar
-    screen==="ex" && h("div",{style:{padding:"10px 24px",background:C.surface,
+    screen==="ex"&&h("div",{style:{padding:"10px 24px",background:C.surface,
       borderBottom:"1px solid "+C.border,display:"flex",alignItems:"center",gap:12}},
-      h(Btn,{variant:"ghost",style:{padding:"6px 12px",fontSize:13},
-        onClick:function(){setScreen("dash");setEx(null);}},
+      h(Btn,{variant:"ghost",style:{padding:"6px 12px",fontSize:13},onClick:function(){setScreen("dash");setEx(null);}},
         "← Voltar"),
       h("span",{style:{fontSize:14,color:C.muted}},names[ex]||"")
     ),
     // Conteúdo
     h("div",{style:{maxWidth:780,margin:"0 auto",padding:"24px 16px"}},
-      screen==="dash"             && h(Dashboard,   {xp:xp,onStart:start,completed:done}),
-      screen==="ex"&&ex==="read-select"   && h(ReadSelect,  {onDone:finish}),
-      screen==="ex"&&ex==="read-complete" && h(ReadComplete, {onDone:finish}),
-      screen==="ex"&&ex==="vocabulary"    && h(Vocabulary,   {onDone:finish}),
-      screen==="ex"&&ex==="writing"       && h(Writing,      {onDone:finish}),
-      screen==="ex"&&ex==="tips"          && h(Tips,         {onDone:finish})
+      screen==="dash"&&h(Dashboard,{xp:xp,onStart:start,completed:done}),
+      screen==="ex"&&ex==="read-select"  &&h(ReadSelect,      {onDone:finish}),
+      screen==="ex"&&ex==="read-complete"&&h(ReadComplete,    {onDone:finish}),
+      screen==="ex"&&ex==="vocabulary"   &&h(Vocabulary,      {onDone:finish}),
+      screen==="ex"&&ex==="sentence"     &&h(SentenceCompletion,{onDone:finish}),
+      screen==="ex"&&ex==="error"        &&h(ErrorCorrection, {onDone:finish}),
+      screen==="ex"&&ex==="wordorder"    &&h(WordOrder,       {onDone:finish}),
+      screen==="ex"&&ex==="writing"      &&h(Writing,         {onDone:finish}),
+      screen==="ex"&&ex==="tips"         &&h(Tips,            {onDone:finish})
     )
   );
 }
