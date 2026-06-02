@@ -1,1 +1,36 @@
+name: Processar Exames
+
+on:
+  push:
+    paths:
+      - 'exames/**.pdf'
+
+jobs:
+  extrair:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install pymupdf
+
+      - name: Extrair dados dos exames
+        run: python3 extrair_exames.py
+
+      - name: Commit do JSON atualizado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add exames_data.json
+          git diff --staged --quiet || git commit -m "🤖 Atualiza exames_data.json [$(date '+%d/%m/%Y')]"
+          git push
 
