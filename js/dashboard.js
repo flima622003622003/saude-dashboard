@@ -1,258 +1,256 @@
-/* ═══════════════════════════════════════════════
-   js/dashboard.js
-   Lógica principal do dashboard:
-   carregamento do JSON, construção de UI,
-   alertas, cards de métricas e tabela.
-   ═══════════════════════════════════════════════ */
+/* js/dashboard.js */
+
+let ALL_DATA = [];
+let ACTIVE_IDX = 0;
 
 async function init() {
   let data;
   try {
     const res = await fetch('exames_data.json');
-    if (!res.ok) throw new Error('not found');
+    if (!res.ok) throw new Error();
     data = await res.json();
-  } catch (e) {
+  } catch {
     document.getElementById('loading').innerHTML = `
-      <div style="text-align:center; padding:40px; max-width:460px; line-height:1.8;">
-        <p style="font-size:32px; margin-bottom:16px;">📂</p>
-        <p style="font-weight:600; color:var(--text); margin-bottom:8px;">
-          Arquivo exames_data.json não encontrado
-        </p>
-        <p style="font-size:13px; color:var(--text2);">
-          Rode <code style="font-family:DM Mono,monospace; background:var(--surface2); padding:2px 6px; border-radius:4px;">python3 extrair_exames.py</code>
-          na pasta do projeto para gerá-lo,
-          depois faça commit e push para o GitHub.
+      <div style="text-align:center;max-width:420px;padding:40px">
+        <div style="font-size:48px;margin-bottom:16px">📂</div>
+        <p style="font-family:Nunito,sans-serif;font-weight:800;font-size:17px;margin-bottom:8px">Nenhum dado encontrado</p>
+        <p style="font-size:13px;color:var(--text2);line-height:1.7">
+          O arquivo <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:12px">exames_data.json</code>
+          não foi encontrado.<br>Rode <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:12px">python3 extrair_exames.py</code>
+          e faça upload para o GitHub.
         </p>
       </div>`;
     return;
   }
 
-  if (!data || !data.length) {
-    document.getElementById('loading').innerHTML =
-      '<p style="color:var(--text2);">Nenhum exame encontrado no JSON.</p>';
-    return;
-  }
+  ALL_DATA = data;
+  ACTIVE_IDX = data.length - 1;
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('main-content').style.display = 'block';
 
-  buildDateTabs(data);
-  buildAlerts(data);
-  buildMetrics(data);
-  buildAllCharts(data);   // definido em charts.js
-  buildTable(data);
-  updateStatusPill(data);
+  buildDateButtons();
+  renderAll();
+  buildAllCharts(data); // gráficos usam série completa
 }
 
-/* ── Status pill ──────────────────────────────────────────────────── */
+/* ── Botões de data ──────────────────────────────────────────────── */
 
-function updateStatusPill(data) {
-  const latest = data[data.length - 1].dados;
-  const pill = document.getElementById('status-pill');
-  if (latest.hba1c >= 6.5 || latest.glicose >= 126) {
-    pill.className = 'status-pill danger';
-    pill.querySelector('.status-dot').style.background = 'currentColor';
-    pill.lastChild.textContent = ' Diabetes — monitorar';
-  } else if (latest.hba1c >= 5.7 || latest.glicose > 99) {
-    pill.className = 'status-pill warn';
-    pill.lastChild.textContent = ' Pré-diabético';
-  } else {
-    pill.className = 'status-pill ok';
-    pill.lastChild.textContent = ' Glicemia normal';
-  }
-}
-
-/* ── Date tabs ────────────────────────────────────────────────────── */
-
-function buildDateTabs(data) {
-  const bar = document.getElementById('compare-bar');
-  data.forEach((entry, i) => {
+function buildDateButtons() {
+  const wrap = document.getElementById('date-buttons');
+  ALL_DATA.forEach((entry, i) => {
     const btn = document.createElement('button');
-    btn.className = 'date-tab' + (i === data.length - 1 ? ' active' : '');
-    btn.textContent = labelOf(entry);
-    btn.title = entry.arquivo;
-    bar.appendChild(btn);
+    btn.className = 'date-btn' + (i === ACTIVE_IDX ? ' active' : '');
+    btn.innerHTML = `<span class="dot"></span>${labelOf(entry)}`;
+    btn.title = `Exame de ${labelOf(entry)} — ${entry.arquivo}`;
+    btn.addEventListener('click', () => {
+      ACTIVE_IDX = i;
+      document.querySelectorAll('.date-btn').forEach((b, j) => b.classList.toggle('active', j === i));
+      renderAll();
+    });
+    wrap.appendChild(btn);
   });
 }
 
-/* ── Alert banners ────────────────────────────────────────────────── */
+/* ── Renderiza tudo com base no exame ativo ──────────────────────── */
 
-function buildAlerts(data) {
-  const latest = data[data.length - 1].dados;
-  const container = document.getElementById('alerts-container');
+function renderAll() {
+  const entry   = ALL_DATA[ACTIVE_IDX];
+  const prev    = ACTIVE_IDX > 0 ? ALL_DATA[ACTIVE_IDX - 1] : null;
+  const dados   = entry.dados;
+  const dadosPrev = prev ? prev.dados : null;
 
-  const alerts = [];
-
-  if (latest.hba1c >= 5.7)
-    alerts.push({
-      level: 'warn',
-      text: `<strong>HbA1c ${fmtVal('hba1c', latest.hba1c)}% — zona de pré-diabetes</strong> (5,7–6,4%).
-             Meta: voltar abaixo de 5,70%. Controle alimentar e exercícios são a primeira linha de tratamento.`
-    });
-
-  if (latest.glicose > 99)
-    alerts.push({
-      level: 'warn',
-      text: `<strong>Glicemia de jejum ${fmtVal('glicose', latest.glicose)} mg/dL</strong> — acima do limite normal (99 mg/dL).
-             Indica que o fígado libera glicose em excesso durante a madrugada.`
-    });
-
-  if (latest.ttgo_60min >= 140)
-    alerts.push({
-      level: 'warn',
-      text: `<strong>Curva glicêmica 1h: ${fmtVal('ttgo_60min', latest.ttgo_60min)} mg/dL</strong> — acima de 140 mg/dL.
-             Resistência à insulina confirmada. Exercício 20–30 min após refeições reduz diretamente esse pico.`
-    });
-
-  if (latest.lpa > 75)
-    alerts.push({
-      level: 'danger',
-      text: `<strong>🚨 Lipoproteína(a): ${Math.round(latest.lpa)} nmol/L</strong> — ${(latest.lpa / 75).toFixed(1)}× acima do limite (75 nmol/L).
-             Fator de risco cardiovascular genético. Não é controlável por dieta. Requer avaliação cardiológica específica.`
-    });
-
-  if (latest.etfg && latest.etfg < 60)
-    alerts.push({
-      level: 'warn',
-      text: `<strong>eTFG: ${Math.round(latest.etfg)} mL/min</strong> — função renal reduzida.
-             Hidratação adequada e controle glicêmico são essenciais para proteger os rins.`
-    });
-
-  if (latest.cpk > 171)
-    alerts.push({
-      level: 'warn',
-      text: `<strong>CPK: ${Math.round(latest.cpk)} U/L</strong> — acima do normal (171 U/L).
-             Pode indicar esforço muscular intenso recente, uso de estatina ou lesão muscular. Investigar com médico.`
-    });
-
-  alerts.forEach(a => {
-    const div = document.createElement('div');
-    div.className = `alert-banner${a.level === 'danger' ? ' danger' : ''}`;
-    div.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="${a.level === 'danger' ? '#b91c1c' : '#b45309'}"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-        <line x1="12" y1="9" x2="12" y2="13"/>
-        <line x1="12" y1="17" x2="12.01" y2="17"/>
-      </svg>
-      <p>${a.text}</p>`;
-    container.appendChild(div);
-  });
+  buildHero(dados, dadosPrev);
+  buildFocusCards(dados, dadosPrev);
+  buildMarkersGrid('grid-lipids',    dados, dadosPrev, ['colesterol_total','hdl','ldl','triglicerideos','nao_hdl','vldl','lpa','apo_a1','apo_b']);
+  buildMarkersGrid('grid-renal',     dados, dadosPrev, ['creatinina','ureia','etfg','albumina_creatinina']);
+  buildMarkersGrid('grid-hepatic',   dados, dadosPrev, ['ast','alt','ggt','cpk']);
+  buildMarkersGrid('grid-hemo',      dados, dadosPrev, ['hemoglobina','hematocrito','eritrocitos','leucocitos','plaquetas']);
+  buildMarkersGrid('grid-vitamins',  dados, dadosPrev, ['vitamina_d','vitamina_b12','acido_folico','ferro','ferritina','potassio','sodio','acido_urico']);
+  buildMarkersGrid('grid-thyroid',   dados, dadosPrev, ['tsh','t4_livre','t3_livre']);
+  buildMarkersGrid('grid-other',     dados, dadosPrev, ['pcr_ultrasensivel','psa_total','vhs']);
+  buildEvoTable(dados, dadosPrev);
 }
 
-/* ── Metric cards ─────────────────────────────────────────────────── */
+/* ── Hero: HbA1c + medidor ──────────────────────────────────────── */
 
-const GLYCEMIC_KEYS = ['glicose', 'hba1c', 'ttgo_basal', 'ttgo_60min', 'glicemia_media_estimada'];
-const LIPIDS_KEYS   = ['colesterol_total', 'hdl', 'ldl', 'triglicerideos', 'lpa'];
-const RENAL_KEYS    = ['creatinina', 'etfg', 'albumina_creatinina', 'ureia'];
-const HEPATIC_KEYS  = ['ast', 'alt', 'ggt', 'cpk'];
-const HEMO_KEYS     = ['hemoglobina', 'hematocrito', 'eritrocitos', 'leucocitos', 'plaquetas'];
+function buildHero(dados, prev) {
+  const hba1c = dados.hba1c;
+  const prevHba1c = prev ? prev.hba1c : null;
 
-function buildMetricCard(key, data) {
-  const latest  = data[data.length - 1].dados;
-  const prev    = data.length > 1 ? data[data.length - 2].dados : null;
-  const val     = latest[key];
-  if (val == null) return null;
+  // Status geral
+  let title, desc, color;
+  if (!hba1c) { title = 'Sem dados de HbA1c'; desc = ''; color = 'var(--text3)'; }
+  else if (hba1c >= 6.5) {
+    title = 'Atenção: zona de diabetes';
+    desc  = `Sua HbA1c de ${fmtVal('hba1c', hba1c)}% indica diabetes. Consulte seu médico imediatamente para iniciar tratamento.`;
+    color = 'var(--red)';
+  } else if (hba1c >= 5.7) {
+    title = 'Pré-diabetes — controlável com mudanças de hábito';
+    desc  = `Sua HbA1c de ${fmtVal('hba1c', hba1c)}% está na zona de pré-diabetes (5,7–6,4%). Com alimentação adequada e exercícios regulares, é totalmente possível voltar ao normal. Continue acompanhando!`;
+    color = 'var(--amber)';
+  } else {
+    title = 'Glicemia sob controle!';
+    desc  = `Sua HbA1c de ${fmtVal('hba1c', hba1c)}% está dentro da faixa normal. Continue com os bons hábitos para manter assim.`;
+    color = 'var(--green)';
+  }
 
-  const m       = MARKERS[key];
-  const st      = statusOf(key, val);
-  const prevVal = prev ? prev[key] : null;
-  const color   = st === 'danger' ? 'var(--danger)' : st === 'warn' ? 'var(--warn)' : 'var(--accent)';
+  document.getElementById('hero-title').textContent = title;
+  document.getElementById('hero-desc').textContent  = desc;
 
-  let trendHtml = '';
-  if (prevVal != null) {
-    const diff = val - prevVal;
-    const pct  = Math.abs(diff / prevVal * 100).toFixed(1);
-    if (Math.abs(diff) > 0.01) {
-      const dir   = diff > 0 ? 'up' : 'down';
-      const arrow = diff > 0 ? '↑' : '↓';
-      trendHtml = `<span class="trend ${dir}">${arrow} ${pct}%</span>`;
+  // Medidor
+  if (hba1c) {
+    const pct = Math.min(100, Math.max(0, (hba1c - 4.5) / (8 - 4.5) * 100));
+    document.getElementById('needle').style.left = pct + '%';
+    document.getElementById('meter-val').textContent = fmtVal('hba1c', hba1c) + '%';
+    document.getElementById('meter-val').style.color = color;
+  }
+
+  // Status pill
+  const pill = document.getElementById('status-pill');
+  if (hba1c >= 6.5) {
+    pill.className = 'status-badge danger';
+    pill.querySelector('span:last-child').textContent = 'Zona de diabetes';
+  } else if (hba1c >= 5.7 || (dados.glicose && dados.glicose > 99)) {
+    pill.className = 'status-badge warn';
+    pill.querySelector('span:last-child').textContent = 'Pré-diabético';
+  } else {
+    pill.className = 'status-badge ok';
+    pill.querySelector('span:last-child').textContent = 'Glicemia normal';
+  }
+}
+
+/* ── Focus cards (glicemia) ─────────────────────────────────────── */
+
+function buildFocusCards(dados, prev) {
+  const container = document.getElementById('focus-cards');
+  container.innerHTML = '';
+
+  const KEYS = ['glicose','hba1c','ttgo_60min'];
+
+  const GOALS = {
+    glicose:    { max: 126, target: 99,  label: 'Meta: abaixo de 99' },
+    hba1c:      { max: 7.5, target: 5.7, label: 'Meta: abaixo de 5,7%' },
+    ttgo_60min: { max: 209, target: 140, label: 'Meta: abaixo de 140' },
+  };
+
+  KEYS.forEach(key => {
+    const val = dados[key];
+    if (val == null) return;
+
+    const m     = MARKERS[key];
+    const st    = statusOf(key, val);
+    const g     = GOALS[key];
+    const pct   = g ? Math.min(100, Math.round(val / g.max * 100)) : 50;
+
+    let trendHtml = '';
+    if (prev && prev[key] != null) {
+      const diff = val - prev[key];
+      const pctDiff = Math.abs(diff / prev[key] * 100).toFixed(1);
+      if (Math.abs(diff) > 0.01) {
+        const dir = diff > 0 ? 'worsening' : 'improving';
+        const arrow = diff > 0 ? '↑' : '↓';
+        const vs = labelOf(ALL_DATA[ACTIVE_IDX - 1]);
+        trendHtml = `<div class="fc-trend ${dir}">${arrow} ${pctDiff}% em relação a ${vs}</div>`;
+      }
     }
-  }
 
-  const card = document.createElement('div');
-  card.className = `metric-card ${st}-card`;
-  card.title = m.info || '';
-  card.innerHTML = `
-    <div class="label">${m.label}</div>
-    <div class="value" style="color:${color}">${fmtVal(key, val)}</div>
-    <div class="unit">${m.unit}${trendHtml}</div>
-    <span class="badge ${st}">
-      ${st === 'ok' ? '✓ Normal' : st === 'warn' ? '⚠ Atenção' : '🔴 Alterado'}
-    </span>`;
-  return card;
+    const card = document.createElement('div');
+    card.className = `focus-card ${st}`;
+    card.innerHTML = `
+      <div class="fc-label">${m.label}</div>
+      <div class="fc-value">${fmtVal(key, val)}</div>
+      <div class="fc-unit">${m.unit} ${g ? '· ' + g.label : ''}</div>
+      <div class="fc-bar-track"><div class="fc-bar-fill" style="width:${pct}%"></div></div>
+      <div class="fc-status">${statusLabel(st)}</div>
+      ${trendHtml}`;
+    container.appendChild(card);
+  });
 }
 
-function buildMetrics(data) {
-  const sections = [
-    ['metrics-glycemic', GLYCEMIC_KEYS],
-    ['metrics-lipids',   LIPIDS_KEYS],
-    ['metrics-renal',    RENAL_KEYS],
-    ['metrics-hepatic',  HEPATIC_KEYS],
-    ['metrics-hemo',     HEMO_KEYS],
-  ];
+/* ── Grade de marcadores ─────────────────────────────────────────── */
 
-  sections.forEach(([id, keys]) => {
-    const grid = document.getElementById(id);
-    if (!grid) return;
-    keys.forEach(key => {
-      const card = buildMetricCard(key, data);
-      if (card) grid.appendChild(card);
-    });
+function buildMarkersGrid(containerId, dados, prev, keys) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  let anyData = false;
+  keys.forEach(key => {
+    const val = dados[key];
+    if (val == null) return;
+    anyData = true;
+
+    const m    = MARKERS[key];
+    const st   = statusOf(key, val);
+    const prevVal = prev ? prev[key] : null;
+
+    let trendHtml = '';
+    if (prevVal != null) {
+      const diff  = val - prevVal;
+      const pctD  = Math.abs(diff / prevVal * 100).toFixed(0);
+      if (Math.abs(diff) > 0.005) {
+        const dir   = diff > 0 ? 'up' : 'down';
+        const arrow = diff > 0 ? '↑' : '↓';
+        trendHtml = `<span class="td-trend ${dir}" style="font-size:11px; margin-left:4px">${arrow}${pctD}%</span>`;
+      }
+    }
+
+    const row = document.createElement('div');
+    row.className = `marker-row ${st}`;
+    row.innerHTML = `
+      <div class="mr-left">
+        <div class="mr-name">${m.label}</div>
+        <div class="mr-ref">Ref: ${m.ref} ${m.unit}</div>
+      </div>
+      <div class="mr-right">
+        <div class="mr-value">${fmtVal(key, val)}${trendHtml}</div>
+        <div class="mr-unit">${m.unit}</div>
+      </div>`;
+    container.appendChild(row);
   });
 
-  // Mostrar seção TTGO apenas se houver dados
-  const latest = data[data.length - 1].dados;
-  if (latest.ttgo_basal || latest.ttgo_60min) {
-    document.getElementById('ttgo-section').style.display = '';
-  }
+  // Esconde seção pai se sem dados
+  const section = container.closest('.dyn-section');
+  if (section) section.style.display = anyData ? '' : 'none';
 }
 
-/* ── Tabela comparativa ───────────────────────────────────────────── */
+/* ── Tabela de evolução ──────────────────────────────────────────── */
 
-function buildTable(data) {
-  const labels = data.map(labelOf);
+function buildEvoTable(dados, prev) {
+  const wrap = document.getElementById('evo-table-body');
+  if (!wrap) return;
+  wrap.innerHTML = '';
 
-  // Cabeçalho
-  const headerRow = document.getElementById('table-header-row');
-  headerRow.innerHTML =
-    '<th>Marcador</th>' +
-    labels.map(l => `<th>${l}</th>`).join('') +
-    '<th>Referência</th>';
+  const allKeys = Object.keys(MARKERS);
+  const dates = ALL_DATA.map(labelOf);
 
-  // Corpo
-  const tbody = document.getElementById('table-body');
+  // Cabeçalho dinâmico
+  const thead = document.getElementById('evo-table-head');
+  if (thead) {
+    thead.innerHTML = '<th>Exame</th>' + dates.map(d => `<th>${d}</th>`).join('') + '<th>Meta</th>';
+  }
 
-  Object.keys(MARKERS).forEach(key => {
-    const hasData = data.some(e => e.dados[key] != null);
-    if (!hasData) return;
+  allKeys.forEach(key => {
+    const hasAny = ALL_DATA.some(e => e.dados[key] != null);
+    if (!hasAny) return;
 
     const m  = MARKERS[key];
     const tr = document.createElement('tr');
 
-    let cells = `<td class="name">${m.label}</td>`;
+    let cells = `<td class="td-name">${m.label}</td>`;
 
-    data.forEach(e => {
+    ALL_DATA.forEach((e, i) => {
       const val = e.dados[key];
       const st  = statusOf(key, val);
-      const color =
-        st === 'danger' ? 'var(--danger)' :
-        st === 'warn'   ? 'var(--warn)'   : '';
-      const style = color ? `style="color:${color}; font-weight:600"` : '';
-      cells += `<td class="num" ${style}>${fmtVal(key, val)}</td>`;
+      const isCurrent = i === ACTIVE_IDX;
+      cells += `<td class="td-num ${st}" style="${isCurrent ? 'background:var(--bg);' : ''}">${fmtVal(key, val)}</td>`;
     });
 
-    // Referência resumida
-    const refs = [];
-    if (m.warn_lo  || m.danger_lo)  refs.push(`≥ ${m.warn_lo  || m.danger_lo}`);
-    if (m.warn_hi  || m.danger_hi)  refs.push(`< ${m.warn_hi  || m.danger_hi}`);
-    cells += `<td class="ref">${refs.join(' / ')} ${m.unit}</td>`;
-
+    cells += `<td class="td-ref">${m.ref} ${m.unit}</td>`;
     tr.innerHTML = cells;
-    tbody.appendChild(tr);
+    wrap.appendChild(tr);
   });
 }
 
-/* ── Inicializar ──────────────────────────────────────────────────── */
 init();
