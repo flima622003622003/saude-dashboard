@@ -1,4 +1,4 @@
-/* js/dashboard.js */
+/* js/dashboard.js — v4 */
 
 let ALL_DATA = [];
 let ACTIVE_IDX = 0;
@@ -11,13 +11,12 @@ async function init() {
     data = await res.json();
   } catch {
     document.getElementById('loading').innerHTML = `
-      <div style="text-align:center;max-width:420px;padding:40px">
-        <div style="font-size:48px;margin-bottom:16px">📂</div>
-        <p style="font-family:Nunito,sans-serif;font-weight:800;font-size:17px;margin-bottom:8px">Nenhum dado encontrado</p>
+      <div style="text-align:center;max-width:400px;padding:40px">
+        <i class="ti ti-folder-open" style="font-size:48px;color:var(--text3)" aria-hidden="true"></i>
+        <p style="font-weight:600;font-size:16px;margin:16px 0 8px">Nenhum dado encontrado</p>
         <p style="font-size:13px;color:var(--text2);line-height:1.7">
-          O arquivo <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:12px">exames_data.json</code>
-          não foi encontrado.<br>Rode <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:12px">python3 extrair_exames.py</code>
-          e faça upload para o GitHub.
+          Rode <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">python3 extrair_exames.py</code>
+          e faça o upload do <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">exames_data.json</code> para o GitHub.
         </p>
       </div>`;
     return;
@@ -31,18 +30,17 @@ async function init() {
 
   buildDateButtons();
   renderAll();
-  buildAllCharts(data); // gráficos usam série completa
+  buildAllCharts(data);
 }
 
-/* ── Botões de data ──────────────────────────────────────────────── */
-
+/* ── Botões de data ─────────────────────────────────────────────── */
 function buildDateButtons() {
   const wrap = document.getElementById('date-buttons');
   ALL_DATA.forEach((entry, i) => {
     const btn = document.createElement('button');
     btn.className = 'date-btn' + (i === ACTIVE_IDX ? ' active' : '');
-    btn.innerHTML = `<span class="dot"></span>${labelOf(entry)}`;
-    btn.title = `Exame de ${labelOf(entry)} — ${entry.arquivo}`;
+    btn.textContent = labelOf(entry);
+    btn.title = entry.arquivo;
     btn.addEventListener('click', () => {
       ACTIVE_IDX = i;
       document.querySelectorAll('.date-btn').forEach((b, j) => b.classList.toggle('active', j === i));
@@ -52,204 +50,284 @@ function buildDateButtons() {
   });
 }
 
-/* ── Renderiza tudo com base no exame ativo ──────────────────────── */
-
+/* ── Render tudo com o exame ativo ─────────────────────────────── */
 function renderAll() {
-  const entry   = ALL_DATA[ACTIVE_IDX];
-  const prev    = ACTIVE_IDX > 0 ? ALL_DATA[ACTIVE_IDX - 1] : null;
-  const dados   = entry.dados;
-  const dadosPrev = prev ? prev.dados : null;
+  const dados     = ALL_DATA[ACTIVE_IDX].dados;
+  const prevDados = ACTIVE_IDX > 0 ? ALL_DATA[ACTIVE_IDX - 1].dados : null;
+  const prevLabel = ACTIVE_IDX > 0 ? labelOf(ALL_DATA[ACTIVE_IDX - 1]) : null;
 
-  buildHero(dados, dadosPrev);
-  buildFocusCards(dados, dadosPrev);
-  buildMarkersGrid('grid-lipids',    dados, dadosPrev, ['colesterol_total','hdl','ldl','triglicerideos','nao_hdl','vldl','lpa','apo_a1','apo_b']);
-  buildMarkersGrid('grid-renal',     dados, dadosPrev, ['creatinina','ureia','etfg','albumina_creatinina']);
-  buildMarkersGrid('grid-hepatic',   dados, dadosPrev, ['ast','alt','ggt','cpk']);
-  buildMarkersGrid('grid-hemo',      dados, dadosPrev, ['hemoglobina','hematocrito','eritrocitos','leucocitos','plaquetas']);
-  buildMarkersGrid('grid-vitamins',  dados, dadosPrev, ['vitamina_d','vitamina_b12','acido_folico','ferro','ferritina','potassio','sodio','acido_urico']);
-  buildMarkersGrid('grid-thyroid',   dados, dadosPrev, ['tsh','t4_livre','t3_livre']);
-  buildMarkersGrid('grid-other',     dados, dadosPrev, ['pcr_ultrasensivel','psa_total','vhs']);
-  buildEvoTable(dados, dadosPrev);
+  buildHero(dados, prevDados);
+  buildGlycemicCards(dados, prevDados, prevLabel);
+  buildMarkersGrid('grid-lipids',   dados, prevDados, ['colesterol_total','hdl','ldl','triglicerideos','nao_hdl','vldl','lpa','apo_a1','apo_b']);
+  buildMarkersGrid('grid-renal',    dados, prevDados, ['creatinina','ureia','etfg','albumina_creatinina']);
+  buildMarkersGrid('grid-hepatic',  dados, prevDados, ['ast','alt','ggt','cpk']);
+  buildMarkersGrid('grid-hemo',     dados, prevDados, ['hemoglobina','hematocrito','eritrocitos','leucocitos','plaquetas']);
+  buildMarkersGrid('grid-vitamins', dados, prevDados, ['vitamina_d','vitamina_b12','acido_folico','ferro','ferritina','potassio','sodio','acido_urico']);
+  buildMarkersGrid('grid-thyroid',  dados, prevDados, ['tsh','t4_livre','t3_livre']);
+  buildMarkersGrid('grid-other',    dados, prevDados, ['pcr_ultrasensivel','psa_total','vhs']);
+  buildEvoTable();
 }
 
-/* ── Hero: HbA1c + medidor ──────────────────────────────────────── */
-
+/* ── Hero ────────────────────────────────────────────────────────── */
 function buildHero(dados, prev) {
   const hba1c = dados.hba1c;
-  const prevHba1c = prev ? prev.hba1c : null;
+  let title, desc, pillClass;
 
-  // Status geral
-  let title, desc, color;
-  if (!hba1c) { title = 'Sem dados de HbA1c'; desc = ''; color = 'var(--text3)'; }
-  else if (hba1c >= 6.5) {
-    title = 'Atenção: zona de diabetes';
-    desc  = `Sua HbA1c de ${fmtVal('hba1c', hba1c)}% indica diabetes. Consulte seu médico imediatamente para iniciar tratamento.`;
-    color = 'var(--red)';
+  if (!hba1c) {
+    title = 'Sem dados de HbA1c neste exame';
+    desc  = 'Adicione um exame com hemoglobina glicada para acompanhar o pré-diabetes.';
+    pillClass = 'ok';
+  } else if (hba1c >= 6.5) {
+    title = 'Zona de diabetes — procure seu médico';
+    desc  = `HbA1c de ${fmtVal('hba1c',hba1c)}% está acima de 6,5%. Consulte seu endocrinologista para iniciar tratamento.`;
+    pillClass = 'danger';
   } else if (hba1c >= 5.7) {
-    title = 'Pré-diabetes — controlável com mudanças de hábito';
-    desc  = `Sua HbA1c de ${fmtVal('hba1c', hba1c)}% está na zona de pré-diabetes (5,7–6,4%). Com alimentação adequada e exercícios regulares, é totalmente possível voltar ao normal. Continue acompanhando!`;
-    color = 'var(--amber)';
+    title = 'Pré-diabetes — controlável com hábitos';
+    desc  = `HbA1c de ${fmtVal('hba1c',hba1c)}% está na zona de pré-diabetes (5,7–6,4%). Com alimentação e exercício é possível voltar ao normal. Acompanhe a evolução abaixo.`;
+    pillClass = 'warn';
   } else {
-    title = 'Glicemia sob controle!';
-    desc  = `Sua HbA1c de ${fmtVal('hba1c', hba1c)}% está dentro da faixa normal. Continue com os bons hábitos para manter assim.`;
-    color = 'var(--green)';
+    title = 'Glicemia dentro do normal!';
+    desc  = `HbA1c de ${fmtVal('hba1c',hba1c)}% está abaixo de 5,7%. Continue com os bons hábitos para manter assim.`;
+    pillClass = 'ok';
   }
 
   document.getElementById('hero-title').textContent = title;
   document.getElementById('hero-desc').textContent  = desc;
 
-  // Medidor
-  if (hba1c) {
-    const pct = Math.min(100, Math.max(0, (hba1c - 4.5) / (8 - 4.5) * 100));
-    document.getElementById('needle').style.left = pct + '%';
-    document.getElementById('meter-val').textContent = fmtVal('hba1c', hba1c) + '%';
-    document.getElementById('meter-val').style.color = color;
-  }
-
-  // Status pill
   const pill = document.getElementById('status-pill');
-  if (hba1c >= 6.5) {
-    pill.className = 'status-badge danger';
-    pill.querySelector('span:last-child').textContent = 'Zona de diabetes';
-  } else if (hba1c >= 5.7 || (dados.glicose && dados.glicose > 99)) {
-    pill.className = 'status-badge warn';
-    pill.querySelector('span:last-child').textContent = 'Pré-diabético';
-  } else {
-    pill.className = 'status-badge ok';
-    pill.querySelector('span:last-child').textContent = 'Glicemia normal';
+  pill.className = `status-badge ${pillClass}`;
+  const labels = { ok: 'Glicemia normal', warn: 'Pré-diabético', danger: 'Zona de diabetes' };
+  pill.innerHTML = `<span class="status-dot"></span><span>${labels[pillClass]}</span>`;
+
+  if (hba1c) {
+    const pct = Math.min(96, Math.max(4, (hba1c - 4.5) / (8.5 - 4.5) * 100));
+    document.getElementById('needle').style.left = pct + '%';
+    const color = hba1c >= 6.5 ? 'var(--red-text)' : hba1c >= 5.7 ? 'var(--amber-text)' : 'var(--green-text)';
+    document.getElementById('hero-value').textContent = fmtVal('hba1c', hba1c) + '%';
+    document.getElementById('hero-value').style.color = color;
   }
 }
 
-/* ── Focus cards (glicemia) ─────────────────────────────────────── */
+/* ── Glycemic cards (shadcn style) ─────────────────────────────── */
 
-function buildFocusCards(dados, prev) {
-  const container = document.getElementById('focus-cards');
+const GC_CONFIG = {
+  hba1c: {
+    label:   'HbA1c — hemoglobina glicada',
+    footer:  'Média da glicemia nos últimos 3 meses',
+    footerIcon: 'ti-calendar',
+    scaleMin: 4,   scaleMax: 8,
+    okMax:  5.7,   preMax: 6.5,
+    labels: ['4%','5,7%','6,5%','8%'],
+    zones: [
+      { cls:'normal', name:'Normal',   val:'< 5,7%'   },
+      { cls:'pre',    name:'Pré-DM',   val:'5,7–6,4%' },
+      { cls:'dm',     name:'Diabetes', val:'≥ 6,5%'   },
+    ],
+  },
+  glicose: {
+    label:   'Glicemia de jejum',
+    footer:  'Coleta após 8h em jejum',
+    footerIcon: 'ti-moon',
+    scaleMin: 60,  scaleMax: 200,
+    okMax:  99,    preMax: 125,
+    labels: ['60','99','126','200'],
+    zones: [
+      { cls:'normal', name:'Normal',   val:'60–99'    },
+      { cls:'pre',    name:'Pré-DM',   val:'100–125'  },
+      { cls:'dm',     name:'Diabetes', val:'≥ 126'    },
+    ],
+  },
+  ttgo_60min: {
+    label:   'Curva glicêmica (1h)',
+    footer:  'Após 75g de dextrosol oral',
+    footerIcon: 'ti-droplet',
+    scaleMin: 60,  scaleMax: 270,
+    okMax:  140,   preMax: 199,
+    labels: ['60','140','200','270'],
+    zones: [
+      { cls:'normal', name:'Normal',   val:'< 140'    },
+      { cls:'pre',    name:'Pré-DM',   val:'140–199'  },
+      { cls:'dm',     name:'Diabetes', val:'≥ 200'    },
+    ],
+  },
+};
+
+function whichZone(key, val) {
+  const c = GC_CONFIG[key];
+  if (!c) return 'normal';
+  if (val >= c.preMax) return 'dm';
+  if (val >= c.okMax)  return 'pre';
+  return 'normal';
+}
+
+function needlePct(key, val) {
+  const c = GC_CONFIG[key];
+  if (!c) return 50;
+  const pct = (val - c.scaleMin) / (c.scaleMax - c.scaleMin) * 100;
+  return Math.min(96, Math.max(4, pct));
+}
+
+function okBarPct(key) {
+  const c = GC_CONFIG[key];
+  if (!c) return 40;
+  return (c.okMax - c.scaleMin) / (c.scaleMax - c.scaleMin) * 100;
+}
+
+function buildGlycemicCards(dados, prev, prevLabel) {
+  const container = document.getElementById('glycemic-cards');
   container.innerHTML = '';
 
-  const KEYS = ['glicose','hba1c','ttgo_60min'];
+  // Mostrar TTGO só se tiver dados
+  const keys = ['hba1c','glicose'];
+  if (dados.ttgo_60min != null) keys.push('ttgo_60min');
 
-  const GOALS = {
-    glicose:    { max: 126, target: 99,  label: 'Meta: abaixo de 99' },
-    hba1c:      { max: 7.5, target: 5.7, label: 'Meta: abaixo de 5,7%' },
-    ttgo_60min: { max: 209, target: 140, label: 'Meta: abaixo de 140' },
-  };
-
-  KEYS.forEach(key => {
+  keys.forEach(key => {
     const val = dados[key];
     if (val == null) return;
 
-    const m     = MARKERS[key];
-    const st    = statusOf(key, val);
-    const g     = GOALS[key];
-    const pct   = g ? Math.min(100, Math.round(val / g.max * 100)) : 50;
+    const c   = GC_CONFIG[key];
+    const m   = MARKERS[key];
+    const st  = statusOf(key, val);
+    const zone = whichZone(key, val);
+    const pct  = needlePct(key, val);
+    const okPct = okBarPct(key);
 
+    // Tendência
     let trendHtml = '';
     if (prev && prev[key] != null) {
       const diff = val - prev[key];
-      const pctDiff = Math.abs(diff / prev[key] * 100).toFixed(1);
-      if (Math.abs(diff) > 0.01) {
-        const dir = diff > 0 ? 'worsening' : 'improving';
+      const pctD = Math.abs(diff / prev[key] * 100).toFixed(1);
+      if (Math.abs(diff) > 0.005) {
+        const dir   = diff > 0 ? 'worsening' : 'improving';
         const arrow = diff > 0 ? '↑' : '↓';
-        const vs = labelOf(ALL_DATA[ACTIVE_IDX - 1]);
-        trendHtml = `<div class="fc-trend ${dir}">${arrow} ${pctDiff}% em relação a ${vs}</div>`;
+        trendHtml = `<span class="gc-trend ${dir}" title="vs ${prevLabel}">${arrow} ${pctD}%</span>`;
       }
+    } else {
+      trendHtml = `<span class="gc-trend" style="color:var(--text3);font-size:10px">1º exame</span>`;
     }
 
+    // Badge
+    const badgeMap = { ok: ['ok','✓ Normal'], warn: ['warn','⚠ Atenção'], danger: ['danger','↑ Alterado'] };
+    const [bCls, bTxt] = badgeMap[st];
+
+    // Zonas com destaque na zona ativa
+    const zonesHtml = c.zones.map(z =>
+      `<div class="gc-zone ${z.cls}${zone === z.cls ? ' active' : ''}">
+        <span class="gc-zone-name">${z.name}</span>
+        <span class="gc-zone-val">${z.val}</span>
+      </div>`
+    ).join('');
+
     const card = document.createElement('div');
-    card.className = `focus-card ${st}`;
+    card.className = `gc-card ${st}`;
     card.innerHTML = `
-      <div class="fc-label">${m.label}</div>
-      <div class="fc-value">${fmtVal(key, val)}</div>
-      <div class="fc-unit">${m.unit} ${g ? '· ' + g.label : ''}</div>
-      <div class="fc-bar-track"><div class="fc-bar-fill" style="width:${pct}%"></div></div>
-      <div class="fc-status">${statusLabel(st)}</div>
-      ${trendHtml}`;
+      <div class="gc-header">
+        <span class="gc-label">${c.label}</span>
+        <span class="gc-badge ${bCls}">
+          <i class="ti ${bCls === 'ok' ? 'ti-check' : 'ti-alert-triangle'}" aria-hidden="true" style="font-size:10px"></i>
+          ${bTxt}
+        </span>
+      </div>
+
+      <div class="gc-value-row">
+        <span class="gc-value">${fmtVal(key, val)}</span>
+        <span class="gc-unit">${m.unit}</span>
+        ${trendHtml}
+      </div>
+
+      <div class="gc-range">
+        <div class="gc-bar-track">
+          <div class="gc-bar-ok" style="width:${okPct}%"></div>
+          <div class="gc-needle" style="left:${pct}%"></div>
+        </div>
+        <div class="gc-range-labels">
+          ${c.labels.map(l => `<span class="gc-range-label">${l}</span>`).join('')}
+        </div>
+      </div>
+
+      <div class="gc-zones">${zonesHtml}</div>
+
+      <div class="gc-sep"></div>
+
+      <div class="gc-footer">
+        <i class="ti ${c.footerIcon}" aria-hidden="true"></i>
+        ${c.footer}
+      </div>`;
+
     container.appendChild(card);
   });
 }
 
-/* ── Grade de marcadores ─────────────────────────────────────────── */
-
-function buildMarkersGrid(containerId, dados, prev, keys) {
-  const container = document.getElementById(containerId);
+/* ── Markers grid ───────────────────────────────────────────────── */
+function buildMarkersGrid(id, dados, prev, keys) {
+  const container = document.getElementById(id);
   if (!container) return;
   container.innerHTML = '';
+  let any = false;
 
-  let anyData = false;
   keys.forEach(key => {
     const val = dados[key];
     if (val == null) return;
-    anyData = true;
+    any = true;
 
-    const m    = MARKERS[key];
-    const st   = statusOf(key, val);
-    const prevVal = prev ? prev[key] : null;
-
+    const m   = MARKERS[key];
+    const st  = statusOf(key, val);
     let trendHtml = '';
-    if (prevVal != null) {
-      const diff  = val - prevVal;
-      const pctD  = Math.abs(diff / prevVal * 100).toFixed(0);
+
+    if (prev && prev[key] != null) {
+      const diff = val - prev[key];
+      const pctD = Math.abs(diff / prev[key] * 100).toFixed(0);
       if (Math.abs(diff) > 0.005) {
-        const dir   = diff > 0 ? 'up' : 'down';
+        const dir = diff > 0 ? 'worsening' : 'improving';
         const arrow = diff > 0 ? '↑' : '↓';
-        trendHtml = `<span class="td-trend ${dir}" style="font-size:11px; margin-left:4px">${arrow}${pctD}%</span>`;
+        const color = dir === 'improving' ? 'var(--green-text)' : 'var(--red-text)';
+        trendHtml = `<div class="mr-trend" style="color:${color}">${arrow} ${pctD}%</div>`;
       }
     }
 
     const row = document.createElement('div');
     row.className = `marker-row ${st}`;
     row.innerHTML = `
-      <div class="mr-left">
+      <div>
         <div class="mr-name">${m.label}</div>
         <div class="mr-ref">Ref: ${m.ref} ${m.unit}</div>
       </div>
-      <div class="mr-right">
-        <div class="mr-value">${fmtVal(key, val)}${trendHtml}</div>
+      <div>
+        <div class="mr-val">${fmtVal(key, val)}</div>
         <div class="mr-unit">${m.unit}</div>
+        ${trendHtml}
       </div>`;
     container.appendChild(row);
   });
 
-  // Esconde seção pai se sem dados
   const section = container.closest('.dyn-section');
-  if (section) section.style.display = anyData ? '' : 'none';
+  if (section) section.style.display = any ? '' : 'none';
 }
 
-/* ── Tabela de evolução ──────────────────────────────────────────── */
-
-function buildEvoTable(dados, prev) {
-  const wrap = document.getElementById('evo-table-body');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-
-  const allKeys = Object.keys(MARKERS);
+/* ── Tabela de evolução ─────────────────────────────────────────── */
+function buildEvoTable() {
   const dates = ALL_DATA.map(labelOf);
 
-  // Cabeçalho dinâmico
   const thead = document.getElementById('evo-table-head');
-  if (thead) {
-    thead.innerHTML = '<th>Exame</th>' + dates.map(d => `<th>${d}</th>`).join('') + '<th>Meta</th>';
-  }
+  thead.innerHTML = '<th>Exame</th>' + dates.map(d => `<th>${d}</th>`).join('') + '<th>Meta</th>';
 
-  allKeys.forEach(key => {
-    const hasAny = ALL_DATA.some(e => e.dados[key] != null);
-    if (!hasAny) return;
+  const tbody = document.getElementById('evo-table-body');
+  tbody.innerHTML = '';
 
-    const m  = MARKERS[key];
+  Object.keys(MARKERS).forEach(key => {
+    if (!ALL_DATA.some(e => e.dados[key] != null)) return;
+    const m = MARKERS[key];
     const tr = document.createElement('tr');
-
     let cells = `<td class="td-name">${m.label}</td>`;
-
     ALL_DATA.forEach((e, i) => {
       const val = e.dados[key];
       const st  = statusOf(key, val);
-      const isCurrent = i === ACTIVE_IDX;
-      cells += `<td class="td-num ${st}" style="${isCurrent ? 'background:var(--bg);' : ''}">${fmtVal(key, val)}</td>`;
+      const isCur = i === ACTIVE_IDX;
+      cells += `<td class="td-num ${st}${isCur ? ' current' : ''}">${fmtVal(key, val)}</td>`;
     });
-
     cells += `<td class="td-ref">${m.ref} ${m.unit}</td>`;
     tr.innerHTML = cells;
-    wrap.appendChild(tr);
+    tbody.appendChild(tr);
   });
 }
 
