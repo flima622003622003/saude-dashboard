@@ -34,18 +34,40 @@ def extract_float(text, pattern, group=1):
     return None
 
 def extract_text_from_zip_pdf(pdf_path):
-    """Abre o arquivo PDF (que é um ZIP) e concatena todos os .txt internos."""
+    """Formato ZIP disfarçado de PDF (laudos evolutivos do laboratório)."""
     full_text = ""
-    try:
-        with zipfile.ZipFile(pdf_path, 'r') as z:
-            txt_files = sorted([f for f in z.namelist() if f.endswith('.txt')],
-                               key=lambda x: int(x.replace('.txt','')) if x.replace('.txt','').isdigit() else 0)
-            for fname in txt_files:
-                with z.open(fname) as f:
-                    full_text += f.read().decode('utf-8', errors='replace') + "\n"
-    except Exception as e:
-        print(f"  Erro ao ler {pdf_path}: {e}")
+    with zipfile.ZipFile(pdf_path, 'r') as z:
+        txt_files = sorted(
+            [f for f in z.namelist() if f.endswith('.txt')],
+            key=lambda x: int(x.replace('.txt','')) if x.replace('.txt','').isdigit() else 0
+        )
+        for fname in txt_files:
+            with z.open(fname) as f:
+                full_text += f.read().decode('utf-8', errors='replace') + "\n"
     return full_text
+
+def extract_text_from_native_pdf(pdf_path):
+    """PDF nativo com camada de texto — usa PyMuPDF (fitz)."""
+    try:
+        import fitz
+        doc = fitz.open(str(pdf_path))
+        full_text = ""
+        for page in doc:
+            full_text += page.get_text() + "\n"
+        doc.close()
+        return full_text
+    except ImportError:
+        print("  PyMuPDF nao instalado. Rode: pip install pymupdf")
+        return ""
+    except Exception as e:
+        print(f"  Erro ao ler PDF nativo {pdf_path}: {e}")
+        return ""
+
+def extract_text_from_pdf(pdf_path):
+    """Detecta automaticamente o formato e extrai o texto."""
+    if zipfile.is_zipfile(pdf_path):
+        return extract_text_from_zip_pdf(pdf_path)
+    return extract_text_from_native_pdf(pdf_path)
 
 def parse_exame(text, label):
     """Extrai todos os marcadores laboratoriais de interesse do texto completo."""
@@ -269,7 +291,7 @@ def main():
             continue
 
         print(f"📄 Processando {pdf_path.name} → {date_key}")
-        text = extract_text_from_zip_pdf(pdf_path)
+        text = extract_text_from_pdf(pdf_path)
         if not text.strip():
             print(f"  ⚠ Arquivo vazio ou formato não suportado.")
             continue
