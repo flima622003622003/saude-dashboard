@@ -175,16 +175,29 @@
     <div class="markers-grid dyn-section" id="grid-other"></div>
 
     <!-- ═══ EVOLUÇÃO COMPLETA ════════════════════════════════════ -->
-    <div class="section-title">
-      <i class="ti ti-table" aria-hidden="true" style="font-size:14px"></i>
-      Evolução completa de todos os exames
-    </div>
-    <div class="card" style="overflow:hidden">
-      <div class="evo-wrap">
-        <table class="evo-table" aria-label="Evolução de todos os marcadores">
-          <thead><tr id="evo-table-head"></tr></thead>
-          <tbody id="evo-table-body"></tbody>
-        </table>
+    <div class="card" style="overflow:hidden; margin-bottom:0">
+      <button id="evo-toggle" onclick="toggleEvo()" aria-expanded="false" aria-controls="evo-panel"
+        style="width:100%; display:flex; align-items:center; justify-content:space-between;
+               padding:14px 18px; background:none; border:none; cursor:pointer;
+               font-family:inherit; font-size:13px; font-weight:600; color:var(--text);
+               border-bottom: 1px solid transparent; transition: border-color .2s;">
+        <span style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-table" aria-hidden="true" style="font-size:15px;color:var(--text2)"></i>
+          Evolução completa de todos os exames
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:400;font-size:12px">
+          <span id="evo-toggle-hint">Clique para expandir</span>
+          <i id="evo-chevron" class="ti ti-chevron-down" aria-hidden="true"
+             style="font-size:16px;transition:transform .25s"></i>
+        </span>
+      </button>
+      <div id="evo-panel" style="display:none; overflow:hidden">
+        <div class="evo-wrap">
+          <table class="evo-table" aria-label="Evolução de todos os marcadores">
+            <thead><tr id="evo-table-head"></tr></thead>
+            <tbody id="evo-table-body"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
