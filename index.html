@@ -115,77 +115,203 @@
       </div>
     </div>
 
-    <!-- ═══ CORAÇÃO ═════════════════════════════════════════════ -->
-    <div class="section-title dyn-section">
-      <i class="ti ti-heart" aria-hidden="true" style="font-size:14px"></i>
-      Coração e colesterol
-    </div>
-    <div class="glycemic-grid dyn-section" id="cards-lipids"></div>
-    <div class="markers-grid dyn-section" id="grid-lipids"></div>
-    <div class="chart-card dyn-section">
-      <h3>Colesterol total</h3>
-      <p class="subtitle">Verde = normal · vermelho = acima de 190 mg/dL</p>
-      <div class="chart-wrap" style="height:140px">
-        <canvas id="colChart" role="img" aria-label="Colesterol total"></canvas>
+
+
+    <!-- ═══ CORAÇÃO E COLESTEROL ═══ -->
+    <div class="dyn-section">
+      <button id="sec-lipids-toggle" onclick="toggleSection('sec-lipids')"
+        aria-expanded="false" aria-controls="sec-lipids-panel"
+        style="width:100%;display:flex;align-items:center;justify-content:space-between;
+               padding:12px 18px;background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--r-lg);cursor:pointer;font-family:inherit;font-size:13px;
+               font-weight:600;color:var(--text);margin-bottom:0;box-shadow:var(--shadow-sm);
+               transition:background .15s;">
+        <span style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-heart" aria-hidden="true" style="font-size:15px;color:var(--text2)"></i>
+          Coração e colesterol
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:400;font-size:12px">
+          <span id="sec-lipids-hint">Expandir</span>
+          <i id="sec-lipids-chevron" class="ti ti-chevron-down" aria-hidden="true"
+             style="font-size:16px;transition:transform .25s"></i>
+        </span>
+      </button>
+      <div id="sec-lipids-panel" style="display:none;padding-top:10px">
+        <div class="glycemic-grid" id="cards-lipids"></div>
+        <div class="markers-grid" id="grid-lipids"></div>
+              <div class="chart-card">
+        <h3>Colesterol total</h3>
+        <p class="subtitle">Verde = normal · vermelho = acima de 190 mg/dL</p>
+        <div class="chart-wrap" style="height:140px">
+          <canvas id="colChart" role="img" aria-label="Colesterol total"></canvas>
+        </div>
+      </div>
       </div>
     </div>
 
-    <!-- ═══ RINS ═════════════════════════════════════════════════ -->
-    <div class="section-title dyn-section">
-      <i class="ti ti-filter" aria-hidden="true" style="font-size:14px"></i>
-      Rins
-    </div>
-    <div class="glycemic-grid dyn-section" id="cards-renal"></div>
-    <div class="markers-grid dyn-section" id="grid-renal"></div>
-
-    <!-- ═══ FÍGADO ═══════════════════════════════════════════════ -->
-    <div class="section-title dyn-section">
-      <i class="ti ti-activity" aria-hidden="true" style="font-size:14px"></i>
-      Fígado
-    </div>
-    <div class="glycemic-grid dyn-section" id="cards-hepatic"></div>
-    <div class="markers-grid dyn-section" id="grid-hepatic"></div>
-    <div class="chart-card dyn-section">
-      <h3>Enzimas do fígado</h3>
-      <p class="subtitle">AST, ALT e GGT — dentro do normal é bom sinal</p>
-      <div class="chart-wrap" style="height:140px">
-        <canvas id="hepaticChart" role="img" aria-label="Enzimas hepáticas"></canvas>
+    <!-- ═══ RINS ═══ -->
+    <div class="dyn-section">
+      <button id="sec-renal-toggle" onclick="toggleSection('sec-renal')"
+        aria-expanded="false" aria-controls="sec-renal-panel"
+        style="width:100%;display:flex;align-items:center;justify-content:space-between;
+               padding:12px 18px;background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--r-lg);cursor:pointer;font-family:inherit;font-size:13px;
+               font-weight:600;color:var(--text);margin-bottom:0;box-shadow:var(--shadow-sm);
+               transition:background .15s;">
+        <span style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-filter" aria-hidden="true" style="font-size:15px;color:var(--text2)"></i>
+          Rins
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:400;font-size:12px">
+          <span id="sec-renal-hint">Expandir</span>
+          <i id="sec-renal-chevron" class="ti ti-chevron-down" aria-hidden="true"
+             style="font-size:16px;transition:transform .25s"></i>
+        </span>
+      </button>
+      <div id="sec-renal-panel" style="display:none;padding-top:10px">
+        <div class="glycemic-grid" id="cards-renal"></div>
+        <div class="markers-grid" id="grid-renal"></div>
+        
       </div>
     </div>
 
-    <!-- ═══ SANGUE ════════════════════════════════════════════════ -->
-    <div class="section-title dyn-section">
-      <i class="ti ti-droplet" aria-hidden="true" style="font-size:14px"></i>
-      Sangue
+    <!-- ═══ FÍGADO ═══ -->
+    <div class="dyn-section">
+      <button id="sec-hepatic-toggle" onclick="toggleSection('sec-hepatic')"
+        aria-expanded="false" aria-controls="sec-hepatic-panel"
+        style="width:100%;display:flex;align-items:center;justify-content:space-between;
+               padding:12px 18px;background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--r-lg);cursor:pointer;font-family:inherit;font-size:13px;
+               font-weight:600;color:var(--text);margin-bottom:0;box-shadow:var(--shadow-sm);
+               transition:background .15s;">
+        <span style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-activity" aria-hidden="true" style="font-size:15px;color:var(--text2)"></i>
+          Fígado
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:400;font-size:12px">
+          <span id="sec-hepatic-hint">Expandir</span>
+          <i id="sec-hepatic-chevron" class="ti ti-chevron-down" aria-hidden="true"
+             style="font-size:16px;transition:transform .25s"></i>
+        </span>
+      </button>
+      <div id="sec-hepatic-panel" style="display:none;padding-top:10px">
+        <div class="glycemic-grid" id="cards-hepatic"></div>
+        <div class="markers-grid" id="grid-hepatic"></div>
+              <div class="chart-card">
+        <h3>Enzimas do fígado</h3>
+        <p class="subtitle">AST, ALT e GGT — dentro do normal é bom sinal</p>
+        <div class="chart-wrap" style="height:140px">
+          <canvas id="hepaticChart" role="img" aria-label="Enzimas hepáticas"></canvas>
+        </div>
+      </div>
+      </div>
     </div>
-    <div class="glycemic-grid dyn-section" id="cards-hemo"></div>
-    <div class="markers-grid dyn-section" id="grid-hemo"></div>
 
-    <!-- ═══ VITAMINAS ════════════════════════════════════════════ -->
-    <div class="section-title dyn-section">
-      <i class="ti ti-pill" aria-hidden="true" style="font-size:14px"></i>
-      Vitaminas e minerais
+    <!-- ═══ SANGUE ═══ -->
+    <div class="dyn-section">
+      <button id="sec-hemo-toggle" onclick="toggleSection('sec-hemo')"
+        aria-expanded="false" aria-controls="sec-hemo-panel"
+        style="width:100%;display:flex;align-items:center;justify-content:space-between;
+               padding:12px 18px;background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--r-lg);cursor:pointer;font-family:inherit;font-size:13px;
+               font-weight:600;color:var(--text);margin-bottom:0;box-shadow:var(--shadow-sm);
+               transition:background .15s;">
+        <span style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-droplet" aria-hidden="true" style="font-size:15px;color:var(--text2)"></i>
+          Sangue
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:400;font-size:12px">
+          <span id="sec-hemo-hint">Expandir</span>
+          <i id="sec-hemo-chevron" class="ti ti-chevron-down" aria-hidden="true"
+             style="font-size:16px;transition:transform .25s"></i>
+        </span>
+      </button>
+      <div id="sec-hemo-panel" style="display:none;padding-top:10px">
+        <div class="glycemic-grid" id="cards-hemo"></div>
+        <div class="markers-grid" id="grid-hemo"></div>
+        
+      </div>
     </div>
-    <div class="glycemic-grid dyn-section" id="cards-vitamins"></div>
-    <div class="markers-grid dyn-section" id="grid-vitamins"></div>
 
-    <!-- ═══ TIREOIDE ═════════════════════════════════════════════ -->
-    <div class="section-title dyn-section">
-      <i class="ti ti-wave-sine" aria-hidden="true" style="font-size:14px"></i>
-      Tireoide
+    <!-- ═══ VITAMINAS E MINERAIS ═══ -->
+    <div class="dyn-section">
+      <button id="sec-vitamins-toggle" onclick="toggleSection('sec-vitamins')"
+        aria-expanded="false" aria-controls="sec-vitamins-panel"
+        style="width:100%;display:flex;align-items:center;justify-content:space-between;
+               padding:12px 18px;background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--r-lg);cursor:pointer;font-family:inherit;font-size:13px;
+               font-weight:600;color:var(--text);margin-bottom:0;box-shadow:var(--shadow-sm);
+               transition:background .15s;">
+        <span style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-pill" aria-hidden="true" style="font-size:15px;color:var(--text2)"></i>
+          Vitaminas e minerais
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:400;font-size:12px">
+          <span id="sec-vitamins-hint">Expandir</span>
+          <i id="sec-vitamins-chevron" class="ti ti-chevron-down" aria-hidden="true"
+             style="font-size:16px;transition:transform .25s"></i>
+        </span>
+      </button>
+      <div id="sec-vitamins-panel" style="display:none;padding-top:10px">
+        <div class="glycemic-grid" id="cards-vitamins"></div>
+        <div class="markers-grid" id="grid-vitamins"></div>
+        
+      </div>
     </div>
-    <div class="glycemic-grid dyn-section" id="cards-thyroid"></div>
-    <div class="markers-grid dyn-section" id="grid-thyroid"></div>
 
-    <!-- ═══ OUTROS ════════════════════════════════════════════════ -->
-    <div class="section-title dyn-section">
-      <i class="ti ti-microscope" aria-hidden="true" style="font-size:14px"></i>
-      Outros marcadores
+    <!-- ═══ TIREOIDE ═══ -->
+    <div class="dyn-section">
+      <button id="sec-thyroid-toggle" onclick="toggleSection('sec-thyroid')"
+        aria-expanded="false" aria-controls="sec-thyroid-panel"
+        style="width:100%;display:flex;align-items:center;justify-content:space-between;
+               padding:12px 18px;background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--r-lg);cursor:pointer;font-family:inherit;font-size:13px;
+               font-weight:600;color:var(--text);margin-bottom:0;box-shadow:var(--shadow-sm);
+               transition:background .15s;">
+        <span style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-wave-sine" aria-hidden="true" style="font-size:15px;color:var(--text2)"></i>
+          Tireoide
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:400;font-size:12px">
+          <span id="sec-thyroid-hint">Expandir</span>
+          <i id="sec-thyroid-chevron" class="ti ti-chevron-down" aria-hidden="true"
+             style="font-size:16px;transition:transform .25s"></i>
+        </span>
+      </button>
+      <div id="sec-thyroid-panel" style="display:none;padding-top:10px">
+        <div class="glycemic-grid" id="cards-thyroid"></div>
+        <div class="markers-grid" id="grid-thyroid"></div>
+        
+      </div>
     </div>
-    <div class="glycemic-grid dyn-section" id="cards-other"></div>
-    <div class="markers-grid dyn-section" id="grid-other"></div>
 
-    <!-- ═══ EVOLUÇÃO COMPLETA ════════════════════════════════════ -->
+    <!-- ═══ OUTROS MARCADORES ═══ -->
+    <div class="dyn-section">
+      <button id="sec-other-toggle" onclick="toggleSection('sec-other')"
+        aria-expanded="false" aria-controls="sec-other-panel"
+        style="width:100%;display:flex;align-items:center;justify-content:space-between;
+               padding:12px 18px;background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--r-lg);cursor:pointer;font-family:inherit;font-size:13px;
+               font-weight:600;color:var(--text);margin-bottom:0;box-shadow:var(--shadow-sm);
+               transition:background .15s;">
+        <span style="display:flex;align-items:center;gap:8px">
+          <i class="ti ti-microscope" aria-hidden="true" style="font-size:15px;color:var(--text2)"></i>
+          Outros marcadores
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:400;font-size:12px">
+          <span id="sec-other-hint">Expandir</span>
+          <i id="sec-other-chevron" class="ti ti-chevron-down" aria-hidden="true"
+             style="font-size:16px;transition:transform .25s"></i>
+        </span>
+      </button>
+      <div id="sec-other-panel" style="display:none;padding-top:10px">
+        <div class="glycemic-grid" id="cards-other"></div>
+        <div class="markers-grid" id="grid-other"></div>
+        
+      </div>
+    </div>
+
+        <!-- ═══ EVOLUÇÃO COMPLETA ════════════════════════════════════ -->
     <div class="card" style="overflow:hidden; margin-bottom:0">
       <button id="evo-toggle" onclick="toggleEvo()" aria-expanded="false" aria-controls="evo-panel"
         style="width:100%; display:flex; align-items:center; justify-content:space-between;
