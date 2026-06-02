@@ -581,3 +581,6 @@ body {
 
 /* ── EVO TOGGLE hover ── */
 #evo-toggle:hover { background: var(--surface2) !important; }
+
+/* ── Section dropdown toggles ── */
+[id$="-toggle"]:hover { background: var(--surface2) !important; }
