@@ -347,3 +347,16 @@ function toggleEvo() {
 }
 
 init();
+
+/* ── Idade dinâmica ─────────────────────────────────────────────── */
+(function() {
+  const nasc = new Date(1962, 9, 15); // 15/10/1962 — mês é base 0
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - nasc.getFullYear();
+  const aindaNaoFezAniver =
+    hoje.getMonth() < nasc.getMonth() ||
+    (hoje.getMonth() === nasc.getMonth() && hoje.getDate() < nasc.getDate());
+  if (aindaNaoFezAniver) idade--;
+  const el = document.getElementById('idade');
+  if (el) el.textContent = idade + ' anos';
+})();
