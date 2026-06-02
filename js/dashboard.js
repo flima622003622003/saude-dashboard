@@ -331,4 +331,19 @@ function buildEvoTable() {
   });
 }
 
+/* ── Dropdown evolução ──────────────────────────────────────────── */
+function toggleEvo() {
+  const panel   = document.getElementById('evo-panel');
+  const chevron = document.getElementById('evo-chevron');
+  const hint    = document.getElementById('evo-toggle-hint');
+  const btn     = document.getElementById('evo-toggle');
+  const open    = panel.style.display === 'none';
+
+  panel.style.display    = open ? '' : 'none';
+  chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+  hint.textContent        = open ? 'Clique para recolher' : 'Clique para expandir';
+  btn.style.borderBottomColor = open ? 'var(--border)' : 'transparent';
+  btn.setAttribute('aria-expanded', open);
+}
+
 init();
