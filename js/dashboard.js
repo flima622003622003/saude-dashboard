@@ -63,6 +63,11 @@ function updateSolicitante() {
     const nome = raw.charAt(0) + raw.slice(1).toLowerCase()
       .replace(/ de /g, ' de ').replace(/ da /g, ' da ').replace(/ do /g, ' do ');
     el.textContent = 'Dr. ' + nome;
+    el.style.fontStyle = 'normal';
+    wrapper.style.display = 'flex';
+  } else if (entry.arquivo === 'histórico') {
+    el.textContent = 'Extraído do histórico do laudo';
+    el.style.fontStyle = 'italic';
     wrapper.style.display = 'flex';
   } else {
     wrapper.style.display = 'none';
