@@ -578,3 +578,6 @@ body {
   .main { padding: 16px 12px 60px; }
   .hero-card { padding: 16px; }
 }
+
+/* ── EVO TOGGLE hover ── */
+#evo-toggle:hover { background: var(--surface2) !important; }
