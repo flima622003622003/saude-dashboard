@@ -74,45 +74,62 @@
     </div>
 
     <!-- ═══ AÇÚCAR NO SANGUE ════════════════════════════════════ -->
-    <div class="section-title">
-      <i class="ti ti-heart-rate-monitor" aria-hidden="true" style="font-size:14px"></i>
-      Açúcar no sangue — foco principal
-    </div>
+    <!-- ═══ AÇÚCAR NO SANGUE ═══ -->
+    <button id="sec-glycemic-toggle" onclick="toggleSection('sec-glycemic')"
+      aria-expanded="true" aria-controls="sec-glycemic-panel"
+      style="width:100%;display:flex;align-items:center;justify-content:space-between;
+             padding:12px 18px;background:var(--surface);border:1px solid var(--border);
+             border-radius:var(--r-lg);cursor:pointer;font-family:inherit;font-size:13px;
+             font-weight:600;color:var(--text);margin-bottom:0;box-shadow:var(--shadow-sm);
+             transition:background .15s;">
+      <span style="display:flex;align-items:center;gap:8px">
+        <i class="ti ti-heart-rate-monitor" aria-hidden="true" style="font-size:15px;color:var(--red-text)"></i>
+        Açúcar no sangue — foco principal
+      </span>
+      <span style="display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:400;font-size:12px">
+        <span id="sec-glycemic-hint">Recolher</span>
+        <i id="sec-glycemic-chevron" class="ti ti-chevron-down" aria-hidden="true"
+           style="font-size:16px;transition:transform .25s;transform:rotate(180deg)"></i>
+      </span>
+    </button>
+    <div id="sec-glycemic-panel" style="padding-top:10px">
 
-    <div class="glycemic-grid" id="glycemic-cards"></div>
+      <div class="glycemic-grid" id="glycemic-cards"></div>
 
-    <div class="two-col">
-      <div class="chart-card">
-        <h3>HbA1c ao longo do tempo</h3>
-        <p class="subtitle">Seu histórico de hemoglobina glicada · meta abaixo de 5,7%</p>
-        <div class="chart-legend">
-          <span class="legend-item"><span class="legend-dot" style="background:#d97706"></span>Sua HbA1c</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#16a34a;opacity:.5"></span>Normal (&lt;5,7%)</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#dc2626;opacity:.5"></span>Diabetes (6,5%)</span>
+      <div class="two-col">
+        <div class="chart-card">
+          <h3>HbA1c ao longo do tempo</h3>
+          <p class="subtitle">Seu histórico de hemoglobina glicada · meta abaixo de 5,7%</p>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#d97706"></span>Sua HbA1c</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#16a34a;opacity:.5"></span>Normal (&lt;5,7%)</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#dc2626;opacity:.5"></span>Diabetes (6,5%)</span>
+          </div>
+          <div class="chart-wrap" style="height:160px">
+            <canvas id="hba1cChart" role="img" aria-label="Evolução HbA1c"></canvas>
+          </div>
         </div>
-        <div class="chart-wrap" style="height:160px">
-          <canvas id="hba1cChart" role="img" aria-label="Evolução HbA1c"></canvas>
+        <div class="chart-card">
+          <h3>Glicemia de jejum</h3>
+          <p class="subtitle">Meta: abaixo de 99 mg/dL · pontos vermelhos = acima do normal</p>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>Glicemia</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#16a34a;opacity:.5"></span>Meta (99)</span>
+          </div>
+          <div class="chart-wrap" style="height:160px">
+            <canvas id="glicChart" role="img" aria-label="Glicemia jejum"></canvas>
+          </div>
         </div>
       </div>
-      <div class="chart-card">
-        <h3>Glicemia de jejum</h3>
-        <p class="subtitle">Meta: abaixo de 99 mg/dL · pontos vermelhos = acima do normal</p>
-        <div class="chart-legend">
-          <span class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>Glicemia</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#16a34a;opacity:.5"></span>Meta (99)</span>
-        </div>
-        <div class="chart-wrap" style="height:160px">
-          <canvas id="glicChart" role="img" aria-label="Glicemia jejum"></canvas>
-        </div>
-      </div>
-    </div>
 
-    <div id="ttgo-section" style="display:none" class="chart-card">
-      <h3>Curva glicêmica (TTGO 75g)</h3>
-      <p class="subtitle">Como seu corpo reage após ingestão de açúcar · meta na 1h: &lt;140 mg/dL</p>
-      <div class="chart-wrap" style="height:150px">
-        <canvas id="ttgoChart" role="img" aria-label="Curva TTGO"></canvas>
+      <div id="ttgo-section" style="display:none" class="chart-card">
+        <h3>Curva glicêmica (TTGO 75g)</h3>
+        <p class="subtitle">Como seu corpo reage após ingestão de açúcar · meta na 1h: &lt;140 mg/dL</p>
+        <div class="chart-wrap" style="height:150px">
+          <canvas id="ttgoChart" role="img" aria-label="Curva TTGO"></canvas>
+        </div>
       </div>
+
     </div>
 
 
