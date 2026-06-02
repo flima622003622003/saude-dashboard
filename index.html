@@ -1,976 +1,241 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Saúde · Fábio Castro</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<style>
-:root {
-  --bg: #f5f4f0;
-  --surface: #fffffe;
-  --surface2: #f0efe9;
-  --border: rgba(0,0,0,0.08);
-  --border2: rgba(0,0,0,0.14);
-  --text: #1a1917;
-  --text2: #6b6a66;
-  --text3: #9e9d99;
-  --accent: #2d6a4f;
-  --accent-light: #e8f4ed;
-  --warn: #b45309;
-  --warn-light: #fef3c7;
-  --danger: #b91c1c;
-  --danger-light: #fee2e2;
-  --info: #1d4ed8;
-  --info-light: #dbeafe;
-  --radius: 14px;
-  --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saúde · Fábio Castro</title>
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-body {
-  background: var(--bg);
-  font-family: 'DM Sans', sans-serif;
-  color: var(--text);
-  font-size: 15px;
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-/* ── HEADER ── */
-.header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 20px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-left h1 {
-  font-family: 'DM Serif Display', serif;
-  font-size: 22px;
-  letter-spacing: -0.3px;
-  color: var(--text);
-}
-
-.header-left p {
-  font-size: 13px;
-  color: var(--text2);
-  margin-top: 1px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.status-pill.warn { background: var(--warn-light); color: var(--warn); }
-.status-pill.ok { background: var(--accent-light); color: var(--accent); }
-.status-pill.danger { background: var(--danger-light); color: var(--danger); }
-
-.status-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: currentColor;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-/* ── MAIN LAYOUT ── */
-.main { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
-
-/* ── ALERT BANNER ── */
-.alert-banner {
-  background: var(--warn-light);
-  border: 1px solid rgba(180, 83, 9, 0.2);
-  border-left: 4px solid var(--warn);
-  border-radius: var(--radius-sm);
-  padding: 14px 18px;
-  margin-bottom: 24px;
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.alert-banner.danger {
-  background: var(--danger-light);
-  border-color: rgba(185, 28, 28, 0.2);
-  border-left-color: var(--danger);
-}
-
-.alert-banner svg { flex-shrink: 0; margin-top: 1px; }
-.alert-banner p { font-size: 13.5px; line-height: 1.6; color: var(--text); }
-.alert-banner strong { font-weight: 600; }
-
-/* ── SECTION TITLES ── */
-.section-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin: 28px 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-label::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* ── METRIC CARDS ── */
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.metric-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow);
-  transition: transform 0.15s ease;
-}
-
-.metric-card:hover { transform: translateY(-1px); }
-
-.metric-card .label {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 6px;
-}
-
-.metric-card .value {
-  font-family: 'DM Serif Display', serif;
-  font-size: 28px;
-  line-height: 1.1;
-  color: var(--text);
-}
-
-.metric-card .unit {
-  font-size: 12px;
-  color: var(--text2);
-  margin-top: 2px;
-  font-family: 'DM Mono', monospace;
-}
-
-.metric-card .badge {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.metric-card.danger-card { border-color: rgba(185,28,28,0.25); }
-.metric-card.warn-card { border-color: rgba(180,83,9,0.25); }
-.metric-card.ok-card { border-color: rgba(45,106,79,0.25); }
-
-.badge.ok { background: var(--accent-light); color: var(--accent); }
-.badge.warn { background: var(--warn-light); color: var(--warn); }
-.badge.danger { background: var(--danger-light); color: var(--danger); }
-.badge.info { background: var(--info-light); color: var(--info); }
-
-/* ── CHART CARDS ── */
-.chart-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 22px;
-  box-shadow: var(--shadow);
-  margin-bottom: 14px;
-}
-
-.chart-card h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-
-.chart-card .subtitle {
-  font-size: 12px;
-  color: var(--text2);
-  margin-bottom: 16px;
-}
-
-.chart-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: var(--text2);
-}
-
-.legend-dot {
-  width: 10px; height: 10px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.chart-wrap { position: relative; width: 100%; }
-
-/* ── TWO-COL LAYOUT ── */
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
-
-/* ── TABLE ── */
-.lab-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-.lab-table th {
-  text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border2);
-}
-.lab-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-.lab-table tr:last-child td { border-bottom: none; }
-.lab-table tr:hover td { background: var(--surface2); }
-.lab-table .num { font-family: 'DM Mono', monospace; font-size: 13px; }
-.lab-table .name { font-weight: 500; }
-.lab-table .ref { font-size: 11px; color: var(--text3); }
-
-/* ── TREND ARROW ── */
-.trend { font-size: 12px; display: inline-flex; align-items: center; gap: 2px; }
-.trend.up { color: var(--danger); }
-.trend.down { color: var(--accent); }
-.trend.stable { color: var(--text3); }
-
-/* ── INFO BOXES ── */
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-@media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
-
-.info-box {
-  background: var(--info-light);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  font-size: 13px;
-  color: #1e3a8a;
-  line-height: 1.6;
-}
-
-.info-box strong { font-weight: 600; }
-
-/* ── FOOTER ACTIONS ── */
-.next-steps {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 22px;
-  margin-top: 14px;
-  box-shadow: var(--shadow);
-}
-
-.steps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
-@media (max-width: 580px) { .steps-grid { grid-template-columns: 1fr; } }
-
-.step-card {
-  background: var(--surface2);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-}
-
-.step-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
-.step-card ul { list-style: none; padding: 0; }
-.step-card li { font-size: 12.5px; color: var(--text2); padding: 3px 0; }
-.step-card li::before { content: '·  '; color: var(--text3); }
-
-/* ── UPLOAD INFO ── */
-.upload-info {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 22px;
-  margin-top: 14px;
-}
-
-.upload-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
-.code-block {
-  background: #1a1917;
-  color: #e5e4e0;
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  font-family: 'DM Mono', monospace;
-  font-size: 12.5px;
-  line-height: 1.8;
-  overflow-x: auto;
-}
-
-.code-block .comment { color: #6b6a66; }
-.code-block .cmd { color: #86efac; }
-
-/* ── LOADING ── */
-#loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.spinner {
-  width: 36px; height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-#main-content { display: none; }
-
-/* ── DATE COMPARISON TABS ── */
-.compare-bar {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  align-items: center;
-}
-
-.compare-bar span { font-size: 12px; color: var(--text2); margin-right: 4px; }
-
-.date-tab {
-  padding: 5px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  border: 1px solid var(--border2);
-  background: var(--surface);
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: 'DM Mono', monospace;
-}
-
-.date-tab.active {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
-}
-
-.date-tab:hover:not(.active) { background: var(--surface2); }
-
-/* ── HEATMAP STRIP ── */
-.heatmap-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.heat-cell {
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  text-align: center;
-}
-
-.heat-cell .h-label { font-size: 10px; color: var(--text3); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
-.heat-cell .h-value { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; margin-top: 4px; }
-.heat-cell .h-date { font-size: 10px; color: var(--text3); margin-top: 2px; }
-
-.heat-ok { background: #ecfdf5; color: #065f46; }
-.heat-warn { background: #fffbeb; color: #92400e; }
-.heat-danger { background: #fef2f2; color: #991b1b; }
-.heat-neutral { background: var(--surface2); color: var(--text2); }
-
-</style>
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div id="loading">
-  <div class="spinner"></div>
-  <p style="color:var(--text2); font-size:14px;">Carregando exames...</p>
-</div>
+  <!-- ── LOADING ── -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p style="color:var(--text2); font-size:14px;">Carregando exames...</p>
+  </div>
 
-<div id="main-content">
+  <!-- ── CONTEÚDO PRINCIPAL ── -->
+  <div id="main-content">
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-left">
-      <h1>Painel de Saúde</h1>
-      <p id="header-sub">Fábio José de Castro e Lima · 62 anos · Acompanhamento pré-diabetes</p>
-    </div>
-    <div class="header-right">
-      <span class="status-pill warn" id="status-pill">
-        <span class="status-dot"></span>
-        Pré-diabético
-      </span>
-    </div>
-  </header>
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-left">
+        <h1>Painel de Saúde</h1>
+        <p>Fábio José de Castro e Lima · 62 anos · Acompanhamento pré-diabetes</p>
+      </div>
+      <div class="header-right">
+        <span class="status-pill warn" id="status-pill">
+          <span class="status-dot"></span>
+          Pré-diabético
+        </span>
+      </div>
+    </header>
 
-  <main class="main">
+    <main class="main">
 
-    <!-- ALERTS -->
-    <div id="alerts-container"></div>
+      <!-- Alertas -->
+      <div id="alerts-container"></div>
 
-    <!-- DATE TABS -->
-    <div class="compare-bar" id="compare-bar">
-      <span>Exames disponíveis:</span>
-    </div>
+      <!-- Abas de datas -->
+      <div class="compare-bar" id="compare-bar">
+        <span>Exames disponíveis:</span>
+      </div>
 
-    <!-- ═══ SEÇÃO 1: GLICEMIA ════════════════════════════════════════════ -->
-    <div class="section-label">🔴 Controle glicêmico — foco principal</div>
+      <!-- ══════════════════════════════════════════════════════════
+           SEÇÃO 1 — GLICEMIA
+           ══════════════════════════════════════════════════════════ -->
+      <div class="section-label">🔴 Controle glicêmico — foco principal</div>
 
-    <div class="metric-grid" id="metrics-glycemic"></div>
+      <div class="metric-grid" id="metrics-glycemic"></div>
 
-    <div class="two-col">
+      <div class="two-col">
+        <div class="chart-card">
+          <h3>HbA1c — hemoglobina glicada</h3>
+          <p class="subtitle">Meta: abaixo de 5,7% (normal) · Zona pré-diabetes: 5,7–6,4%</p>
+          <div class="chart-legend">
+            <span class="legend-item">
+              <span class="legend-dot" style="background:#b45309"></span>HbA1c
+            </span>
+            <span class="legend-item">
+              <span class="legend-dot" style="background:#15803d; opacity:.5"></span>Limite normal (5,69%)
+            </span>
+            <span class="legend-item">
+              <span class="legend-dot" style="background:#b91c1c; opacity:.5"></span>Diabetes (6,5%)
+            </span>
+          </div>
+          <div class="chart-wrap" style="height:160px">
+            <canvas id="hba1cChart" role="img" aria-label="Evolução HbA1c ao longo do tempo"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Glicemia de jejum</h3>
+          <p class="subtitle">Meta: abaixo de 99 mg/dL · Diabetes: ≥ 126 mg/dL</p>
+          <div class="chart-legend">
+            <span class="legend-item">
+              <span class="legend-dot" style="background:#b91c1c"></span>Glicemia
+            </span>
+            <span class="legend-item">
+              <span class="legend-dot" style="background:#15803d; opacity:.5"></span>Meta (99 mg/dL)
+            </span>
+          </div>
+          <div class="chart-wrap" style="height:160px">
+            <canvas id="glicemiaChart" role="img" aria-label="Evolução glicemia jejum"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Curva glicêmica (visível apenas se houver dados TTGO) -->
+      <div id="ttgo-section" style="display:none" class="chart-card">
+        <h3>Curva glicêmica (TTGO 75g)</h3>
+        <p class="subtitle">Basal → 1h → 2h após ingestão de 75g de dextrosol · Meta 1h: &lt;140 mg/dL</p>
+        <div class="chart-wrap" style="height:150px">
+          <canvas id="ttgoChart" role="img" aria-label="Curva TTGO"></canvas>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <strong>Por que a HbA1c importa?</strong><br>
+          Reflete a média glicêmica dos <em>últimos 3 meses</em>, não apenas o dia do exame.
+          É o exame mais confiável para monitorar pré-diabetes.
+        </div>
+        <div class="info-box">
+          <strong>Glicemia pós-refeição (TTGO)</strong><br>
+          Detecta resistência à insulina antes mesmo que a glicemia de jejum altere.
+          Exercício 30 min após as refeições reduz diretamente esse pico.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           SEÇÃO 2 — LIPÍDIOS
+           ══════════════════════════════════════════════════════════ -->
+      <div class="section-label">🫀 Perfil lipídico e risco cardiovascular</div>
+
+      <div class="metric-grid" id="metrics-lipids"></div>
+
       <div class="chart-card">
-        <h3>HbA1c — hemoglobina glicada</h3>
-        <p class="subtitle">Meta: abaixo de 5,7% (normal) · Zona pré-diabetes: 5,7–6,4%</p>
-        <div class="chart-legend">
-          <span class="legend-item"><span class="legend-dot" style="background:#b45309"></span>HbA1c</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#15803d; opacity:.5"></span>Limite normal (5,69%)</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#b91c1c; opacity:.5"></span>Diabetes (6,5%)</span>
-        </div>
-        <div class="chart-wrap" style="height:160px">
-          <canvas id="hba1cChart" role="img" aria-label="Evolução HbA1c ao longo do tempo"></canvas>
+        <h3>Evolução do colesterol total</h3>
+        <p class="subtitle">Meta: &lt;190 mg/dL · Barras vermelhas = acima do limite</p>
+        <div class="chart-wrap" style="height:150px">
+          <canvas id="colChart" role="img" aria-label="Evolução colesterol total"></canvas>
         </div>
       </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           SEÇÃO 3 — FUNÇÃO RENAL
+           ══════════════════════════════════════════════════════════ -->
+      <div class="section-label">🫘 Função renal</div>
+      <div class="metric-grid" id="metrics-renal"></div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           SEÇÃO 4 — FUNÇÃO HEPÁTICA
+           ══════════════════════════════════════════════════════════ -->
+      <div class="section-label">🟡 Função hepática</div>
+      <div class="metric-grid" id="metrics-hepatic"></div>
+
       <div class="chart-card">
-        <h3>Glicemia de jejum</h3>
-        <p class="subtitle">Meta: abaixo de 99 mg/dL · Diabetes: ≥ 126 mg/dL</p>
-        <div class="chart-legend">
-          <span class="legend-item"><span class="legend-dot" style="background:#b91c1c"></span>Glicemia</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#15803d; opacity:.5"></span>Meta (99 mg/dL)</span>
-        </div>
-        <div class="chart-wrap" style="height:160px">
-          <canvas id="glicemiaChart" role="img" aria-label="Evolução glicemia jejum"></canvas>
+        <h3>Transaminases e GGT</h3>
+        <p class="subtitle">AST: ref 17–59 · ALT: ref 21–72 · GGT: ref 10–78 (U/L)</p>
+        <div class="chart-wrap" style="height:150px">
+          <canvas id="hepaticChart" role="img" aria-label="Evolução transaminases e GGT"></canvas>
         </div>
       </div>
-    </div>
 
-    <div id="ttgo-section" style="display:none" class="chart-card">
-      <h3>Curva glicêmica (TTGO 75g)</h3>
-      <p class="subtitle">Basal → 1h → 2h após ingestão de 75g dextrosol · Meta 1h: &lt;140 mg/dL</p>
-      <div class="chart-wrap" style="height:150px">
-        <canvas id="ttgoChart" role="img" aria-label="Curva TTGO"></canvas>
+      <!-- ══════════════════════════════════════════════════════════
+           SEÇÃO 5 — HEMOGRAMA
+           ══════════════════════════════════════════════════════════ -->
+      <div class="section-label">🩸 Hemograma</div>
+      <div class="metric-grid" id="metrics-hemo"></div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           SEÇÃO 6 — TABELA GERAL
+           ══════════════════════════════════════════════════════════ -->
+      <div class="section-label">📋 Todos os marcadores — comparativo completo</div>
+      <div class="chart-card table-card">
+        <table class="lab-table" aria-label="Comparativo de todos os marcadores laboratoriais">
+          <thead>
+            <tr id="table-header-row"></tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
       </div>
-    </div>
 
-    <div class="info-grid">
-      <div class="info-box">
-        <strong>Por que a HbA1c importa?</strong><br>
-        Reflete a média glicêmica dos <em>últimos 3 meses</em>, não apenas o dia do exame. É o exame mais confiável para monitorar pré-diabetes.
-      </div>
-      <div class="info-box">
-        <strong>Glicemia pós-refeição (TTGO)</strong><br>
-        Detecta resistência à insulina antes mesmo que a glicemia de jejum altere. Exercício 30min após as refeições reduz diretamente esse pico.
-      </div>
-    </div>
-
-    <!-- ═══ SEÇÃO 2: LIPÍDIOS ════════════════════════════════════════════ -->
-    <div class="section-label">🫀 Perfil lipídico e risco cardiovascular</div>
-
-    <div class="metric-grid" id="metrics-lipids"></div>
-
-    <div class="chart-card">
-      <h3>Evolução do colesterol total</h3>
-      <p class="subtitle">Meta: &lt;190 mg/dL · Valores acima em vermelho</p>
-      <div class="chart-wrap" style="height:150px">
-        <canvas id="colChart" role="img" aria-label="Evolução colesterol total"></canvas>
-      </div>
-    </div>
-
-    <!-- ═══ SEÇÃO 3: FUNÇÃO RENAL/HEPÁTICA ═══════════════════════════════ -->
-    <div class="section-label">🫘 Função renal e hepática</div>
-    <div class="metric-grid" id="metrics-renal"></div>
-    <div class="chart-card">
-      <h3>Transaminases e GGT — fígado</h3>
-      <p class="subtitle">AST: ref 17–59 · ALT: ref 21–72 · GGT: ref 10–78 (U/L)</p>
-      <div class="chart-wrap" style="height:150px">
-        <canvas id="hepaticChart" role="img" aria-label="Evolução transaminases"></canvas>
-      </div>
-    </div>
-
-    <!-- ═══ SEÇÃO 4: HEMOGRAMA ════════════════════════════════════════════ -->
-    <div class="section-label">🩸 Hemograma</div>
-    <div class="metric-grid" id="metrics-hemo"></div>
-
-    <!-- ═══ SEÇÃO 5: TABELA GERAL ════════════════════════════════════════ -->
-    <div class="section-label">📋 Todos os marcadores — comparativo</div>
-    <div class="chart-card" style="padding:0; overflow:hidden;">
-      <table class="lab-table" id="main-table">
-        <thead>
-          <tr id="table-header-row"></tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-      </table>
-    </div>
-
-    <!-- ═══ PRÓXIMOS PASSOS ═══════════════════════════════════════════════ -->
-    <div class="section-label">📅 Próximos passos</div>
-    <div class="next-steps">
-      <div class="steps-grid">
-        <div class="step-card">
-          <h4>🗓 Em 3 meses</h4>
-          <ul>
-            <li>Glicemia jejum + HbA1c</li>
-            <li>Curva glicêmica (TTGO)</li>
-            <li>Peso corporal</li>
-            <li>Pressão arterial</li>
-          </ul>
-        </div>
-        <div class="step-card">
-          <h4>🗓 Em 6 meses</h4>
-          <ul>
-            <li>Painel completo + eTFG</li>
-            <li>Lipoproteína(a) — acompanhar</li>
-            <li>GGT e transaminases</li>
-            <li>Hemograma completo</li>
-            <li>PCR ultra-sensível</li>
-          </ul>
+      <!-- ══════════════════════════════════════════════════════════
+           PRÓXIMOS PASSOS
+           ══════════════════════════════════════════════════════════ -->
+      <div class="section-label">📅 Próximos passos recomendados</div>
+      <div class="next-steps">
+        <div class="steps-grid">
+          <div class="step-card">
+            <h4>🗓 Em 3 meses</h4>
+            <ul>
+              <li>Glicemia de jejum + HbA1c</li>
+              <li>Curva glicêmica (TTGO)</li>
+              <li>Peso corporal</li>
+              <li>Pressão arterial</li>
+            </ul>
+          </div>
+          <div class="step-card">
+            <h4>🗓 Em 6 meses</h4>
+            <ul>
+              <li>Painel completo + eTFG</li>
+              <li>Lipoproteína(a) — acompanhar</li>
+              <li>GGT e transaminases</li>
+              <li>Hemograma completo</li>
+              <li>PCR ultra-sensível</li>
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- ═══ COMO ADICIONAR EXAMES ═════════════════════════════════════════ -->
-    <div class="section-label">📂 Como adicionar novos exames</div>
-    <div class="upload-info">
-      <h3>Fluxo para atualizar o dashboard</h3>
-      <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">Siga os 3 passos abaixo sempre que receber um novo resultado de laboratório:</p>
-      <div class="code-block">
+      <!-- ══════════════════════════════════════════════════════════
+           COMO ADICIONAR EXAMES
+           ══════════════════════════════════════════════════════════ -->
+      <div class="section-label">📂 Como adicionar novos exames</div>
+      <div class="upload-info">
+        <h3>Fluxo para atualizar o dashboard</h3>
+        <p>Siga os 3 passos abaixo sempre que receber um resultado de laboratório:</p>
+        <div class="code-block">
 <span class="comment"># 1. Nomeie o PDF no formato: mes_ano.pdf</span>
 <span class="comment">#    Exemplos aceitos:</span>
-junho_2026.pdf<br>
-setembro_2026.pdf<br>
-dezembro_2026.pdf<br><br>
+junho_2026.pdf
+setembro_2026.pdf
+dezembro_2026.pdf
+
 <span class="comment"># 2. Coloque o PDF na pasta /exames/ e rode o extrator:</span>
-<span class="cmd">python3 extrair_exames.py</span><br><br>
+<span class="cmd">python3 extrair_exames.py</span>
+
 <span class="comment"># 3. Faça commit e push para o GitHub:</span>
 <span class="cmd">git add exames/ exames_data.json</span>
 <span class="cmd">git commit -m "Adiciona exame junho/2026"</span>
 <span class="cmd">git push</span>
+        </div>
+        <p class="note">
+          O GitHub Pages atualiza automaticamente em ~1 minuto após o push.<br>
+          Formatos de nome aceitos:
+          <code>agosto_2025.pdf</code>,
+          <code>ago_2025.pdf</code>,
+          <code>08_2025.pdf</code>.
+        </p>
       </div>
-      <p style="font-size:12px; color:var(--text3); margin-top:10px;">
-        O GitHub Pages atualiza automaticamente em ~1 minuto após o push.
-        Formatos de nome aceitos: <code style="font-family:DM Mono,monospace">agosto_2025.pdf</code>, <code style="font-family:DM Mono,monospace">ago_2025.pdf</code>, <code style="font-family:DM Mono,monospace">08_2025.pdf</code>.
-      </p>
-    </div>
 
-  </main>
-</div>
+    </main>
+  </div><!-- /#main-content -->
 
-<script>
-// ─── Configuração de marcadores ──────────────────────────────────────────────
+  <!-- Bibliotecas externas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
-const MARKERS = {
-  // Glicemia
-  glicose:               { label: 'Glicemia jejum',     unit: 'mg/dL', min: 60,   max: 99,    danger_hi: 126, warn_hi: 99,   section: 'glycemic' },
-  hba1c:                 { label: 'HbA1c',              unit: '%',     min: 4,    max: 5.69,  danger_hi: 6.5, warn_hi: 5.7,  section: 'glycemic' },
-  glicemia_media_estim:  { label: 'Glic. média estimada', unit:'mg/dL', min:60, max:114,  warn_hi:154, section:'glycemic' },
-  ttgo_basal:            { label: 'TTGO basal',         unit: 'mg/dL', min: 60,   max: 99,    warn_hi: 99,   section: 'glycemic' },
-  ttgo_60min:            { label: 'TTGO 60min',         unit: 'mg/dL', min: 60,   max: 140,   warn_hi: 140,  section: 'glycemic' },
-  ttgo_120min:           { label: 'TTGO 120min',        unit: 'mg/dL', min: 60,   max: 140,   warn_hi: 140,  section: 'glycemic' },
-  // Lipídios
-  colesterol_total:      { label: 'Colesterol total',   unit: 'mg/dL', warn_hi: 190, danger_hi: 240, section: 'lipids' },
-  hdl:                   { label: 'HDL',                unit: 'mg/dL', warn_lo: 40,  danger_lo: 35,  section: 'lipids' },
-  ldl:                   { label: 'LDL',                unit: 'mg/dL', warn_hi: 130, danger_hi: 160, section: 'lipids' },
-  triglicerideos:        { label: 'Triglicerídeos',     unit: 'mg/dL', warn_hi: 150, danger_hi: 200, section: 'lipids' },
-  vldl:                  { label: 'VLDL',               unit: 'mg/dL', warn_hi: 20,  section: 'lipids' },
-  nao_hdl:               { label: 'Não-HDL',            unit: 'mg/dL', warn_hi: 130, danger_hi: 160, section: 'lipids' },
-  lpa:                   { label: 'Lipoproteína(a)',    unit: 'nmol/L', warn_hi: 75,  danger_hi: 125, section: 'lipids' },
-  apo_a1:                { label: 'Apo A-1',            unit: 'mg/dL', warn_lo: 110, section: 'lipids' },
-  apo_b:                 { label: 'Apo B',              unit: 'mg/dL', warn_hi: 80,  danger_hi: 100, section: 'lipids' },
-  // Renal / hepático
-  creatinina:            { label: 'Creatinina',         unit: 'mg/dL', warn_lo:0.7, warn_hi:1.3, danger_hi:1.5, section:'renal' },
-  ureia:                 { label: 'Ureia',              unit: 'mg/dL', warn_lo:15,  warn_hi:45,  section:'renal' },
-  etfg:                  { label: 'eTFG (rim)',         unit: 'mL/min', warn_lo:60,  danger_lo:45, section:'renal' },
-  albumina_creatinina:   { label: 'Albumina/Creat.',   unit: 'mg/g',  warn_hi:30,  danger_hi:300, section:'renal' },
-  ast:                   { label: 'AST (TGO)',          unit: 'U/L',   warn_lo:17,  warn_hi:59,   section:'renal' },
-  alt:                   { label: 'ALT (TGP)',          unit: 'U/L',   warn_lo:21,  warn_hi:72,   section:'renal' },
-  ggt:                   { label: 'GGT',                unit: 'U/L',   warn_hi:78,  danger_hi:100, section:'renal' },
-  cpk:                   { label: 'CPK',                unit: 'U/L',   warn_hi:171, danger_hi:300, section:'renal' },
-  // Hemograma
-  hemoglobina:           { label: 'Hemoglobina',        unit: 'g/dL',  warn_lo:13.5, danger_lo:11, section:'hemo' },
-  hematocrito:           { label: 'Hematócrito',        unit: '%',     warn_lo:41,   section:'hemo' },
-  leucocitos:            { label: 'Leucócitos',         unit: '/mm³',  warn_lo:3600, warn_hi:11000, section:'hemo' },
-  plaquetas:             { label: 'Plaquetas',          unit: '/mm³',  warn_lo:140000, warn_hi:400000, section:'hemo' },
-  eritrocitos:           { label: 'Eritrócitos',        unit: 'M/mm³', warn_lo:4.3,  warn_hi:6.0,  section:'hemo' },
-  // Vitaminas / outros
-  vitamina_d:            { label: 'Vitamina D',         unit: 'ng/mL', warn_lo:20,   section:'other' },
-  vitamina_b12:          { label: 'Vitamina B12',       unit: 'pg/mL', warn_lo:211,  warn_hi:911,  section:'other' },
-  acido_folico:          { label: 'Ácido fólico',       unit: 'ng/mL', warn_lo:5,    section:'other' },
-  tsh:                   { label: 'TSH',                unit: 'µIU/mL', warn_lo:0.55, warn_hi:4.78, section:'other' },
-  t4_livre:              { label: 'T4 livre',           unit: 'ng/dL', warn_lo:0.89, warn_hi:1.76, section:'other' },
-  t3_livre:              { label: 'T3 livre',           unit: 'pg/mL', warn_lo:2.3,  warn_hi:4.2,  section:'other' },
-  acido_urico:           { label: 'Ácido úrico',        unit: 'mg/dL', warn_hi:9.2,  section:'other' },
-  ferritina:             { label: 'Ferritina',          unit: 'ng/mL', warn_lo:22,   warn_hi:322,  section:'other' },
-  ferro:                 { label: 'Ferro sérico',       unit: 'µg/dL', warn_lo:65,   warn_hi:175,  section:'other' },
-  potassio:              { label: 'Potássio',           unit: 'mEq/L', warn_lo:3.5,  warn_hi:5.5,  section:'other' },
-  sodio:                 { label: 'Sódio',              unit: 'mEq/L', warn_lo:132,  warn_hi:148,  section:'other' },
-  pcr_ultrasensivel:     { label: 'PCR ultra-sens.',    unit: 'mg/dL', warn_hi:0.10, danger_hi:0.3, section:'other' },
-  psa_total:             { label: 'PSA total',          unit: 'ng/mL', warn_hi:4.0,  section:'other' },
-  vhs:                   { label: 'VHS',                unit: 'mm/h',  warn_hi:20,   section:'other' },
-};
+  <!-- Módulos do dashboard (ordem importa) -->
+  <script src="js/markers.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/dashboard.js"></script>
 
-function statusOf(key, val) {
-  if (val == null) return 'neutral';
-  const m = MARKERS[key];
-  if (!m) return 'neutral';
-  if ((m.danger_hi && val >= m.danger_hi) || (m.danger_lo && val <= m.danger_lo)) return 'danger';
-  if ((m.warn_hi && val >= m.warn_hi) || (m.warn_lo && val <= m.warn_lo)) return 'warn';
-  return 'ok';
-}
-
-function fmtVal(key, val) {
-  if (val == null) return '—';
-  if (key === 'leucocitos' || key === 'plaquetas') return val.toLocaleString('pt-BR');
-  if (Math.abs(val) >= 100) return Math.round(val).toLocaleString('pt-BR');
-  return val.toFixed(2).replace('.', ',');
-}
-
-const LABEL_MONTHS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-
-function labelOf(entry) {
-  return LABEL_MONTHS[entry.mes - 1] + '/' + String(entry.ano).slice(2);
-}
-
-// ─── Colores dos gráficos ────────────────────────────────────────────────────
-
-const COLORS = ['#b45309','#1d4ed8','#065f46','#7c3aed','#db2777','#0e7490','#92400e'];
-
-// ─── Main ───────────────────────────────────────────────────────────────────
-
-async function init() {
-  let data;
-  try {
-    const res = await fetch('exames_data.json');
-    if (!res.ok) throw new Error('not found');
-    data = await res.json();
-  } catch(e) {
-    document.getElementById('loading').innerHTML =
-      `<p style="color:var(--text2); text-align:center; padding:40px; max-width:420px; line-height:1.7;">
-        <strong>Arquivo exames_data.json não encontrado.</strong><br><br>
-        Rode <code style="font-family:DM Mono,monospace">python3 extrair_exames.py</code> na pasta do projeto para gerá-lo.
-      </p>`;
-    return;
-  }
-
-  if (!data || !data.length) {
-    document.getElementById('loading').innerHTML =
-      '<p style="color:var(--text2)">Nenhum exame encontrado no JSON.</p>';
-    return;
-  }
-
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('main-content').style.display = 'block';
-
-  buildDateTabs(data);
-  buildAlerts(data);
-  buildMetrics(data);
-  buildCharts(data);
-  buildTable(data);
-}
-
-// ── Date tabs ────────────────────────────────────────────────────────────────
-
-function buildDateTabs(data) {
-  const bar = document.getElementById('compare-bar');
-  data.forEach((entry, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'date-tab' + (i === data.length - 1 ? ' active' : '');
-    btn.textContent = labelOf(entry);
-    btn.title = entry.arquivo;
-    bar.appendChild(btn);
-  });
-}
-
-// ── Alerts ───────────────────────────────────────────────────────────────────
-
-function buildAlerts(data) {
-  const latest = data[data.length - 1].dados;
-  const container = document.getElementById('alerts-container');
-  const alerts = [];
-
-  if (latest.hba1c && latest.hba1c >= 5.7)
-    alerts.push({ level: 'warn', text: `<strong>HbA1c ${fmtVal('hba1c', latest.hba1c)}% — zona de pré-diabetes</strong> (5,7–6,4%). Meta: voltar abaixo de 5,70%. Controle alimentar e exercícios são a primeira linha de tratamento.` });
-
-  if (latest.glicose && latest.glicose > 99)
-    alerts.push({ level: 'warn', text: `<strong>Glicemia de jejum ${fmtVal('glicose', latest.glicose)} mg/dL</strong> — acima do limite normal (99 mg/dL). Indica que o fígado libera glicose em excesso durante a madrugada.` });
-
-  if (latest.ttgo_60min && latest.ttgo_60min >= 140)
-    alerts.push({ level: 'warn', text: `<strong>Curva glicêmica 1h: ${fmtVal('ttgo_60min', latest.ttgo_60min)} mg/dL</strong> — acima de 140 mg/dL. Resistência à insulina confirmada. Exercício 20–30min após refeições é fundamental.` });
-
-  if (latest.lpa && latest.lpa > 75)
-    alerts.push({ level: 'danger', text: `<strong>🚨 Lipoproteína(a): ${Math.round(latest.lpa)} nmol/L</strong> — 4,8× acima do limite (75). Fator de risco cardiovascular genético importante. Requer avaliação cardiológica específica — não é controlável por dieta.` });
-
-  if (latest.etfg && latest.etfg < 60)
-    alerts.push({ level: 'warn', text: `<strong>eTFG: ${Math.round(latest.etfg)} mL/min</strong> — função renal reduzida. Hidratação adequada e controle glicêmico são essenciais para proteger os rins.` });
-
-  if (latest.cpk && latest.cpk > 171)
-    alerts.push({ level: 'warn', text: `<strong>CPK: ${Math.round(latest.cpk)} U/L</strong> — acima do normal (171). Pode indicar esforço muscular intenso recente, uso de estatina, ou lesão muscular. Investigar com médico.` });
-
-  alerts.forEach(a => {
-    const div = document.createElement('div');
-    div.className = `alert-banner ${a.level === 'danger' ? 'danger' : ''}`;
-    div.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${a.level === 'danger' ? '#b91c1c' : '#b45309'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-      </svg>
-      <p>${a.text}</p>`;
-    container.appendChild(div);
-  });
-}
-
-// ── Metric Cards ─────────────────────────────────────────────────────────────
-
-function buildMetricCard(key, data) {
-  const latest = data[data.length - 1].dados;
-  const prev = data.length > 1 ? data[data.length - 2].dados : null;
-  const val = latest[key];
-  if (val == null) return null;
-
-  const m = MARKERS[key];
-  const st = statusOf(key, val);
-  const prevVal = prev ? prev[key] : null;
-
-  let trendHtml = '';
-  if (prevVal != null) {
-    const diff = val - prevVal;
-    const pct = Math.abs(diff / prevVal * 100).toFixed(1);
-    if (Math.abs(diff) > 0.01) {
-      const dir = diff > 0 ? 'up' : 'down';
-      const arrow = diff > 0 ? '↑' : '↓';
-      trendHtml = `<span class="trend ${dir}" style="font-size:11px; margin-left:6px;">${arrow} ${pct}%</span>`;
-    }
-  }
-
-  const card = document.createElement('div');
-  card.className = `metric-card ${st}-card`;
-  card.innerHTML = `
-    <div class="label">${m.label}</div>
-    <div class="value" style="color:${st === 'danger' ? 'var(--danger)' : st === 'warn' ? 'var(--warn)' : 'var(--accent)'}">${fmtVal(key, val)}</div>
-    <div class="unit">${m.unit}${trendHtml}</div>
-    <span class="badge ${st}">${st === 'ok' ? '✓ Normal' : st === 'warn' ? '⚠ Atenção' : '🔴 Alterado'}</span>`;
-  return card;
-}
-
-function buildMetrics(data) {
-  const sections = { glycemic: [], lipids: [], renal: [], hemo: [] };
-  const GLYCEMIC_KEYS = ['glicose', 'hba1c', 'ttgo_basal', 'ttgo_60min', 'glicemia_media_estimada'];
-  const LIPIDS_KEYS = ['colesterol_total', 'hdl', 'ldl', 'triglicerideos', 'lpa'];
-  const RENAL_KEYS = ['creatinina', 'etfg', 'albumina_creatinina', 'ureia', 'ggt'];
-  const HEMO_KEYS = ['hemoglobina', 'hematocrito', 'eritrocitos', 'leucocitos', 'plaquetas'];
-
-  [
-    ['metrics-glycemic', GLYCEMIC_KEYS],
-    ['metrics-lipids', LIPIDS_KEYS],
-    ['metrics-renal', RENAL_KEYS],
-    ['metrics-hemo', HEMO_KEYS],
-  ].forEach(([id, keys]) => {
-    const grid = document.getElementById(id);
-    keys.forEach(key => {
-      const card = buildMetricCard(key, data);
-      if (card) grid.appendChild(card);
-    });
-  });
-
-  // TTGO section
-  const latest = data[data.length-1].dados;
-  if (latest.ttgo_basal || latest.ttgo_60min) {
-    document.getElementById('ttgo-section').style.display = '';
-  }
-}
-
-// ── Charts ───────────────────────────────────────────────────────────────────
-
-const GRID = 'rgba(0,0,0,0.05)';
-const TICK = '#9e9d99';
-
-function baseOpts(yMin, yMax) {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: {} } },
-    scales: {
-      x: { grid: { color: GRID }, ticks: { color: TICK, font: { size: 10, family: 'DM Mono' }, maxRotation: 30 } },
-      y: { min: yMin, max: yMax, grid: { color: GRID }, ticks: { color: TICK, font: { size: 10, family: 'DM Mono' } } }
-    }
-  };
-}
-
-function getTimeSeries(data, key) {
-  return {
-    labels: data.map(labelOf),
-    values: data.map(e => e.dados[key] ?? null),
-  };
-}
-
-function buildCharts(data) {
-  const labels = data.map(labelOf);
-
-  // HbA1c
-  const hba1c = data.map(e => e.dados.hba1c ?? null);
-  new Chart(document.getElementById('hba1cChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { data: hba1c, borderColor: '#b45309', backgroundColor: 'rgba(180,83,9,0.08)', fill: true, tension: 0.4, pointBackgroundColor: '#b45309', pointRadius: 5, borderWidth: 2 },
-        { data: labels.map(() => 5.69), borderColor: '#15803d', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false },
-        { data: labels.map(() => 6.5), borderColor: '#b91c1c', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false },
-      ]
-    },
-    options: baseOpts(4.8, 7.0),
-  });
-
-  // Glicemia
-  const glic = data.map(e => e.dados.glicose ?? null);
-  new Chart(document.getElementById('glicemiaChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { data: glic, borderColor: '#b91c1c', backgroundColor: 'rgba(185,28,28,0.08)', fill: true, tension: 0.4,
-          pointBackgroundColor: glic.map(v => v && v > 99 ? '#b91c1c' : '#15803d'),
-          pointRadius: 5, borderWidth: 2 },
-        { data: labels.map(() => 99), borderColor: '#15803d', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false },
-      ]
-    },
-    options: baseOpts(80, Math.max(130, ...glic.filter(Boolean)) + 5),
-  });
-
-  // TTGO (se disponível)
-  const latest = data[data.length-1].dados;
-  if (latest.ttgo_basal || latest.ttgo_60min) {
-    const ttgoPts = [latest.ttgo_basal, latest.ttgo_60min, latest.ttgo_120min].map((v,i) => ({x: ['Basal','60min','120min'][i], y: v})).filter(p => p.y);
-    new Chart(document.getElementById('ttgoChart'), {
-      type: 'bar',
-      data: {
-        labels: ttgoPts.map(p => p.x),
-        datasets: [
-          { data: ttgoPts.map(p => p.y), backgroundColor: ttgoPts.map(p => p.y > 140 ? 'rgba(185,28,28,0.7)' : 'rgba(45,106,79,0.7)'), borderRadius: 6 },
-          { type: 'line', data: ttgoPts.map(() => 140), borderColor: '#b45309', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false },
-        ]
-      },
-      options: baseOpts(60, Math.max(170, ...ttgoPts.map(p=>p.y)) + 10),
-    });
-  }
-
-  // Colesterol total
-  const col = data.map(e => e.dados.colesterol_total ?? null);
-  new Chart(document.getElementById('colChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { data: col, backgroundColor: col.map(v => v && v > 190 ? 'rgba(185,28,28,0.7)' : 'rgba(45,106,79,0.7)'), borderRadius: 6 },
-        { type: 'line', data: labels.map(() => 190), borderColor: '#b45309', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false },
-      ]
-    },
-    options: { ...baseOpts(60, Math.max(260, ...col.filter(Boolean)) + 20), scales: { ...baseOpts(60,260).scales } },
-  });
-
-  // Hepático
-  const astD = data.map(e => e.dados.ast ?? null);
-  const altD = data.map(e => e.dados.alt ?? null);
-  const ggtD = data.map(e => e.dados.ggt ?? null);
-  new Chart(document.getElementById('hepaticChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'AST', data: astD, borderColor: '#1d4ed8', pointRadius: 4, tension: 0.4, borderWidth: 2, pointBackgroundColor: '#1d4ed8' },
-        { label: 'ALT', data: altD, borderColor: '#7c3aed', pointRadius: 4, tension: 0.4, borderWidth: 2, pointBackgroundColor: '#7c3aed' },
-        { label: 'GGT', data: ggtD, borderColor: '#b45309', pointRadius: 4, tension: 0.4, borderWidth: 2, pointBackgroundColor: '#b45309' },
-      ]
-    },
-    options: {
-      ...baseOpts(0, Math.max(90, ...astD.filter(Boolean), ...altD.filter(Boolean), ...ggtD.filter(Boolean)) + 10),
-      plugins: {
-        legend: {
-          display: true,
-          labels: { color: TICK, font: { size: 11, family: 'DM Sans' }, boxWidth: 12, boxHeight: 12 }
-        }
-      }
-    },
-  });
-}
-
-// ── Table ─────────────────────────────────────────────────────────────────────
-
-function buildTable(data) {
-  const labels = data.map(labelOf);
-  const headerRow = document.getElementById('table-header-row');
-  headerRow.innerHTML = '<th>Marcador</th>' + labels.map(l => `<th>${l}</th>`).join('') + '<th>Ref.</th>';
-
-  const tbody = document.getElementById('table-body');
-  const allKeys = Object.keys(MARKERS);
-
-  allKeys.forEach(key => {
-    const hasData = data.some(e => e.dados[key] != null);
-    if (!hasData) return;
-
-    const m = MARKERS[key];
-    const tr = document.createElement('tr');
-
-    let cells = `<td class="name">${m.label}</td>`;
-    data.forEach(e => {
-      const val = e.dados[key];
-      const st = statusOf(key, val);
-      const color = st === 'danger' ? 'var(--danger)' : st === 'warn' ? 'var(--warn)' : 'var(--accent)';
-      cells += `<td class="num" style="${val != null && st !== 'ok' ? 'color:'+color+';font-weight:600' : ''}">${fmtVal(key, val)}</td>`;
-    });
-
-    // Referência textual
-    const refs = [];
-    if (m.warn_lo || m.danger_lo) refs.push(`≥${m.warn_lo || m.danger_lo}`);
-    if (m.warn_hi || m.danger_hi) refs.push(`<${m.warn_hi || m.danger_hi}`);
-    cells += `<td class="ref">${refs.join(' / ')} ${m.unit}</td>`;
-
-    tr.innerHTML = cells;
-    tbody.appendChild(tr);
-  });
-}
-
-// ─── Start ───────────────────────────────────────────────────────────────────
-init();
-</script>
 </body>
 </html>
