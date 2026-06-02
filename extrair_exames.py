@@ -343,8 +343,11 @@ def main():
                 if marker not in all_data[date_k]:
                     all_data[date_k][marker] = val
 
-        if solicitante and dk:
-            solicitantes[dk] = solicitante
+        if solicitante:
+            # Propaga o médico para TODAS as datas extraídas deste PDF
+            for date_k in history.keys():
+                if date_k not in solicitantes:
+                    solicitantes[date_k] = solicitante
 
         print(f" → {len(history)} datas extraídas: {', '.join(sorted(history.keys()))}")
 
