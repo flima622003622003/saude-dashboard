@@ -2,313 +2,279 @@
 """
 extrair_exames.py
 -----------------
-Lê os PDFs da pasta ./exames/ e gera exames_data.json.
-Aproveita o histórico embutido nos laudos evolutivos do laboratório —
-um único PDF já carrega todas as medições anteriores com datas exatas.
+Lê os arquivos PDF (que são na verdade ZIPs com .txt e .jpeg) da pasta ./exames/
+e gera o arquivo exames_data.json usado pelo dashboard.
 
-Nomeie os PDFs como: mes_ano.pdf
-Exemplos: agosto_2025.pdf, marco_2026.pdf, novembro_2022.pdf
+Uso:
+  python3 extrair_exames.py
+
+Cada PDF deve ser nomeado como: MES_ANO.pdf
+Exemplos: agosto_2025.pdf, marco_2026.pdf, janeiro_2026.pdf
 """
 
-import json, re, zipfile
+import os
+import json
+import re
+import zipfile
+import io
 from pathlib import Path
-from datetime import datetime
 
-EXAMES_DIR  = Path("exames")
+EXAMES_DIR = Path("exames")
 OUTPUT_FILE = Path("exames_data.json")
 
-MESES = {
-    'janeiro':1,'fevereiro':2,'marco':3,'março':3,'abril':4,'maio':5,'junho':6,
-    'julho':7,'agosto':8,'setembro':9,'outubro':10,'novembro':11,'dezembro':12,
-    'jan':1,'fev':2,'mar':3,'abr':4,'mai':5,'jun':6,
-    'jul':7,'ago':8,'set':9,'out':10,'nov':11,'dez':12,
-}
+# ─── Extratores de valores ────────────────────────────────────────────────────
 
-# ─── Leitura de texto ────────────────────────────────────────────────────────
-
-def read_zip_pdf(path):
-    txt = ""
-    with zipfile.ZipFile(path) as z:
-        files = sorted([f for f in z.namelist() if f.endswith('.txt')],
-                       key=lambda x: int(x.replace('.txt','')) if x.replace('.txt','').isdigit() else 0)
-        for f in files:
-            with z.open(f) as fp:
-                txt += fp.read().decode('utf-8', errors='replace') + "\n"
-    return txt
-
-def read_native_pdf(path):
-    try:
-        import fitz
-        doc = fitz.open(str(path))
-        txt = "".join(p.get_text() + "\n" for p in doc)
-        doc.close()
-        return txt
-    except Exception as e:
-        print(f"  Erro PDF nativo: {e}")
-        return ""
-
-def read_pdf(path):
-    return read_zip_pdf(path) if zipfile.is_zipfile(path) else read_native_pdf(path)
-
-# ─── Parse de data dd/mm/yyyy → (ano, mes) ──────────────────────────────────
-
-def parse_date_str(s):
-    """'11/03/2026' → (2026, 3)"""
-    m = re.match(r'(\d{2})/(\d{2})/(\d{4})', s.strip())
+def extract_float(text, pattern, group=1):
+    m = re.search(pattern, text, re.IGNORECASE)
     if m:
-        return int(m.group(3)), int(m.group(2))
-    return None, None
-
-def date_label(ano, mes):
-    meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
-    return f"{meses[mes-1]}/{str(ano)[2:]}"
-
-def date_key(ano, mes):
-    return f"{ano}-{mes:02d}"
-
-# ─── Extração do histórico embutido no laudo ─────────────────────────────────
-
-def extract_history(text):
-    """
-    Retorna dict: { '2026-03': {'glicose': 101.52, 'hba1c': 5.70, ...}, ... }
-    Aproveita as tabelas evolutivas e linhas 'Resultados anteriores' do laudo.
-    """
-    history = {}  # date_key -> {marker -> value}
-
-    def add(dk, marker, val):
-        if dk not in history:
-            history[dk] = {}
-        if marker not in history[dk]:   # primeiro valor encontrado vence
-            history[dk][marker] = val
-
-    def flt(s):
         try:
-            return float(s.replace(',','.').replace(' ',''))
+            return float(m.group(group).replace(",", "."))
         except:
             return None
+    return None
 
-    lines = text.split('\n')
+def extract_text_from_zip_pdf(pdf_path):
+    """Formato ZIP disfarçado de PDF (laudos evolutivos do laboratório)."""
+    full_text = ""
+    with zipfile.ZipFile(pdf_path, 'r') as z:
+        txt_files = sorted(
+            [f for f in z.namelist() if f.endswith('.txt')],
+            key=lambda x: int(x.replace('.txt','')) if x.replace('.txt','').isdigit() else 0
+        )
+        for fname in txt_files:
+            with z.open(fname) as f:
+                full_text += f.read().decode('utf-8', errors='replace') + "\n"
+    return full_text
 
-    # ── 1. Tabelas com cabeçalho de datas ────────────────────────────────────
-    # Ex: "HEMOGRAMA 11/03/2026 13/08/2025 11/03/2024 ..."
-    # seguidas de linhas como "GLICOSE 101,52 98,56 88,30 ..."
+def extract_text_from_native_pdf(pdf_path):
+    """PDF nativo com camada de texto — usa PyMuPDF (fitz)."""
+    try:
+        import fitz
+        doc = fitz.open(str(pdf_path))
+        full_text = ""
+        for page in doc:
+            full_text += page.get_text() + "\n"
+        doc.close()
+        return full_text
+    except ImportError:
+        print("  PyMuPDF nao instalado. Rode: pip install pymupdf")
+        return ""
+    except Exception as e:
+        print(f"  Erro ao ler PDF nativo {pdf_path}: {e}")
+        return ""
 
-    TABLE_HEADERS = {}  # nome_secao -> [date_keys ordenados]
-    current_dates = []
+def extract_text_from_pdf(pdf_path):
+    """Detecta automaticamente o formato e extrai o texto."""
+    if zipfile.is_zipfile(pdf_path):
+        return extract_text_from_zip_pdf(pdf_path)
+    return extract_text_from_native_pdf(pdf_path)
 
-    DATE_HEADER_RE = re.compile(
-        r'^(HEMOGRAMA|LIPIDOGRAMA|Exames|BIOQUÍMICA|URINA)\s+'
-        r'((?:\d{2}/\d{2}/\d{4}\s*)+)', re.IGNORECASE)
+def parse_exame(text, label):
+    """Extrai todos os marcadores laboratoriais de interesse do texto completo."""
+    data = {}
 
-    MARKER_MAP = {
-        'GLICOSE':               'glicose',
-        'HEMOGLOBINA GLICADA':   'hba1c',
-        'ERITRÓCITOS':           'eritrocitos',
-        'HEMOGLOBINA':           'hemoglobina',
-        'HEMATÓCRITO':           'hematocrito',
-        'LEUCÓCITOS':            'leucocitos',
-        'PLAQUETAS':             'plaquetas',
-        'TRIGLICERÍDEOS':        'triglicerideos',
-        'COLESTEROL TOTAL':      'colesterol_total',
-        'COLESTEROL HDL':        'hdl',
-        'HDL COLESTEROL':        'hdl',
-        'LDL COLESTEROL':        'ldl',
-        'VLDL COLESTEROL':       'vldl',
-        'COLESTEROL NÃO-HDL':    'nao_hdl',
-        'AST (TGO)':             'ast',
-        'ALT (TGP)':             'alt',
-        'GAMA GLUTAMIL':         'ggt',
-        'CPK':                   'cpk',
-        'CREATININA':            'creatinina',
-        'UREIA':                 'ureia',
-        'VITAMINA D':            'vitamina_d',
-        'VITAMINA B12':          'vitamina_b12',
-        'TSH':                   'tsh',
-        'PSA TOTAL':             'psa_total',
-        'ÁCIDO ÚRICO':           'acido_urico',
-        'FERRITINA':             'ferritina',
-        'POTÁSSIO':              'potassio',
-        'SÓDIO':                 'sodio',
-    }
+    # ── GLICOSE / GLICEMIA ──────────────────────────────────────────────
+    # Formato laudo único: "GLICEMIA EM JEJUM 88,30 mg/dL"
+    v = extract_float(text, r'GLICEMIA EM JEJUM\s+([\d,\.]+)\s*mg')
+    # Formato laudo evolutivo (tabela): "GLICOSE 88,30 95,53 ..."
+    if not v: v = extract_float(text, r'GLICOSE\s+([\d,\.]+)')
+    if v: data['glicose'] = v
 
-    i = 0
-    while i < len(lines):
-        line = lines[i].strip()
+    # ── HBA1C ───────────────────────────────────────────────────────────
+    # Formato laudo único: "HEMOGLOBINA GLICADA (A1C) 5,90 %"
+    v = extract_float(text, r'HEMOGLOBINA GLICADA \(A1C\)\s+([\d,\.]+)\s*%')
+    # Formato evolutivo: "HEMOGLOBINA GLICADA 5,90 5,60 ..."
+    if not v: v = extract_float(text, r'HEMOGLOBINA GLICADA\s+([\d,\.]+)')
+    if v: data['hba1c'] = v
 
-        # Detecta cabeçalho de tabela
-        m = DATE_HEADER_RE.match(line)
-        if m:
-            current_dates = []
-            for ds in re.findall(r'\d{2}/\d{2}/\d{4}', m.group(2)):
-                ano, mes = parse_date_str(ds)
-                if ano:
-                    current_dates.append(date_key(ano, mes))
-            i += 1
-            continue
+    # Glicemia média estimada
+    v = extract_float(text, r'Glicemia M[eé]dia Estimada\s+([\d,\.]+)')
+    if v: data['glicemia_media_estimada'] = v
 
-        # Lê linha de marcador quando temos datas no contexto
-        if current_dates:
-            for raw, marker in MARKER_MAP.items():
-                if line.upper().startswith(raw.upper()):
-                    nums = re.findall(r'[\d]+[,\.][\d]+', line)
-                    for j, dk in enumerate(current_dates):
-                        if j < len(nums):
-                            v = flt(nums[j])
-                            if v is not None:
-                                add(dk, marker, v)
-                    break
+    # ── CURVA GLICÊMICA (TTGO) ──────────────────────────────────────────
+    v = extract_float(text, r'Glicemia Basal\s*[\.:\s]+([\d,\.]+)\s*mg')
+    if v: data['ttgo_basal'] = v
+    v = extract_float(text, r'Glicemia 60 minutos.*?:\s*([\d,\.]+)\s*mg')
+    if v: data['ttgo_60min'] = v
+    v = extract_float(text, r'Glicemia 120 minutos.*?:\s*([\d,\.]+)\s*mg')
+    if v: data['ttgo_120min'] = v
 
-        i += 1
+    # ── LIPIDOGRAMA ──────────────────────────────────────────────────────
+    v = extract_float(text, r'TRIGLICER[IÍ]DEOS\s+([\d,\.]+)\s*mg')
+    if v: data['triglicerideos'] = v
 
-    # ── 2. Linhas "Resultados anteriores: dd/mm/yyyy - val | ..." ────────────
-    PREV_RE = re.compile(
-        r'(?:Resultados anteriores|anteriores)\s*:\s*'
-        r'((?:\d{2}/\d{2}/\d{4}\s*-\s*[\d,\.]+\s*\|?\s*)+)',
-        re.IGNORECASE)
+    v = extract_float(text, r'COLESTEROL TOTAL\s+([\d,\.]+)\s*mg')
+    if v: data['colesterol_total'] = v
 
-    INLINE_RE = re.compile(
-        r'(\d{2}/\d{2}/\d{4})\s*-\s*([\d,\.]+)')
+    v = extract_float(text, r'(?:HDL COLESTEROL|COLESTEROL HDL)\s+([\d,\.]+)\s*mg')
+    if v: data['hdl'] = v
 
-    # Detecta qual marcador está associado a cada bloco "Resultados anteriores"
-    PREV_CONTEXT = {
-        'HbA1c':                 'hba1c',
-        'Glicemia Média':        'glicemia_media_estimada',
-        'AST':                   'ast',
-        'ALT':                   'alt',
-        'GGT':                   'ggt',
-        'Vitamina D':            'vitamina_d',
-        'Vitamina B12':          'vitamina_b12',
-        'Ferro':                 'ferro',
-        'Ferritina':             'ferritina',
-        'CPK':                   'cpk',
-        'TSH':                   'tsh',
-        'PSA':                   'psa_total',
-        'Ácido Úrico':           'acido_urico',
-        'Creatinina':            'creatinina',
-        'eTFG':                  'etfg',
-        'Albumina':              'albumina_creatinina',
-    }
+    v = extract_float(text, r'LDL COLESTEROL\s+([\d,\.]+)\s*mg')
+    if v: data['ldl'] = v
 
-    for i, line in enumerate(lines):
-        m = PREV_RE.search(line)
-        if not m:
-            continue
-        # Tenta identificar o marcador pelas linhas próximas
-        context_window = '\n'.join(lines[max(0,i-5):i+2])
-        marker = None
-        for ctx, mk in PREV_CONTEXT.items():
-            if ctx.lower() in context_window.lower():
-                marker = mk
-                break
-        if not marker:
-            continue
-        for ds, vs in INLINE_RE.findall(m.group(1)):
-            ano, mes = parse_date_str(ds)
-            if ano:
-                v = flt(vs)
-                if v is not None:
-                    add(date_key(ano, mes), marker, v)
+    v = extract_float(text, r'VLDL COLESTEROL\s+([\d,\.]+)\s*mg')
+    if v: data['vldl'] = v
 
-    # ── 3. Linhas inline HbA1c/Glicemia: "dd/mm/yyyy - val | ..." ───────────
-    # Ex: "20/02/2026 - 5,80 | 13/08/2025 - 5,90 | ..."
-    PURE_INLINE_RE = re.compile(
-        r'^(?:(\d{2}/\d{2}/\d{4})\s*-\s*([\d,\.]+)\s*\|?\s*){2,}')
+    v = extract_float(text, r'COLESTEROL N[ÃA]O.HDL\s+([\d,\.]+)\s*mg')
+    if v: data['nao_hdl'] = v
 
-    for i, line in enumerate(lines):
-        line = line.strip()
-        if not PURE_INLINE_RE.match(line):
-            continue
-        pairs = INLINE_RE.findall(line)
-        if len(pairs) < 2:
-            continue
-        # Determina marcador pelo contexto
-        context_window = '\n'.join(lines[max(0,i-8):i+2])
-        marker = None
-        for ctx, mk in PREV_CONTEXT.items():
-            if ctx.lower() in context_window.lower():
-                marker = mk
-                break
-        if not marker:
-            continue
-        for ds, vs in pairs:
-            ano, mes = parse_date_str(ds)
-            if ano:
-                v = flt(vs)
-                if v is not None:
-                    add(date_key(ano, mes), marker, v)
+    v = extract_float(text, r'LIPOPROTE[IÍ]NA \(a\)\s+([\d,\.]+)\s*nmol')
+    if v: data['lpa'] = v
 
-    # ── 4. Valores pontuais do exame atual (laudo individual) ────────────────
-    SINGLE_RE = {
-        'glicose':               [r'GLICEMIA EM JEJUM\s+([\d,\.]+)', r'GLICOSE\s+([\d,\.]+)(?:\s|$)'],
-        'hba1c':                 [r'HEMOGLOBINA GLICADA \(A1C\)\s+([\d,\.]+)', r'HEMOGLOBINA GLICADA\s+([\d,\.]+)'],
-        'glicemia_media_estimada':[r'Glicemia M[eé]dia Estimada\s+([\d,\.]+)'],
-        'ttgo_basal':            [r'Glicemia Basal\s*[:\s]+([\d,\.]+)'],
-        'ttgo_60min':            [r'Glicemia 60 minutos[^:]*:\s*([\d,\.]+)', r'TTGO.*?60.*?:\s*([\d,\.]+)'],
-        'ttgo_120min':           [r'Glicemia 120 minutos[^:]*:\s*([\d,\.]+)'],
-        'lpa':                   [r'LIPOPROTE[IÍ]NA \(a\)\s+([\d,\.]+)'],
-        'apo_a1':                [r'APOLIPOPROTE[IÍ]NA A.1\s+([\d,\.]+)'],
-        'apo_b':                 [r'APOLIPOPROTE[IÍ]NA B\s+([\d,\.]+)'],
-        'etfg':                  [r'eTFG.*?([\d,\.]+)\s*mL'],
-        'albumina_creatinina':   [r'Rela[çc][ãa]o Albumina/Creatinina\s+([\d,\.]+)'],
-        'acido_folico':          [r'[AÁ]CIDO F[OÓ]LICO\s+([\d,\.]+)'],
-        't4_livre':              [r'T4 LIVRE.*?([\d,\.]+)\s*ng'],
-        't3_livre':              [r'T3 L.*?TRIIODOTIRONINA.*?([\d,\.]+)\s*pg'],
-        'pcr_ultrasensivel':     [r'PCR ULTRA SENS[IÍ]VEL\s+(?:Menor que\s+)?([\d,\.]+)'],
-        'vhs':                   [r'Velocidade de Hemossedimenta[çc][ãa]o\s+([\d,\.]+)'],
-        'ferro':                 [r'FERRO\s+S[EÉ]RICO\s+([\d,\.]+)', r'\bFERRO\b\s+([\d,\.]+)'],
-    }
+    v = extract_float(text, r'APOLIPOPROTE[IÍ]NA A.1\s+([\d,\.]+)\s*mg')
+    if v: data['apo_a1'] = v
 
-    def exflt(t, pats):
-        for p in pats:
-            m = re.search(p, t, re.IGNORECASE)
-            if m:
-                try: return float(m.group(1).replace(',','.'))
-                except: pass
-        return None
+    v = extract_float(text, r'APOLIPOPROTE[IÍ]NA B\s+([\d,\.]+)\s*mg')
+    if v: data['apo_b'] = v
 
-    # Detecta data principal do exame
-    main_date = None
-    m = re.search(r'Data/Hora da [Cc]oleta:\s*(\d{2}/\d{2}/\d{4})', text)
-    if m:
-        ano, mes = parse_date_str(m.group(1))
-        if ano:
-            main_date = date_key(ano, mes)
+    # ── FUNÇÃO HEPÁTICA ──────────────────────────────────────────────────
+    v = extract_float(text, r'AST \(TGO\)\s+([\d,\.]+)\s*U')
+    if v: data['ast'] = v
 
-    if main_date:
-        for marker, pats in SINGLE_RE.items():
-            v = exflt(text, pats)
-            if v is not None:
-                add(main_date, marker, v)
+    v = extract_float(text, r'ALT \(TGP\)\s+([\d,\.]+)\s*U')
+    if v: data['alt'] = v
 
-    # ── 5. Médico solicitante ─────────────────────────────────────────────────
-    sol = re.search(r'SOLICITANTE:\s*([^\r\n]+)', text)
-    solicitante = sol.group(1).split('UNIDADE')[0].strip() if sol else None
+    v = extract_float(text, r'GAMA GLUTAMIL TRANSFERASE\s+([\d,\.]+)\s*U')
+    if v: data['ggt'] = v
 
-    return history, solicitante
+    # ── FUNÇÃO RENAL ──────────────────────────────────────────────────────
+    v = extract_float(text, r'CREATININA\s+([\d,\.]+)\s*mg')
+    if v: data['creatinina'] = v
 
-# ─── Parse nome do arquivo → data ────────────────────────────────────────────
+    v = extract_float(text, r'UREIA\s+([\d,\.]+)\s*mg')
+    if v: data['ureia'] = v
+
+    v = extract_float(text, r'eTFG.*?([\d,\.]+)\s*mL')
+    if v: data['etfg'] = v
+
+    v = extract_float(text, r'Rela[çc][ãa]o Albumina/Creatinina\s+([\d,\.]+)\s*mg')
+    if v: data['albumina_creatinina'] = v
+
+    # ── HEMOGRAMA ────────────────────────────────────────────────────────
+    v = extract_float(text, r'ERITR[OÓ]CITOS\s+([\d,\.]+)\s*milh')
+    if not v: v = extract_float(text, r'ERITR[OÓ]CITOS\s+([\d,\.]+)')
+    if v: data['eritrocitos'] = v
+
+    v = extract_float(text, r'HEMOGLOBINA\s*:\s*([\d,\.]+)\s*g/dL')
+    if not v: v = extract_float(text, r'HEMOGLOBINA\s+([\d,\.]+)\s*g/dL')
+    if not v: v = extract_float(text, r'HEMOGLOBINA\s+([\d,\.]+)\s+\d')
+    if v: data['hemoglobina'] = v
+
+    v = extract_float(text, r'HEMAT[OÓ]CRITO\s*:\s*([\d,\.]+)\s*%')
+    if not v: v = extract_float(text, r'HEMAT[OÓ]CRITO\s+([\d,\.]+)\s*%')
+    if not v: v = extract_float(text, r'HEMAT[OÓ]CRITO\s+([\d,\.]+)')
+    if v: data['hematocrito'] = v
+
+    v = extract_float(text, r'LEUCÓCITOS\s+([\d\.]+)[,\s]')
+    if v: data['leucocitos'] = v
+
+    v = extract_float(text, r'PLAQUETAS\s+([\d\.]+)\s')
+    if v: data['plaquetas'] = v
+
+    # ── VITAMINAS / MINERAIS ─────────────────────────────────────────────
+    v = extract_float(text, r'VITAMINA D TOTAL.*?([\d,\.]+)\s*ng')
+    if v: data['vitamina_d'] = v
+
+    v = extract_float(text, r'VITAMINA B12\s+([\d,\.]+)\s*pg')
+    if v: data['vitamina_b12'] = v
+
+    v = extract_float(text, r'[AÁ]CIDO F[OÓ]LICO\s+([\d,\.]+)\s*ng')
+    if v: data['acido_folico'] = v
+
+    # ── TIREÓIDE ──────────────────────────────────────────────────────────
+    v = extract_float(text, r'TSH.*?([\d,\.]+)\s*[µu]IU')
+    if v: data['tsh'] = v
+
+    v = extract_float(text, r'T4 LIVRE.*?([\d,\.]+)\s*ng')
+    if v: data['t4_livre'] = v
+
+    v = extract_float(text, r'T3 L.*?TRIIODOTIRONINA.*?([\d,\.]+)\s*pg')
+    if v: data['t3_livre'] = v
+
+    # ── OUTROS ────────────────────────────────────────────────────────────
+    v = extract_float(text, r'CPK\s+([\d,\.]+)\s*U')
+    if not v: v = extract_float(text, r'\bCPK\s+([\d,\.]+)')
+    if v: data['cpk'] = v
+
+    v = extract_float(text, r'GGT\s+([\d,\.]+)\s*U')
+    if not data.get('ggt') and v: data['ggt'] = v
+
+    v = extract_float(text, r'[AÁ]CIDO [ÚU]RICO\s+([\d,\.]+)\s*mg')
+    if v: data['acido_urico'] = v
+
+    v = extract_float(text, r'FERRITINA\s+([\d,\.]+)\s*ng')
+    if v: data['ferritina'] = v
+
+    v = extract_float(text, r'FERRO\s+S[EÉ]RICO\s+([\d,\.]+)\s*[µu]g')
+    if not v: v = extract_float(text, r'FERRO\s+([\d,\.]+)\s*[µu]g')
+    if v: data['ferro'] = v
+
+    v = extract_float(text, r'POTÁSSIO\s+([\d,\.]+)\s*mEq')
+    if v: data['potassio'] = v
+
+    v = extract_float(text, r'SÓDIO\s+([\d,\.]+)\s*mEq')
+    if v: data['sodio'] = v
+
+    v = extract_float(text, r'PCR ULTRA SENS[IÍ]VEL\s+(?:Menor que\s+)?([\d,\.]+)')
+    if v: data['pcr_ultrasensivel'] = v
+    else:
+        m = re.search(r'PCR ULTRA SENS[IÍ]VEL\s+Menor que\s+([\d,\.]+)', text, re.IGNORECASE)
+        if m: data['pcr_ultrasensivel_menor_que'] = float(m.group(1).replace(',','.'))
+
+    v = extract_float(text, r'PSA TOTAL.*?([\d,\.]+)\s*ng')
+    if v: data['psa_total'] = v
+
+    v = extract_float(text, r'Velocidade de Hemossedimenta[çc][ãa]o\s+([\d,\.]+)\s*mm')
+    if v: data['vhs'] = v
+
+    return data
+
+# ─── Mapeamento de nomes de meses ─────────────────────────────────────────────
+
+MESES = {
+    'janeiro': 1, 'fevereiro': 2, 'marco': 3, 'março': 3,
+    'abril': 4, 'maio': 5, 'junho': 6, 'julho': 7,
+    'agosto': 8, 'setembro': 9, 'outubro': 10,
+    'novembro': 11, 'dezembro': 12,
+    'jan': 1, 'fev': 2, 'mar': 3, 'abr': 4, 'mai': 5,
+    'jun': 6, 'jul': 7, 'ago': 8, 'set': 9, 'out': 10,
+    'nov': 11, 'dez': 12,
+}
 
 def parse_filename_date(filename):
-    stem = Path(filename).stem.lower().replace('-','_')
+    """
+    Aceita formatos:
+      agosto_2025.pdf  →  2025-08
+      marco_2026.pdf   →  2026-03
+      08_2025.pdf      →  2025-08
+      2025_08.pdf      →  2025-08
+    """
+    stem = Path(filename).stem.lower().replace('-', '_')
     parts = stem.split('_')
+
+    # Tenta nome de mês
     for part in parts:
         if part in MESES:
             mes = MESES[part]
             for other in parts:
                 if other != part and other.isdigit() and len(other) == 4:
-                    return date_key(int(other), mes), mes, int(other)
+                    return f"{other}-{mes:02d}", mes, int(other)
+
+    # Tenta numérico
     nums = [p for p in parts if p.isdigit()]
     if len(nums) == 2:
         a, b = int(nums[0]), int(nums[1])
-        year, month = (a, b) if a > 12 else (b, a)
-        return date_key(year, month), month, year
+        if a > 12: year, month = a, b
+        else: year, month = b, a
+        return f"{year}-{month:02d}", month, year
+
     return None, None, None
 
-# ─── Main ────────────────────────────────────────────────────────────────────
+# ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
     if not EXAMES_DIR.exists():
-        print(f"Pasta '{EXAMES_DIR}' não encontrada.")
+        print(f"Pasta '{EXAMES_DIR}' não encontrada. Crie-a e coloque os PDFs.")
         return
 
     pdf_files = sorted(EXAMES_DIR.glob("*.pdf"))
@@ -316,60 +282,38 @@ def main():
         print("Nenhum PDF encontrado em ./exames/")
         return
 
-    # Acumula todos os dados históricos de todos os PDFs
-    all_data   = {}   # date_key -> dados
-    solicitantes = {} # date_key -> nome médico
-    file_dates = {}   # date_key -> nome do arquivo que o originou
+    results = []
 
     for pdf_path in pdf_files:
-        dk, mes, ano = parse_filename_date(pdf_path.name)
-        print(f"📄 Lendo {pdf_path.name}", end="")
-
-        text = read_pdf(pdf_path)
-        if not text.strip():
-            print(f" → ⚠ Formato não suportado.")
+        date_key, mes, ano = parse_filename_date(pdf_path.name)
+        if not date_key:
+            print(f"  ⚠ Não consegui interpretar a data de '{pdf_path.name}' — pulando.")
             continue
 
-        history, solicitante = extract_history(text)
+        print(f"📄 Processando {pdf_path.name} → {date_key}")
+        text = extract_text_from_pdf(pdf_path)
+        if not text.strip():
+            print(f"  ⚠ Arquivo vazio ou formato não suportado.")
+            continue
 
-        # Marca o arquivo de origem para cada data
-        if dk and dk not in file_dates:
-            file_dates[dk] = pdf_path.name
+        dados = parse_exame(text, date_key)
+        entry = {
+            "label": date_key,
+            "mes": mes,
+            "ano": ano,
+            "arquivo": pdf_path.name,
+            "dados": dados
+        }
+        results.append(entry)
+        print(f"  ✓ {len(dados)} marcadores extraídos: {', '.join(dados.keys())}")
 
-        for date_k, dados in history.items():
-            if date_k not in all_data:
-                all_data[date_k] = {}
-            for marker, val in dados.items():
-                if marker not in all_data[date_k]:
-                    all_data[date_k][marker] = val
-
-        if solicitante and dk:
-            solicitantes[dk] = solicitante
-
-        print(f" → {len(history)} datas extraídas: {', '.join(sorted(history.keys()))}")
-
-    if not all_data:
-        print("Nenhum dado extraído.")
-        return
-
-    # Monta lista ordenada cronologicamente
-    results = []
-    for dk in sorted(all_data.keys()):
-        ano  = int(dk[:4])
-        mes  = int(dk[5:])
-        results.append({
-            "label":       dk,
-            "mes":         mes,
-            "ano":         ano,
-            "arquivo":     file_dates.get(dk, "histórico"),
-            "solicitante": solicitantes.get(dk, ""),
-            "dados":       all_data[dk],
-        })
+    # Ordena cronologicamente
+    results.sort(key=lambda x: (x['ano'], x['mes']))
 
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✅ Gerado: {OUTPUT_FILE} ({len(results)} datas: {', '.join(e['label'] for e in results)})")
+    print(f"\n✅ Gerado: {OUTPUT_FILE} ({len(results)} exames)")
 
 if __name__ == "__main__":
     main()
