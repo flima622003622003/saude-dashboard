@@ -3,239 +3,234 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Saúde · Fábio Castro</title>
-
-  <!-- Fontes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-  <!-- Estilos -->
+  <title>Minha Saúde — Fábio Castro</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <!-- ── LOADING ── -->
-  <div id="loading">
-    <div class="spinner"></div>
-    <p style="color:var(--text2); font-size:14px;">Carregando exames...</p>
-  </div>
+<!-- LOADING -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="color:var(--text2);font-size:14px;font-family:Nunito,sans-serif">Carregando seus exames...</p>
+</div>
 
-  <!-- ── CONTEÚDO PRINCIPAL ── -->
-  <div id="main-content">
+<!-- CONTEÚDO -->
+<div id="main-content">
 
-    <!-- HEADER -->
-    <header class="header">
-      <div class="header-left">
-        <h1>Painel de Saúde</h1>
-        <p>Fábio José de Castro e Lima · 62 anos · Acompanhamento pré-diabetes</p>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="header-icon">🩺</div>
+      <div>
+        <h1>Minha Saúde</h1>
+        <p>Fábio Castro · 62 anos · Controle glicêmico</p>
       </div>
-      <div class="header-right">
-        <span class="status-pill warn" id="status-pill">
-          <span class="status-dot"></span>
-          Pré-diabético
-        </span>
-      </div>
-    </header>
+    </div>
+    <span class="status-badge warn" id="status-pill">
+      <span class="status-dot"></span>
+      <span>Pré-diabético</span>
+    </span>
+  </header>
 
-    <main class="main">
+  <main class="main">
 
-      <!-- Alertas -->
-      <div id="alerts-container"></div>
+    <!-- SELETOR DE DATA -->
+    <div class="date-selector">
+      <span class="date-selector-label">📅 Ver exame de:</span>
+      <div id="date-buttons" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
 
-      <!-- Abas de datas -->
-      <div class="compare-bar" id="compare-bar">
-        <span>Exames disponíveis:</span>
-      </div>
+    <!-- HERO -->
+    <div class="score-hero">
+      <div>
+        <h2 id="hero-title">Carregando...</h2>
+        <p id="hero-desc" style="margin-top:6px"></p>
 
-      <!-- ══════════════════════════════════════════════════════════
-           SEÇÃO 1 — GLICEMIA
-           ══════════════════════════════════════════════════════════ -->
-      <div class="section-label">🔴 Controle glicêmico — foco principal</div>
-
-      <div class="metric-grid" id="metrics-glycemic"></div>
-
-      <div class="two-col">
-        <div class="chart-card">
-          <h3>HbA1c — hemoglobina glicada</h3>
-          <p class="subtitle">Meta: abaixo de 5,7% (normal) · Zona pré-diabetes: 5,7–6,4%</p>
-          <div class="chart-legend">
-            <span class="legend-item">
-              <span class="legend-dot" style="background:#b45309"></span>HbA1c
-            </span>
-            <span class="legend-item">
-              <span class="legend-dot" style="background:#15803d; opacity:.5"></span>Limite normal (5,69%)
-            </span>
-            <span class="legend-item">
-              <span class="legend-dot" style="background:#b91c1c; opacity:.5"></span>Diabetes (6,5%)
-            </span>
+        <div class="tip-grid" style="margin-top:14px">
+          <div class="tip-box">
+            <strong>💡 O que é a HbA1c?</strong>
+            Mede a sua glicemia média dos <em>últimos 3 meses</em>. É o exame mais importante para acompanhar o pré-diabetes. Meta: abaixo de 5,7%.
           </div>
-          <div class="chart-wrap" style="height:160px">
-            <canvas id="hba1cChart" role="img" aria-label="Evolução HbA1c ao longo do tempo"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h3>Glicemia de jejum</h3>
-          <p class="subtitle">Meta: abaixo de 99 mg/dL · Diabetes: ≥ 126 mg/dL</p>
-          <div class="chart-legend">
-            <span class="legend-item">
-              <span class="legend-dot" style="background:#b91c1c"></span>Glicemia
-            </span>
-            <span class="legend-item">
-              <span class="legend-dot" style="background:#15803d; opacity:.5"></span>Meta (99 mg/dL)
-            </span>
-          </div>
-          <div class="chart-wrap" style="height:160px">
-            <canvas id="glicemiaChart" role="img" aria-label="Evolução glicemia jejum"></canvas>
+          <div class="tip-box">
+            <strong>🏃 Como baixar o açúcar?</strong>
+            Caminhar 30 minutos após o almoço reduz a glicemia em até 30%. Evitar arroz branco, pão e açúcar no café também ajuda muito.
           </div>
         </div>
       </div>
 
-      <!-- Curva glicêmica (visível apenas se houver dados TTGO) -->
-      <div id="ttgo-section" style="display:none" class="chart-card">
-        <h3>Curva glicêmica (TTGO 75g)</h3>
-        <p class="subtitle">Basal → 1h → 2h após ingestão de 75g de dextrosol · Meta 1h: &lt;140 mg/dL</p>
-        <div class="chart-wrap" style="height:150px">
-          <canvas id="ttgoChart" role="img" aria-label="Curva TTGO"></canvas>
+      <div class="score-meter">
+        <div class="meter-value" id="meter-val" style="color:var(--amber)">—</div>
+        <div class="meter-label">HbA1c</div>
+        <div class="meter-track">
+          <div class="meter-needle" id="needle" style="left:50%"></div>
+        </div>
+        <div class="meter-labels">
+          <span>Normal</span>
+          <span>Pré</span>
+          <span>DM</span>
         </div>
       </div>
+    </div>
 
-      <div class="info-grid">
-        <div class="info-box">
-          <strong>Por que a HbA1c importa?</strong><br>
-          Reflete a média glicêmica dos <em>últimos 3 meses</em>, não apenas o dia do exame.
-          É o exame mais confiável para monitorar pré-diabetes.
+    <!-- ══════════════════════════════════════════
+         AÇÚCAR NO SANGUE — FOCO PRINCIPAL
+         ══════════════════════════════════════════ -->
+    <div class="section-title">🔴 Açúcar no sangue — seu foco principal</div>
+
+    <div class="focus-grid" id="focus-cards"></div>
+
+    <div class="two-col">
+      <div class="chart-card">
+        <h3>HbA1c ao longo do tempo</h3>
+        <p class="subtitle">Linha verde = zona normal · Linha vermelha = diabetes</p>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#b55d00"></span>Sua HbA1c</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#1a7a4a;opacity:.6"></span>Meta (5,69%)</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#c0392b;opacity:.6"></span>Diabetes (6,5%)</span>
         </div>
-        <div class="info-box">
-          <strong>Glicemia pós-refeição (TTGO)</strong><br>
-          Detecta resistência à insulina antes mesmo que a glicemia de jejum altere.
-          Exercício 30 min após as refeições reduz diretamente esse pico.
+        <div class="chart-wrap" style="height:170px">
+          <canvas id="hba1cChart" role="img" aria-label="Evolução HbA1c"></canvas>
         </div>
       </div>
-
-      <!-- ══════════════════════════════════════════════════════════
-           SEÇÃO 2 — LIPÍDIOS
-           ══════════════════════════════════════════════════════════ -->
-      <div class="section-label">🫀 Perfil lipídico e risco cardiovascular</div>
-
-      <div class="metric-grid" id="metrics-lipids"></div>
 
       <div class="chart-card">
-        <h3>Evolução do colesterol total</h3>
-        <p class="subtitle">Meta: &lt;190 mg/dL · Barras vermelhas = acima do limite</p>
-        <div class="chart-wrap" style="height:150px">
-          <canvas id="colChart" role="img" aria-label="Evolução colesterol total"></canvas>
+        <h3>Glicemia de jejum</h3>
+        <p class="subtitle">Meta: abaixo de 99 mg/dL · Pontos vermelhos = acima do normal</p>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#c0392b"></span>Glicemia</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#1a7a4a;opacity:.6"></span>Meta (99)</span>
+        </div>
+        <div class="chart-wrap" style="height:170px">
+          <canvas id="glicChart" role="img" aria-label="Glicemia jejum"></canvas>
         </div>
       </div>
+    </div>
 
-      <!-- ══════════════════════════════════════════════════════════
-           SEÇÃO 3 — FUNÇÃO RENAL
-           ══════════════════════════════════════════════════════════ -->
-      <div class="section-label">🫘 Função renal</div>
-      <div class="metric-grid" id="metrics-renal"></div>
-
-      <!-- ══════════════════════════════════════════════════════════
-           SEÇÃO 4 — FUNÇÃO HEPÁTICA
-           ══════════════════════════════════════════════════════════ -->
-      <div class="section-label">🟡 Função hepática</div>
-      <div class="metric-grid" id="metrics-hepatic"></div>
-
-      <div class="chart-card">
-        <h3>Transaminases e GGT</h3>
-        <p class="subtitle">AST: ref 17–59 · ALT: ref 21–72 · GGT: ref 10–78 (U/L)</p>
-        <div class="chart-wrap" style="height:150px">
-          <canvas id="hepaticChart" role="img" aria-label="Evolução transaminases e GGT"></canvas>
-        </div>
+    <div id="ttgo-section" style="display:none" class="chart-card">
+      <h3>Teste de tolerância à glicose (curva glicêmica)</h3>
+      <p class="subtitle">Como seu corpo reage após beber solução de açúcar · Meta em 1h: abaixo de 140 mg/dL</p>
+      <div class="chart-wrap" style="height:160px">
+        <canvas id="ttgoChart" role="img" aria-label="Curva glicêmica TTGO"></canvas>
       </div>
+    </div>
 
-      <!-- ══════════════════════════════════════════════════════════
-           SEÇÃO 5 — HEMOGRAMA
-           ══════════════════════════════════════════════════════════ -->
-      <div class="section-label">🩸 Hemograma</div>
-      <div class="metric-grid" id="metrics-hemo"></div>
+    <!-- ══════════════════════════════════════════
+         CORAÇÃO E COLESTEROL
+         ══════════════════════════════════════════ -->
+    <div class="section-title dyn-section">🫀 Coração e colesterol</div>
 
-      <!-- ══════════════════════════════════════════════════════════
-           SEÇÃO 6 — TABELA GERAL
-           ══════════════════════════════════════════════════════════ -->
-      <div class="section-label">📋 Todos os marcadores — comparativo completo</div>
-      <div class="chart-card table-card">
-        <table class="lab-table" aria-label="Comparativo de todos os marcadores laboratoriais">
-          <thead>
-            <tr id="table-header-row"></tr>
-          </thead>
-          <tbody id="table-body"></tbody>
+    <div class="markers-grid dyn-section" id="grid-lipids"></div>
+
+    <div class="chart-card dyn-section">
+      <h3>Colesterol total ao longo do tempo</h3>
+      <p class="subtitle">Verde = dentro do normal · Vermelho = acima de 190 mg/dL</p>
+      <div class="chart-wrap" style="height:150px">
+        <canvas id="colChart" role="img" aria-label="Colesterol total"></canvas>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         RINS
+         ══════════════════════════════════════════ -->
+    <div class="section-title dyn-section">🫘 Rins</div>
+    <div class="markers-grid dyn-section" id="grid-renal"></div>
+
+    <!-- ══════════════════════════════════════════
+         FÍGADO
+         ══════════════════════════════════════════ -->
+    <div class="section-title dyn-section">🟡 Fígado</div>
+    <div class="markers-grid dyn-section" id="grid-hepatic"></div>
+
+    <div class="chart-card dyn-section">
+      <h3>Enzimas do fígado ao longo do tempo</h3>
+      <p class="subtitle">AST, ALT e GGT — todos devem ficar dentro da faixa verde</p>
+      <div class="chart-wrap" style="height:150px">
+        <canvas id="hepaticChart" role="img" aria-label="Enzimas hepáticas"></canvas>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SANGUE
+         ══════════════════════════════════════════ -->
+    <div class="section-title dyn-section">🩸 Sangue</div>
+    <div class="markers-grid dyn-section" id="grid-hemo"></div>
+
+    <!-- ══════════════════════════════════════════
+         VITAMINAS E MINERAIS
+         ══════════════════════════════════════════ -->
+    <div class="section-title dyn-section">💊 Vitaminas e minerais</div>
+    <div class="markers-grid dyn-section" id="grid-vitamins"></div>
+
+    <!-- ══════════════════════════════════════════
+         TIREOIDE
+         ══════════════════════════════════════════ -->
+    <div class="section-title dyn-section">🦋 Tireoide</div>
+    <div class="markers-grid dyn-section" id="grid-thyroid"></div>
+
+    <!-- ══════════════════════════════════════════
+         OUTROS
+         ══════════════════════════════════════════ -->
+    <div class="section-title dyn-section">🔬 Outros marcadores</div>
+    <div class="markers-grid dyn-section" id="grid-other"></div>
+
+    <!-- ══════════════════════════════════════════
+         TABELA COMPLETA DE EVOLUÇÃO
+         ══════════════════════════════════════════ -->
+    <div class="section-title">📋 Evolução completa de todos os exames</div>
+    <div class="chart-card" style="padding:0;overflow:hidden">
+      <div class="evo-table-wrap">
+        <table class="evo-table" aria-label="Evolução de todos os marcadores">
+          <thead><tr id="evo-table-head"></tr></thead>
+          <tbody id="evo-table-body"></tbody>
         </table>
       </div>
+    </div>
 
-      <!-- ══════════════════════════════════════════════════════════
-           PRÓXIMOS PASSOS
-           ══════════════════════════════════════════════════════════ -->
-      <div class="section-label">📅 Próximos passos recomendados</div>
-      <div class="next-steps">
-        <div class="steps-grid">
-          <div class="step-card">
-            <h4>🗓 Em 3 meses</h4>
-            <ul>
-              <li>Glicemia de jejum + HbA1c</li>
-              <li>Curva glicêmica (TTGO)</li>
-              <li>Peso corporal</li>
-              <li>Pressão arterial</li>
-            </ul>
-          </div>
-          <div class="step-card">
-            <h4>🗓 Em 6 meses</h4>
-            <ul>
-              <li>Painel completo + eTFG</li>
-              <li>Lipoproteína(a) — acompanhar</li>
-              <li>GGT e transaminases</li>
-              <li>Hemograma completo</li>
-              <li>PCR ultra-sensível</li>
-            </ul>
-          </div>
+    <!-- ══════════════════════════════════════════
+         PRÓXIMOS PASSOS
+         ══════════════════════════════════════════ -->
+    <div class="section-title">📅 O que fazer a seguir</div>
+    <div class="chart-card">
+      <div class="next-grid">
+        <div class="next-card">
+          <h4>🗓 Próximos 3 meses</h4>
+          <ul>
+            <li>Glicemia + HbA1c</li>
+            <li>Curva glicêmica (TTGO)</li>
+            <li>Peso semanal</li>
+            <li>Pressão arterial</li>
+          </ul>
+        </div>
+        <div class="next-card">
+          <h4>🗓 Próximos 6 meses</h4>
+          <ul>
+            <li>Exame completo de sangue</li>
+            <li>Lipoproteína(a) — acompanhar</li>
+            <li>Função renal (eTFG)</li>
+            <li>GGT e fígado</li>
+            <li>Avaliação cardiológica (Lp(a))</li>
+          </ul>
         </div>
       </div>
 
-      <!-- ══════════════════════════════════════════════════════════
-           COMO ADICIONAR EXAMES
-           ══════════════════════════════════════════════════════════ -->
-      <div class="section-label">📂 Como adicionar novos exames</div>
-      <div class="upload-info">
-        <h3>Fluxo para atualizar o dashboard</h3>
-        <p>Siga os 3 passos abaixo sempre que receber um resultado de laboratório:</p>
-        <div class="code-block">
-<span class="comment"># 1. Nomeie o PDF no formato: mes_ano.pdf</span>
-<span class="comment">#    Exemplos aceitos:</span>
-junho_2026.pdf
-setembro_2026.pdf
-dezembro_2026.pdf
-
-<span class="comment"># 2. Coloque o PDF na pasta /exames/ e rode o extrator:</span>
-<span class="cmd">python3 extrair_exames.py</span>
-
-<span class="comment"># 3. Faça commit e push para o GitHub:</span>
-<span class="cmd">git add exames/ exames_data.json</span>
-<span class="cmd">git commit -m "Adiciona exame junho/2026"</span>
-<span class="cmd">git push</span>
+      <div class="tip-grid" style="margin-top:14px">
+        <div class="tip-box">
+          <strong>🥗 Alimentação anti-diabetes</strong>
+          Priorize proteínas, legumes e folhas. Reduza arroz branco, pão, macarrão e frituras. Coma de 3 em 3 horas em porções menores.
         </div>
-        <p class="note">
-          O GitHub Pages atualiza automaticamente em ~1 minuto após o push.<br>
-          Formatos de nome aceitos:
-          <code>agosto_2025.pdf</code>,
-          <code>ago_2025.pdf</code>,
-          <code>08_2025.pdf</code>.
-        </p>
+        <div class="tip-box">
+          <strong>🚶 Exercício que mais ajuda</strong>
+          Caminhada de 30 min após o almoço e jantar. Musculação 3x por semana também reduz a resistência à insulina de forma duradoura.
+        </div>
       </div>
+    </div>
 
-    </main>
-  </div><!-- /#main-content -->
+  </main>
+</div>
 
-  <!-- Bibliotecas externas -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-
-  <!-- Módulos do dashboard (ordem importa) -->
-  <script src="js/markers.js"></script>
-  <script src="js/charts.js"></script>
-  <script src="js/dashboard.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="js/markers.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/dashboard.js"></script>
 </body>
 </html>
