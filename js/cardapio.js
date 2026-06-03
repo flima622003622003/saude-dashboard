@@ -93,6 +93,14 @@ function toggleTokenSetup() {
   if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
 }
 
+/* ── Atalho secreto Ctrl+Shift+T ───────────────────────────────── */
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.shiftKey && e.key === 'K') {
+    e.preventDefault();
+    toggleTokenSetup();
+  }
+});
+
 function clearToken() {
   ghToken = '';
   localStorage.removeItem('gh_token');
