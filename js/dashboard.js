@@ -494,5 +494,4 @@ function toggleEvo() {
   if (el) el.textContent = idade + ' anos';
 })();
 
-// init() é chamado pelo auth.js após login autorizado
-window.startDashboard = init;
+init();
