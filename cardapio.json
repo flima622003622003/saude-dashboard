@@ -1,9 +1,57 @@
 {
-  "seg": {"cafe":[],"almoco":[],"lanche":[],"jantar":[]},
-  "ter": {"cafe":[],"almoco":[],"lanche":[],"jantar":[]},
-  "qua": {"cafe":[],"almoco":[],"lanche":[],"jantar":[]},
-  "qui": {"cafe":[],"almoco":[],"lanche":[],"jantar":[]},
-  "sex": {"cafe":[],"almoco":[],"lanche":[],"jantar":[]},
-  "sab": {"cafe":[],"almoco":[],"lanche":[],"jantar":[]},
-  "dom": {"cafe":[],"almoco":[],"lanche":[],"jantar":[]}
+  "seg": {
+    "cafe": [],
+    "almoco": [
+      {
+        "name": "Anchovas",
+        "group": "acelerador"
+      },
+      {
+        "name": "Atum",
+        "group": "acelerador"
+      },
+      {
+        "name": "Camarão",
+        "group": "acelerador"
+      }
+    ],
+    "lanche": [],
+    "jantar": []
+  },
+  "ter": {
+    "cafe": [],
+    "almoco": [],
+    "lanche": [],
+    "jantar": []
+  },
+  "qua": {
+    "cafe": [],
+    "almoco": [],
+    "lanche": [],
+    "jantar": []
+  },
+  "qui": {
+    "cafe": [],
+    "almoco": [],
+    "lanche": [],
+    "jantar": []
+  },
+  "sex": {
+    "cafe": [],
+    "almoco": [],
+    "lanche": [],
+    "jantar": []
+  },
+  "sab": {
+    "cafe": [],
+    "almoco": [],
+    "lanche": [],
+    "jantar": []
+  },
+  "dom": {
+    "cafe": [],
+    "almoco": [],
+    "lanche": [],
+    "jantar": []
+  }
 }
