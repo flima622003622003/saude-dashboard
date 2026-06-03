@@ -1,20 +1,7 @@
 {
   "seg": {
     "cafe": [],
-    "almoco": [
-      {
-        "name": "Anchovas",
-        "group": "acelerador"
-      },
-      {
-        "name": "Atum",
-        "group": "acelerador"
-      },
-      {
-        "name": "Camarão",
-        "group": "acelerador"
-      }
-    ],
+    "almoco": [],
     "lanche": [],
     "jantar": []
   },
