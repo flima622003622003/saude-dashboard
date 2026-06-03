@@ -876,3 +876,21 @@ body {
   .cardapio-layout { grid-template-columns: 1fr; }
   .week-calendar { border: none; }
 }
+
+/* ── Save status bar ── */
+.save-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  padding: 4px 0;
+  transition: color .3s;
+}
+.save-status-bar.saving  { color: var(--amber-text); }
+.save-status-bar.saved   { color: var(--green-text); }
+.save-status-bar.error   { color: var(--red-text);   }
+.save-status-bar.no-token{ color: var(--text3);      }
+.save-status-bar.loading { color: var(--text2);      }
+
+@keyframes ti-spin { to { transform: rotate(360deg); } }
+.ti-spin { display: inline-block; animation: ti-spin .8s linear infinite; }
