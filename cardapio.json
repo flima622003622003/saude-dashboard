@@ -1,6 +1,19 @@
 {
   "seg": {
-    "cafe": [],
+    "cafe": [
+      {
+        "name": "Peperoni",
+        "group": "moderador"
+      },
+      {
+        "name": "Salame",
+        "group": "moderador"
+      },
+      {
+        "name": "Manteiga de amêndoas",
+        "group": "moderador"
+      }
+    ],
     "almoco": [],
     "lanche": [],
     "jantar": []
