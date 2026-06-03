@@ -30,6 +30,16 @@
     </span>
   </header>
 
+  <!-- NAV TABS -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('dashboard')" id="tab-dashboard">
+      <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Meus Exames
+    </button>
+    <button class="nav-tab" onclick="switchTab('cardapio')" id="tab-cardapio">
+      <i class="ti ti-salad" aria-hidden="true"></i> Cardápio Semanal
+    </button>
+  </nav>
+
   <main class="main">
 
     <!-- seletor de data -->
@@ -395,10 +405,163 @@
     </div>
 
   </main>
+
+  <!-- ═══ CARDÁPIO SEMANAL ═══ -->
+  <div id="page-cardapio" style="display:none">
+    <main class="main">
+      <div class="cardapio-layout">
+
+        <!-- COLUNA ESQUERDA: tabela de alimentos -->
+        <div class="food-table-col">
+          <div class="food-table-header">
+            <h2 class="food-table-title">Guia de alimentos</h2>
+            <p class="food-table-sub">Clique num alimento para adicionar ao cardápio</p>
+            <div class="food-search-wrap">
+              <i class="ti ti-search" aria-hidden="true"></i>
+              <input id="food-search" type="text" placeholder="Buscar alimento..." oninput="filterFoods(this.value)">
+            </div>
+          </div>
+
+          <div class="food-cols">
+
+            <div class="food-group acelerador">
+              <div class="food-group-title">
+                <span class="food-badge acelerador">🟢 Aceleradores</span>
+                <span class="food-badge-sub">Priorize sempre</span>
+              </div>
+
+              <div class="food-category">🥩 Carnes e Peixes</div>
+              <div class="food-items" data-group="acelerador">Anchovas,Atum,Bacon,Camarão,Caranguejo,Carneiro,Carne de Caça,Coelho,Fígado de Frango,Frango,Gado,Lagosta,Leão,Lula,Mariscos,Merluza,Ostras,Pato,Peixe no geral,Peru,Porco,Rim,Salmão,Sardinhas,Tilápia,Truta</div>
+
+              <div class="food-category">🥚 Ovos e Laticínios</div>
+              <div class="food-items" data-group="acelerador">Leite de coco (não é laticínio),Ovos (clara e gema)</div>
+
+              <div class="food-category">🥗 Legumes e Tubérculos</div>
+              <div class="food-items" data-group="acelerador">Agrião,Abobrinha,Alho,Alcachofra,Alface e afins,Algas,Alho,Almeirão,Aspargo,Azeitona,Berinjela,Beterraba,Brócoli,Brotos,Cebola (todas),Cebolinha,Cenoura,Chilis,Cogumelos (todas),Couve de bruxelas,Couve galega,Couve-de-folhas,Couve-flor,Ervilhas,Espinafre,Funcho,Gengibre,Pepino,Pimentão,Rabanete,Repolho,Rúcula,Tomates,Vagém,Zucchini</div>
+
+              <div class="food-category">🫒 Gorduras e Óleos</div>
+              <div class="food-items" data-group="acelerador">Azeite de dendê,Azeite de oliva,Banha de porco,Ghee,Gordura bovina,Gordura de pato,Manteiga,Manteiga de cacau,Óleo de abacate,Óleo de coco,Óleo de macadâmia,Óleo de peixe</div>
+
+              <div class="food-category">🌰 Nozes, Sementes e Afins</div>
+              <div class="food-items" data-group="acelerador">Gergelim,Linhaça,Semente de abóbora,Semente de chia,Semente de girassol</div>
+
+              <div class="food-category">🍓 Frutas</div>
+              <div class="food-items" data-group="acelerador">Abacate,Amoras,Coco,Cranberry,Framboesa (raspberry),Limão e lima,Mirtilo (blueberry),Morango</div>
+
+              <div class="food-category">🌿 Temperos, Ervas e Afins</div>
+              <div class="food-items" data-group="acelerador">Açafrão,Alecrim,Canela,Coentro,Cominho,Cravo,Curry,Endro,Gengibre,Hortelã,Maionese (caseira),Manjerição,Mostarda (planta),Mostarda (semente),Noz moscada,Orégano,Páprica,Pimenta (todas),Sal,Salsinhas,Stevia,Vinagre,Vinagre balsâmico (sem açúcar)</div>
+
+              <div class="food-category">🧀 Bebidas e Adoçantes</div>
+              <div class="food-items" data-group="acelerador">Água com gás (natural),Brodo (frango, peixe, gado),Café Preto,Café com leite/óleo de coco,Café com manteiga,Chá (todos),Chá gelado (sem açúcar/adoçante),Kefir,Suco verde (sem açúcar)</div>
+
+              <div class="food-category">🍞 Outros</div>
+              <div class="food-items" data-group="acelerador">Chucrute (Sauerkraut),Pão de linhaça</div>
+            </div>
+
+            <div class="food-group moderador">
+              <div class="food-group-title">
+                <span class="food-badge moderador">🟡 Moderadores</span>
+                <span class="food-badge-sub">Com moderação</span>
+              </div>
+
+              <div class="food-category">🥩 Carnes e Peixes</div>
+              <div class="food-items" data-group="moderador">Peperoni,Presunto,Salame</div>
+
+              <div class="food-category">🫒 Gorduras e Óleos</div>
+              <div class="food-items" data-group="moderador">Manteiga de amêndoas,Pasta de amendoim</div>
+
+              <div class="food-category">🌾 Grãos e Cereais</div>
+              <div class="food-items" data-group="moderador">Arroz branco,Arroz integral,Arroz selvagem</div>
+
+              <div class="food-category">🥕 Legumes e Tubérculos</div>
+              <div class="food-items" data-group="moderador">Abóbora,Banana verde (de cozinhar),Batata doce,Batata inglesa,Grão de bico,Inhame,Mandioca,Tapioca (mandioca),Taro</div>
+
+              <div class="food-category">💧 Bebidas e Adoçantes</div>
+              <div class="food-items" data-group="moderador">Água de coco,Leite de amêndoas,Suco de fruta natural (sem bolo)</div>
+
+              <div class="food-category">🌰 Nozes, Sementes e Afins</div>
+              <div class="food-items" data-group="moderador">Amêndoa,Avelã,Castanha de caju,Castanha do pará,Macadâmia,Noz peca,Pistache</div>
+
+              <div class="food-category">🍓 Frutas</div>
+              <div class="food-items" data-group="moderador">Abacaxi,Ameixa,Banana,Açaí,Carambola,Cereja,Damasco,Figo,Fruta do conde,Fruta pão,Goiaba,Grapefruit,Jaca,Kiwi,Laranja,Lichia,Maçã,Mamão,Maracujá,Melancia,Melão,Nectarina,Pêra,Pêssego,Tangerina,Uva</div>
+            </div>
+
+            <div class="food-group retardador">
+              <div class="food-group-title">
+                <span class="food-badge retardador">🔴 Retardadores</span>
+                <span class="food-badge-sub">Evitar</span>
+              </div>
+
+              <div class="food-category">🥩 Carnes e Peixes</div>
+              <div class="food-items" data-group="retardador">Apronto,Salsinha</div>
+
+              <div class="food-category">🫒 Gorduras e Óleos</div>
+              <div class="food-items" data-group="retardador">Margarina,Óleo de amendoim,Óleo de canola,Óleo de girassol,Óleo de milho,Óleo de semente de algodão,Óleo de soja,Óleo vegetal (outros)</div>
+
+              <div class="food-category">🌾 Grãos e Cereais</div>
+              <div class="food-items" data-group="retardador">Aveia,Cuscuz,Granola,Milho,Quinoa,Soja,Trigo (em todas as formas)</div>
+
+              <div class="food-category">🥕 Legumes e Tubérculos</div>
+              <div class="food-items" data-group="retardador">Feijão (todos),Lentilha</div>
+
+              <div class="food-category">🥚 Ovos e Laticínios</div>
+              <div class="food-items" data-group="retardador">Creme de leite,Iogurte de baixa gordura,Iogurte natural integral,Kefir de leite,Leite condensado,Leite desnatado e afins,Leite em pó,Leite integral (puro/misturado),Queijo Cottage,Queijo de cabra,Queijos,Requeijão,Sorvete,Whey Protein</div>
+
+              <div class="food-category">💧 Bebidas e Adoçantes</div>
+              <div class="food-items" data-group="retardador">Açúcar cristalizado,Açúcar de coco,Açúcar integral,Açúcar mascavo,Agave,Aspartame</div>
+
+              <div class="food-category">🍞 Outros</div>
+              <div class="food-items" data-group="retardador">Barra de cereal,Barra de proteína,Batata frita,Chips,Massas,Pão (todos),Salgadinhos,Salgados (coxinha, pastel, etc),Sorvetes e cereais matinais,Tortilhas</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- COLUNA DIREITA: calendário semanal -->
+        <div class="calendar-col">
+          <div class="calendar-header">
+            <h2 class="food-table-title">Cardápio da semana</h2>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button onclick="clearMenu()" class="cal-btn-clear">
+                <i class="ti ti-trash" aria-hidden="true"></i> Limpar tudo
+              </button>
+              <button onclick="printMenu()" class="cal-btn-print">
+                <i class="ti ti-printer" aria-hidden="true"></i> Imprimir
+              </button>
+            </div>
+          </div>
+
+          <div class="meal-selector">
+            <span style="font-size:12px;font-weight:600;color:var(--text2)">Adicionar em:</span>
+            <select id="selected-day" style="font-family:inherit;font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text)">
+              <option value="seg">Segunda</option>
+              <option value="ter">Terça</option>
+              <option value="qua">Quarta</option>
+              <option value="qui">Quinta</option>
+              <option value="sex">Sexta</option>
+              <option value="sab">Sábado</option>
+              <option value="dom">Domingo</option>
+            </select>
+            <select id="selected-meal" style="font-family:inherit;font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text)">
+              <option value="cafe">☕ Café da manhã</option>
+              <option value="almoco">🍽 Almoço</option>
+              <option value="lanche">🍎 Lanche</option>
+              <option value="jantar">🌙 Jantar</option>
+            </select>
+          </div>
+
+          <div class="week-calendar" id="week-calendar"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="js/markers.js"></script>
+<script src="js/cardapio.js"></script>
 <script src="js/charts.js"></script>
 <script src="js/dashboard.js"></script>
 </body>
