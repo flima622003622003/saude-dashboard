@@ -521,13 +521,46 @@
         <div class="calendar-col">
           <div class="calendar-header">
             <h2 class="food-table-title">Cardápio da semana</h2>
-            <div style="display:flex;gap:8px;margin-top:8px">
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
               <button onclick="clearMenu()" class="cal-btn-clear">
                 <i class="ti ti-trash" aria-hidden="true"></i> Limpar tudo
               </button>
               <button onclick="printMenu()" class="cal-btn-print">
                 <i class="ti ti-printer" aria-hidden="true"></i> Imprimir
               </button>
+              <button onclick="toggleTokenSetup()" class="cal-btn-print" style="margin-left:auto">
+                <i class="ti ti-key" aria-hidden="true"></i> Token
+              </button>
+            </div>
+
+            <!-- Status de sincronização -->
+            <div id="save-status" class="save-status-bar no-token" style="margin-top:10px;font-size:11px;display:flex;align-items:center;gap:5px;color:var(--text2)">
+              <i class="ti ti-device-floppy" aria-hidden="true"></i> Salvo neste navegador
+            </div>
+            <div id="token-status" style="font-size:11px;margin-top:4px"></div>
+
+            <!-- Painel de configuração do token -->
+            <div id="token-setup" style="display:none;margin-top:12px;background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:var(--r);padding:12px 14px">
+              <p style="font-size:12px;font-weight:600;color:var(--blue-text);margin-bottom:6px">
+                <i class="ti ti-info-circle" aria-hidden="true"></i> Token do GitHub
+              </p>
+              <p style="font-size:11px;color:var(--blue-text);margin-bottom:8px;line-height:1.6">
+                Para salvar em qualquer dispositivo, gere um token em:<br>
+                <strong>github.com → Settings → Developer settings → Personal access tokens → Tokens (classic)</strong><br>
+                Permissão necessária: <code style="background:rgba(0,0,0,.08);padding:1px 5px;border-radius:3px">repo</code>
+              </p>
+              <div style="display:flex;gap:6px">
+                <input id="token-input" type="password" placeholder="ghp_xxxxxxxxxxxx"
+                  style="flex:1;font-family:monospace;font-size:12px;padding:6px 10px;border:1px solid var(--blue-bd);border-radius:var(--r);background:var(--surface);color:var(--text)">
+                <button onclick="saveToken()" style="padding:6px 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-family:inherit;font-size:12px;cursor:pointer;font-weight:600">
+                  Salvar
+                </button>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-top:6px">
+                <button onclick="clearToken()" style="font-size:11px;color:var(--red-text);background:none;border:none;cursor:pointer;font-family:inherit">
+                  Remover token salvo
+                </button>
+              </div>
             </div>
           </div>
 
