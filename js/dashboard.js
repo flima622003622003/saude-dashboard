@@ -135,12 +135,16 @@ function buildHero(dados, prev) {
   const labels = { ok: 'Glicemia normal', warn: 'Pré-diabético', danger: 'Zona de diabetes' };
   pill.innerHTML = '<span class="status-dot"></span><span>' + labels[pillClass] + '</span>';
 
+  const needleEl = document.getElementById('needle');
+  const heroVal  = document.getElementById('hero-value');
   if (hba1c) {
     const pct   = Math.min(96, Math.max(4, (hba1c - 4.5) / (8.5 - 4.5) * 100));
     const color = hba1c >= 6.5 ? 'var(--red-text)' : hba1c >= 5.7 ? 'var(--amber-text)' : 'var(--green-text)';
-    document.getElementById('needle').style.left = pct + '%';
-    document.getElementById('hero-value').textContent = fmtVal('hba1c', hba1c) + '%';
-    document.getElementById('hero-value').style.color = color;
+    if (needleEl) needleEl.style.left = pct + '%';
+    if (heroVal)  { heroVal.textContent = fmtVal('hba1c', hba1c) + '%'; heroVal.style.color = color; }
+  } else {
+    if (needleEl) needleEl.style.left = '50%';
+    if (heroVal)  { heroVal.textContent = '—'; heroVal.style.color = 'var(--text3)'; }
   }
 }
 
@@ -418,8 +422,10 @@ function buildSectionCards(containerId, dados, prev, prevLabel, keys) {
     const prevVal = prev ? prev[key] : null;
     container.appendChild(buildCard(key, val, prevVal, prevLabel));
   });
-  const section = container.closest('.dyn-section');
-  if (section) section.style.display = any ? '' : 'none';
+  // Não esconde a seção — mostra mesmo sem dados no exame atual
+  if (!any) {
+    container.innerHTML = '<p style="font-size:12px;color:var(--text3);padding:8px 4px;font-style:italic">Sem dados neste exame</p>';
+  }
 }
 
 /* ── Glicemia ───────────────────────────────────────────────────── */
@@ -467,8 +473,10 @@ function buildMarkersGrid(id, dados, prev, prevLabel, keys) {
       '<div><div class="mr-val">' + fmtVal(key, val) + '</div><div class="mr-unit">' + m.unit + '</div>' + trendHtml + '</div>';
     container.appendChild(row);
   });
-  const section = container.closest('.dyn-section');
-  if (section) section.style.display = any ? '' : 'none';
+  // Não esconde a seção — mostra mesmo sem dados no exame atual
+  if (!any) {
+    container.innerHTML = '<p style="font-size:12px;color:var(--text3);padding:8px 4px;font-style:italic">Sem dados neste exame</p>';
+  }
 }
 
 /* ── Dropdowns das seções secundárias ───────────────────────────── */
