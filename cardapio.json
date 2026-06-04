@@ -2,14 +2,6 @@
   "seg": {
     "cafe": [
       {
-        "name": "Peperoni",
-        "group": "moderador"
-      },
-      {
-        "name": "Manteiga de amÃÂªndoas",
-        "group": "moderador"
-      },
-      {
         "name": "Frango",
         "group": "acelerador"
       }
