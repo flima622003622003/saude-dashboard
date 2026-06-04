@@ -97,6 +97,11 @@ function renderAll() {
   buildMarkersGrid('grid-vitamins', dados, prevDados, prevLabel, ['acido_folico','ferro','ferritina','potassio','sodio','acido_urico']);
   buildMarkersGrid('grid-thyroid',  dados, prevDados, prevLabel, ['t4_livre','t3_livre']);
   buildMarkersGrid('grid-other',    dados, prevDados, prevLabel, ['vhs']);
+  buildMarkersGrid('grid-pancreas', dados, prevDados, prevLabel, ['amilase','lipase','lactose_basal','lactose_30min','lactose_60min','anti_transglutaminase_iga','anti_endomisio_iga']);
+  buildSectionCards('cards-pancreas', dados, prevDados, prevLabel, ['amilase','lipase']);
+  buildSectionCards('cards-lactose',  dados, prevDados, prevLabel, ['lactose_basal','lactose_30min','lactose_60min']);
+  buildSectionCards('cards-celiaca',  dados, prevDados, prevLabel, ['anti_transglutaminase_iga']);
+  buildMarkersGrid('grid-celiaca',    dados, prevDados, prevLabel, ['anti_endomisio_iga']);
   buildEvoTable();
 }
 
@@ -260,6 +265,39 @@ const CARD_CONFIG = {
                   scaleMin:0, scaleMax:1, okMax:0.10, warnMax:0.30,
                   labels:['0','0,10','0,30','1,0'],
                   zones:[{cls:'normal',name:'Baixo risco',val:'< 0,10'},{cls:'pre',name:'Moderado',val:'0,10–0,30'},{cls:'dm',name:'Alto risco',val:'> 0,30'}] },
+
+  /* PÂNCREAS */
+  amilase:      { label:'Amilase — pâncreas', unit:'U/L', footer:'Enzima digestiva do pâncreas', footerIcon:'ti-activity',
+                  scaleMin:0, scaleMax:150, okMin:30, okMax:118, dupla:true,
+                  labels:['0','30','118','150'],
+                  zones:[{cls:'pre',name:'Baixa',val:'< 30'},{cls:'normal',name:'Normal',val:'30–118'},{cls:'pre',name:'Elevada',val:'> 118'}] },
+
+  lipase:       { label:'Lipase — pâncreas', unit:'U/L', footer:'Enzima digestiva do pâncreas', footerIcon:'ti-activity',
+                  scaleMin:0, scaleMax:80, okMin:12, okMax:53, dupla:true,
+                  labels:['0','12','53','80'],
+                  zones:[{cls:'pre',name:'Baixa',val:'< 12'},{cls:'normal',name:'Normal',val:'12–53'},{cls:'pre',name:'Elevada',val:'> 53'}] },
+
+  /* LACTOSE */
+  lactose_basal: { label:'Lactose — basal', unit:'mg/dL', footer:'Glicemia antes de ingerir lactose', footerIcon:'ti-droplet',
+                  scaleMin:60, scaleMax:140, okMax:99, warnMax:125,
+                  labels:['60','99','126','140'],
+                  zones:[{cls:'normal',name:'Normal',val:'60–99'},{cls:'pre',name:'Atenção',val:'100–125'},{cls:'dm',name:'Alto',val:'≥ 126'}] },
+
+  lactose_30min: { label:'Lactose — 30 min', unit:'mg/dL', footer:'Elevação esperada: 20–25 mg/dL acima do basal', footerIcon:'ti-droplet',
+                  scaleMin:60, scaleMax:200, okMax:125, warnMax:160,
+                  labels:['60','125','160','200'],
+                  zones:[{cls:'normal',name:'Normal',val:'< 125'},{cls:'pre',name:'Atenção',val:'125–160'},{cls:'dm',name:'Alto',val:'> 160'}] },
+
+  lactose_60min: { label:'Lactose — 60 min', unit:'mg/dL', footer:'Avalia intolerância à lactose', footerIcon:'ti-droplet',
+                  scaleMin:60, scaleMax:200, okMax:125, warnMax:160,
+                  labels:['60','125','160','200'],
+                  zones:[{cls:'normal',name:'Normal',val:'< 125'},{cls:'pre',name:'Atenção',val:'125–160'},{cls:'dm',name:'Alto',val:'> 160'}] },
+
+  /* DOENÇA CELÍACA */
+  anti_transglutaminase_iga: { label:'Anti Transglutaminase IgA', unit:'U/mL', footer:'Marcador de doença celíaca', footerIcon:'ti-microscope',
+                  scaleMin:0, scaleMax:15, okMax:7.0, warnMax:10.0,
+                  labels:['0','7,0','10,0','15'],
+                  zones:[{cls:'normal',name:'Negativo',val:'< 7,0'},{cls:'pre',name:'Indeterminado',val:'7,0–10,0'},{cls:'dm',name:'Positivo',val:'> 10,0'}] },
 
   psa_total:    { label:'PSA — próstata', unit:'ng/mL', footer:'Monitorar anualmente', footerIcon:'ti-microscope',
                   scaleMin:0, scaleMax:8, okMax:4.0, warnMax:6.0,
