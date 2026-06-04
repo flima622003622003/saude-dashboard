@@ -256,11 +256,19 @@ def extract_history(text):
         'pcr_ultrasensivel':     [r'PCR ULTRA SENS[IÍ]VEL\s+(?:Menor que\s+)?([\d,\.]+)'],
         'vhs':                   [r'Velocidade de Hemossedimenta[çc][ãa]o\s+([\d,\.]+)'],
         'ferro':                 [r'FERRO\s+S[EÉ]RICO\s+([\d,\.]+)', r'\bFERRO\b\s+([\d,\.]+)'],
+        'amilase':               [r'AMILASE\s+([\d,\.]+)\s*U/L', r'AMILASE\s+([\d,\.]+)'],
+        'lipase':                [r'LIPASE\s+([\d,\.]+)\s*U/L', r'LIPASE\s+([\d,\.]+)'],
+        'lactose_basal':         [r'Glicose Basal\s*\.+:\s*([\d,\.]+)'],
+        'lactose_30min':         [r'Glicose 30\nMinutos após estímulo\s*\.+:\s*([\d,\.]+)',
+                                  r'Glicose 30\s+Minutos após estímulo\s*\.+:\s*([\d,\.]+)'],
+        'lactose_60min':         [r'Glicose 60\nMinutos após estímulo\s*\.+:\s*([\d,\.]+)',
+                                  r'Glicose 60\s+Minutos após estímulo\s*\.+:\s*([\d,\.]+)'],
+        'anti_transglutaminase_iga': [r'ANTI TRANSGLUTAMINASE.*?Inferior a\s*([\d,\.]+)', r'ANTI TRANSGLUTAMINASE[^\n]*([\d,\.]+)\s*U/mL'],
     }
 
     def exflt(t, pats):
         for p in pats:
-            m = re.search(p, t, re.IGNORECASE)
+            m = re.search(p, t, re.IGNORECASE | re.DOTALL)
             if m:
                 try: return float(m.group(1).replace(',','.'))
                 except: pass
@@ -279,6 +287,12 @@ def extract_history(text):
             v = exflt(text, pats)
             if v is not None:
                 add(main_date, marker, v)
+
+    # Anti-endomísio (resultado qualitativo: 0=Não Reagente, 1=Reagente)
+    m_end = re.search(r'ANTI ENDOMÍSIO.*?(Não Reagente|Reagente)', text, re.DOTALL|re.IGNORECASE)
+    if m_end and main_date:
+        val_end = 0 if 'não' in m_end.group(1).lower() else 1
+        add(main_date, 'anti_endomisio_iga', val_end)
 
     # ── 5. Médico solicitante ─────────────────────────────────────────────────
     sol = re.search(r'SOLICITANTE:\s*([^\r\n]+)', text)
