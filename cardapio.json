@@ -6,8 +6,12 @@
         "group": "moderador"
       },
       {
-        "name": "Manteiga de amÃªndoas",
+        "name": "Manteiga de amÃÂªndoas",
         "group": "moderador"
+      },
+      {
+        "name": "Frango",
+        "group": "acelerador"
       }
     ],
     "almoco": [],
