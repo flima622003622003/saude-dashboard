@@ -97,7 +97,8 @@ function renderAll() {
   buildMarkersGrid('grid-vitamins', dados, prevDados, prevLabel, ['acido_folico','ferro','ferritina','potassio','sodio','acido_urico']);
   buildMarkersGrid('grid-thyroid',  dados, prevDados, prevLabel, ['t4_livre','t3_livre']);
   buildMarkersGrid('grid-other',    dados, prevDados, prevLabel, ['vhs']);
-  buildMarkersGrid('grid-pancreas', dados, prevDados, prevLabel, ['amilase','lipase','lactose_basal','lactose_30min','lactose_60min','anti_transglutaminase_iga','anti_endomisio_iga']);
+  buildSectionCards('cards-pancreas', dados, prevDados, prevLabel, ['amilase','lipase','lactose_basal','lactose_30min','lactose_60min','anti_transglutaminase_iga']);
+  buildMarkersGrid('grid-pancreas',  dados, prevDados, prevLabel, ['anti_endomisio_iga']);
   buildSectionCards('cards-pancreas', dados, prevDados, prevLabel, ['amilase','lipase']);
   buildSectionCards('cards-lactose',  dados, prevDados, prevLabel, ['lactose_basal','lactose_30min','lactose_60min']);
   buildSectionCards('cards-celiaca',  dados, prevDados, prevLabel, ['anti_transglutaminase_iga']);
