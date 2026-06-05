@@ -1,6 +1,11 @@
 {
   "seg": {
-    "cafe": [],
+    "cafe": [
+      {
+        "name": "Frango",
+        "group": "acelerador"
+      }
+    ],
     "almoco": [],
     "lanche": [],
     "jantar": []
