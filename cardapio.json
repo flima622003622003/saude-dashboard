@@ -37,7 +37,16 @@
         "group": "moderador"
       }
     ],
-    "jantar": []
+    "jantar": [
+      {
+        "name": "Óleo de semente de algodão",
+        "group": "retardador"
+      },
+      {
+        "name": "Óleo de girassol",
+        "group": "retardador"
+      }
+    ]
   },
   "ter": {
     "cafe": [],
