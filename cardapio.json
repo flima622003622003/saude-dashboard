@@ -43,7 +43,24 @@
       }
     ],
     "almoco": [],
-    "lanche": [],
+    "lanche": [
+      {
+        "name": "Abacate",
+        "group": "acelerador"
+      },
+      {
+        "name": "Mamão",
+        "group": "moderador"
+      },
+      {
+        "name": "Melão",
+        "group": "moderador"
+      },
+      {
+        "name": "Tangerina",
+        "group": "moderador"
+      }
+    ],
     "jantar": []
   },
   "qua": {
@@ -58,7 +75,24 @@
       }
     ],
     "almoco": [],
-    "lanche": [],
+    "lanche": [
+      {
+        "name": "Abacate",
+        "group": "acelerador"
+      },
+      {
+        "name": "Mamão",
+        "group": "moderador"
+      },
+      {
+        "name": "Melão",
+        "group": "moderador"
+      },
+      {
+        "name": "Tangerina",
+        "group": "moderador"
+      }
+    ],
     "jantar": []
   },
   "qui": {
@@ -73,7 +107,24 @@
       }
     ],
     "almoco": [],
-    "lanche": [],
+    "lanche": [
+      {
+        "name": "Abacate",
+        "group": "acelerador"
+      },
+      {
+        "name": "Mamão",
+        "group": "moderador"
+      },
+      {
+        "name": "Melão",
+        "group": "moderador"
+      },
+      {
+        "name": "Tangerina",
+        "group": "moderador"
+      }
+    ],
     "jantar": []
   },
   "sex": {
@@ -88,7 +139,24 @@
       }
     ],
     "almoco": [],
-    "lanche": [],
+    "lanche": [
+      {
+        "name": "Abacate",
+        "group": "acelerador"
+      },
+      {
+        "name": "Mamão",
+        "group": "moderador"
+      },
+      {
+        "name": "Melão",
+        "group": "moderador"
+      },
+      {
+        "name": "Tangerina",
+        "group": "moderador"
+      }
+    ],
     "jantar": []
   },
   "sab": {
@@ -103,7 +171,24 @@
       }
     ],
     "almoco": [],
-    "lanche": [],
+    "lanche": [
+      {
+        "name": "Abacate",
+        "group": "acelerador"
+      },
+      {
+        "name": "Mamão",
+        "group": "moderador"
+      },
+      {
+        "name": "Melão",
+        "group": "moderador"
+      },
+      {
+        "name": "Tangerina",
+        "group": "moderador"
+      }
+    ],
     "jantar": []
   },
   "dom": {
@@ -118,7 +203,24 @@
       }
     ],
     "almoco": [],
-    "lanche": [],
+    "lanche": [
+      {
+        "name": "Abacate",
+        "group": "acelerador"
+      },
+      {
+        "name": "Mamão",
+        "group": "moderador"
+      },
+      {
+        "name": "Melão",
+        "group": "moderador"
+      },
+      {
+        "name": "Tangerina",
+        "group": "moderador"
+      }
+    ],
     "jantar": []
   }
 }
