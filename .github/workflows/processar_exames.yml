@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'exames/**.pdf'
+  workflow_dispatch:
 
 jobs:
   extrair:
@@ -33,4 +34,3 @@ jobs:
           git add exames_data.json
           git diff --staged --quiet || git commit -m "🤖 Atualiza exames_data.json [$(date '+%d/%m/%Y')]"
           git push
-
