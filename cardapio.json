@@ -29,7 +29,12 @@
         "group": "moderador"
       }
     ],
-    "jantar": []
+    "jantar": [
+      {
+        "name": "Leite em pó",
+        "group": "retardador"
+      }
+    ]
   },
   "ter": {
     "cafe": [
