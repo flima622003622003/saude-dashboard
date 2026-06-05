@@ -1,52 +1,9 @@
 {
   "seg": {
     "cafe": [],
-    "almoco": [
-      {
-        "name": "CamarÃ£o",
-        "group": "acelerador"
-      },
-      {
-        "name": "Frango",
-        "group": "acelerador"
-      },
-      {
-        "name": "Gado",
-        "group": "acelerador"
-      },
-      {
-        "name": "SalmÃ£o",
-        "group": "acelerador"
-      },
-      {
-        "name": "Sardinhas",
-        "group": "acelerador"
-      },
-      {
-        "name": "Leão",
-        "group": "acelerador"
-      },
-      {
-        "name": "Pato",
-        "group": "acelerador"
-      }
-    ],
-    "lanche": [
-      {
-        "name": "Banana verde (de cozinhar)",
-        "group": "moderador"
-      }
-    ],
-    "jantar": [
-      {
-        "name": "Óleo de semente de algodão",
-        "group": "retardador"
-      },
-      {
-        "name": "Óleo de girassol",
-        "group": "retardador"
-      }
-    ]
+    "almoco": [],
+    "lanche": [],
+    "jantar": []
   },
   "ter": {
     "cafe": [],
