@@ -15,6 +15,10 @@
       {
         "name": "Abacate",
         "group": "acelerador"
+      },
+      {
+        "name": "Mamão",
+        "group": "moderador"
       }
     ],
     "jantar": []
