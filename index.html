@@ -455,32 +455,23 @@
                 <span class="food-badge-sub">Priorize sempre</span>
               </div>
 
-              <div class="food-category">🥩 Carnes e Peixes</div>
-              <div class="food-items" data-group="acelerador">Anchovas,Atum,Bacon,Camarão,Caranguejo,Carneiro,Carne de Caça,Coelho,Fígado de Frango,Frango,Gado,Lagosta,Leão,Lula,Mariscos,Merluza,Ostras,Pato,Peixe no geral,Peru,Porco,Rim,Salmão,Sardinhas,Tilápia,Truta</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-carnes-e-peixes')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🥩 Carnes e Peixes</span><i id="fcat--carnes-e-peixes" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--carnes-e-peixes" style="display:none"><div class="food-items" data-group="acelerador">Anchovas,Atum,Bacon,Camarão,Caranguejo,Carneiro,Carne de Caça,Coelho,Fígado de Frango,Frango,Gado,Lagosta,Leão,Lula,Mariscos,Merluza,Ostras,Pato,Peixe no geral,Peru,Porco,Rim,Salmão,Sardinhas,Tilápia,Truta</div></div>
 
-              <div class="food-category">🥚 Ovos e Laticínios</div>
-              <div class="food-items" data-group="acelerador">Leite de coco (não é laticínio),Ovos (clara e gema)</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-ovos-e-laticinios')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🥚 Ovos e Laticínios</span><i id="fcat--ovos-e-laticinios" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--ovos-e-laticinios" style="display:none"><div class="food-items" data-group="acelerador">Leite de coco (não é laticínio),Ovos (clara e gema)</div></div>
 
-              <div class="food-category">🥗 Legumes e Tubérculos</div>
-              <div class="food-items" data-group="acelerador">Agrião,Abobrinha,Alho,Alcachofra,Alface e afins,Algas,Alho,Almeirão,Aspargo,Azeitona,Berinjela,Beterraba,Brócoli,Brotos,Cebola (todas),Cebolinha,Cenoura,Chilis,Cogumelos (todas),Couve de bruxelas,Couve galega,Couve-de-folhas,Couve-flor,Ervilhas,Espinafre,Funcho,Gengibre,Pepino,Pimentão,Rabanete,Repolho,Rúcula,Tomates,Vagém,Zucchini</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-legumes-e-tuberculos')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🥗 Legumes e Tubérculos</span><i id="fcat--legumes-e-tuberculos" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--legumes-e-tuberculos" style="display:none"><div class="food-items" data-group="acelerador">Agrião,Abobrinha,Alho,Alcachofra,Alface e afins,Algas,Alho,Almeirão,Aspargo,Azeitona,Berinjela,Beterraba,Brócoli,Brotos,Cebola (todas),Cebolinha,Cenoura,Chilis,Cogumelos (todas),Couve de bruxelas,Couve galega,Couve-de-folhas,Couve-flor,Ervilhas,Espinafre,Funcho,Gengibre,Pepino,Pimentão,Rabanete,Repolho,Rúcula,Tomates,Vagém,Zucchini</div></div>
 
-              <div class="food-category">🫒 Gorduras e Óleos</div>
-              <div class="food-items" data-group="acelerador">Azeite de dendê,Azeite de oliva,Banha de porco,Ghee,Gordura bovina,Gordura de pato,Manteiga,Manteiga de cacau,Óleo de abacate,Óleo de coco,Óleo de macadâmia,Óleo de peixe</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-gorduras-e-oleos')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🫒 Gorduras e Óleos</span><i id="fcat--gorduras-e-oleos" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--gorduras-e-oleos" style="display:none"><div class="food-items" data-group="acelerador">Azeite de dendê,Azeite de oliva,Banha de porco,Ghee,Gordura bovina,Gordura de pato,Manteiga,Manteiga de cacau,Óleo de abacate,Óleo de coco,Óleo de macadâmia,Óleo de peixe</div></div>
 
-              <div class="food-category">🌰 Nozes, Sementes e Afins</div>
-              <div class="food-items" data-group="acelerador">Gergelim,Linhaça,Semente de abóbora,Semente de chia,Semente de girassol</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-nozes-sementes-e-afins')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🌰 Nozes, Sementes e Afins</span><i id="fcat--nozes-sementes-e-afins" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--nozes-sementes-e-afins" style="display:none"><div class="food-items" data-group="acelerador">Gergelim,Linhaça,Semente de abóbora,Semente de chia,Semente de girassol</div></div>
 
-              <div class="food-category">🍓 Frutas</div>
-              <div class="food-items" data-group="acelerador">Abacate,Amoras,Coco,Cranberry,Framboesa (raspberry),Limão e lima,Mirtilo (blueberry),Morango</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-frutas')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🍓 Frutas</span><i id="fcat--frutas" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--frutas" style="display:none"><div class="food-items" data-group="acelerador">Abacate,Amoras,Coco,Cranberry,Framboesa (raspberry),Limão e lima,Mirtilo (blueberry),Morango</div></div>
 
-              <div class="food-category">🌿 Temperos, Ervas e Afins</div>
-              <div class="food-items" data-group="acelerador">Açafrão,Alecrim,Canela,Coentro,Cominho,Cravo,Curry,Endro,Gengibre,Hortelã,Maionese (caseira),Manjerição,Mostarda (planta),Mostarda (semente),Noz moscada,Orégano,Páprica,Pimenta (todas),Sal,Salsinhas,Stevia,Vinagre,Vinagre balsâmico (sem açúcar)</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-temperos-ervas-e-afins')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🌿 Temperos, Ervas e Afins</span><i id="fcat--temperos-ervas-e-afins" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--temperos-ervas-e-afins" style="display:none"><div class="food-items" data-group="acelerador">Açafrão,Alecrim,Canela,Coentro,Cominho,Cravo,Curry,Endro,Gengibre,Hortelã,Maionese (caseira),Manjerição,Mostarda (planta),Mostarda (semente),Noz moscada,Orégano,Páprica,Pimenta (todas),Sal,Salsinhas,Stevia,Vinagre,Vinagre balsâmico (sem açúcar)</div></div>
 
-              <div class="food-category">🧀 Bebidas e Adoçantes</div>
-              <div class="food-items" data-group="acelerador">Água com gás (natural),Brodo (frango, peixe, gado),Café Preto,Café com leite/óleo de coco,Café com manteiga,Chá (todos),Chá gelado (sem açúcar/adoçante),Kefir,Suco verde (sem açúcar)</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-bebidas-e-adocantes')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🧀 Bebidas e Adoçantes</span><i id="fcat--bebidas-e-adocantes" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--bebidas-e-adocantes" style="display:none"><div class="food-items" data-group="acelerador">Água com gás (natural),Brodo (frango, peixe, gado),Café Preto,Café com leite/óleo de coco,Café com manteiga,Chá (todos),Chá gelado (sem açúcar/adoçante),Kefir,Suco verde (sem açúcar)</div></div>
 
-              <div class="food-category">🍞 Outros</div>
-              <div class="food-items" data-group="acelerador">Chucrute (Sauerkraut),Pão de linhaça</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-outros')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🍞 Outros</span><i id="fcat--outros" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--outros" style="display:none"><div class="food-items" data-group="acelerador">Chucrute (Sauerkraut),Pão de linhaça</div></div>
             </div>
 
             <div class="food-group moderador">
@@ -489,26 +480,19 @@
                 <span class="food-badge-sub">Com moderação</span>
               </div>
 
-              <div class="food-category">🥩 Carnes e Peixes</div>
-              <div class="food-items" data-group="moderador">Peperoni,Presunto,Salame</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-carnes-e-peixes')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🥩 Carnes e Peixes</span><i id="fcat--carnes-e-peixes" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--carnes-e-peixes" style="display:none"><div class="food-items" data-group="moderador">Peperoni,Presunto,Salame</div></div>
 
-              <div class="food-category">🫒 Gorduras e Óleos</div>
-              <div class="food-items" data-group="moderador">Manteiga de amêndoas,Pasta de amendoim</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-gorduras-e-oleos')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🫒 Gorduras e Óleos</span><i id="fcat--gorduras-e-oleos" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--gorduras-e-oleos" style="display:none"><div class="food-items" data-group="moderador">Manteiga de amêndoas,Pasta de amendoim</div></div>
 
-              <div class="food-category">🌾 Grãos e Cereais</div>
-              <div class="food-items" data-group="moderador">Arroz branco,Arroz integral,Arroz selvagem</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-graos-e-cereais')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🌾 Grãos e Cereais</span><i id="fcat--graos-e-cereais" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--graos-e-cereais" style="display:none"><div class="food-items" data-group="moderador">Arroz branco,Arroz integral,Arroz selvagem</div></div>
 
-              <div class="food-category">🥕 Legumes e Tubérculos</div>
-              <div class="food-items" data-group="moderador">Abóbora,Banana verde (de cozinhar),Batata doce,Batata inglesa,Grão de bico,Inhame,Mandioca,Tapioca (mandioca),Taro</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-legumes-e-tuberculos')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🥕 Legumes e Tubérculos</span><i id="fcat--legumes-e-tuberculos" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--legumes-e-tuberculos" style="display:none"><div class="food-items" data-group="moderador">Abóbora,Banana verde (de cozinhar),Batata doce,Batata inglesa,Grão de bico,Inhame,Mandioca,Tapioca (mandioca),Taro</div></div>
 
-              <div class="food-category">💧 Bebidas e Adoçantes</div>
-              <div class="food-items" data-group="moderador">Água de coco,Leite de amêndoas,Suco de fruta natural (sem bolo)</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-bebidas-e-adocantes')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>💧 Bebidas e Adoçantes</span><i id="fcat--bebidas-e-adocantes" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--bebidas-e-adocantes" style="display:none"><div class="food-items" data-group="moderador">Água de coco,Leite de amêndoas,Suco de fruta natural (sem bolo)</div></div>
 
-              <div class="food-category">🌰 Nozes, Sementes e Afins</div>
-              <div class="food-items" data-group="moderador">Amêndoa,Avelã,Castanha de caju,Castanha do pará,Macadâmia,Noz peca,Pistache</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-nozes-sementes-e-afins')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🌰 Nozes, Sementes e Afins</span><i id="fcat--nozes-sementes-e-afins" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--nozes-sementes-e-afins" style="display:none"><div class="food-items" data-group="moderador">Amêndoa,Avelã,Castanha de caju,Castanha do pará,Macadâmia,Noz peca,Pistache</div></div>
 
-              <div class="food-category">🍓 Frutas</div>
-              <div class="food-items" data-group="moderador">Abacaxi,Ameixa,Banana,Açaí,Carambola,Cereja,Damasco,Figo,Fruta do conde,Fruta pão,Goiaba,Grapefruit,Jaca,Kiwi,Laranja,Lichia,Maçã,Mamão,Maracujá,Melancia,Melão,Nectarina,Pêra,Pêssego,Tangerina,Uva</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-frutas')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🍓 Frutas</span><i id="fcat--frutas" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--frutas" style="display:none"><div class="food-items" data-group="moderador">Abacaxi,Ameixa,Banana,Açaí,Carambola,Cereja,Damasco,Figo,Fruta do conde,Fruta pão,Goiaba,Grapefruit,Jaca,Kiwi,Laranja,Lichia,Maçã,Mamão,Maracujá,Melancia,Melão,Nectarina,Pêra,Pêssego,Tangerina,Uva</div></div>
             </div>
 
             <div class="food-group retardador">
@@ -517,26 +501,19 @@
                 <span class="food-badge-sub">Evitar</span>
               </div>
 
-              <div class="food-category">🥩 Carnes e Peixes</div>
-              <div class="food-items" data-group="retardador">Apronto,Salsinha</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-carnes-e-peixes')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🥩 Carnes e Peixes</span><i id="fcat--carnes-e-peixes" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--carnes-e-peixes" style="display:none"><div class="food-items" data-group="retardador">Apronto,Salsinha</div></div>
 
-              <div class="food-category">🫒 Gorduras e Óleos</div>
-              <div class="food-items" data-group="retardador">Margarina,Óleo de amendoim,Óleo de canola,Óleo de girassol,Óleo de milho,Óleo de semente de algodão,Óleo de soja,Óleo vegetal (outros)</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-gorduras-e-oleos')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🫒 Gorduras e Óleos</span><i id="fcat--gorduras-e-oleos" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--gorduras-e-oleos" style="display:none"><div class="food-items" data-group="retardador">Margarina,Óleo de amendoim,Óleo de canola,Óleo de girassol,Óleo de milho,Óleo de semente de algodão,Óleo de soja,Óleo vegetal (outros)</div></div>
 
-              <div class="food-category">🌾 Grãos e Cereais</div>
-              <div class="food-items" data-group="retardador">Aveia,Cuscuz,Granola,Milho,Quinoa,Soja,Trigo (em todas as formas)</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-graos-e-cereais')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🌾 Grãos e Cereais</span><i id="fcat--graos-e-cereais" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--graos-e-cereais" style="display:none"><div class="food-items" data-group="retardador">Aveia,Cuscuz,Granola,Milho,Quinoa,Soja,Trigo (em todas as formas)</div></div>
 
-              <div class="food-category">🥕 Legumes e Tubérculos</div>
-              <div class="food-items" data-group="retardador">Feijão (todos),Lentilha</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-legumes-e-tuberculos')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🥕 Legumes e Tubérculos</span><i id="fcat--legumes-e-tuberculos" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--legumes-e-tuberculos" style="display:none"><div class="food-items" data-group="retardador">Feijão (todos),Lentilha</div></div>
 
-              <div class="food-category">🥚 Ovos e Laticínios</div>
-              <div class="food-items" data-group="retardador">Creme de leite,Iogurte de baixa gordura,Iogurte natural integral,Kefir de leite,Leite condensado,Leite desnatado e afins,Leite em pó,Leite integral (puro/misturado),Queijo Cottage,Queijo de cabra,Queijos,Requeijão,Sorvete,Whey Protein</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-ovos-e-laticinios')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🥚 Ovos e Laticínios</span><i id="fcat--ovos-e-laticinios" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--ovos-e-laticinios" style="display:none"><div class="food-items" data-group="retardador">Creme de leite,Iogurte de baixa gordura,Iogurte natural integral,Kefir de leite,Leite condensado,Leite desnatado e afins,Leite em pó,Leite integral (puro/misturado),Queijo Cottage,Queijo de cabra,Queijos,Requeijão,Sorvete,Whey Protein</div></div>
 
-              <div class="food-category">💧 Bebidas e Adoçantes</div>
-              <div class="food-items" data-group="retardador">Açúcar cristalizado,Açúcar de coco,Açúcar integral,Açúcar mascavo,Agave,Aspartame</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-bebidas-e-adocantes')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>💧 Bebidas e Adoçantes</span><i id="fcat--bebidas-e-adocantes" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--bebidas-e-adocantes" style="display:none"><div class="food-items" data-group="retardador">Açúcar cristalizado,Açúcar de coco,Açúcar integral,Açúcar mascavo,Agave,Aspartame</div></div>
 
-              <div class="food-category">🍞 Outros</div>
-              <div class="food-items" data-group="retardador">Barra de cereal,Barra de proteína,Batata frita,Chips,Massas,Pão (todos),Salgadinhos,Salgados (coxinha, pastel, etc),Sorvetes e cereais matinais,Tortilhas</div>
+              <div class="food-category food-cat-toggle" onclick="toggleFoodCat('-outros')" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span>🍞 Outros</span><i id="fcat--outros" class="ti ti-chevron-down" style="font-size:12px;transition:transform .2s"></i></div><div id="fcatbody--outros" style="display:none"><div class="food-items" data-group="retardador">Barra de cereal,Barra de proteína,Batata frita,Chips,Massas,Pão (todos),Salgadinhos,Salgados (coxinha, pastel, etc),Sorvetes e cereais matinais,Tortilhas</div></div>
             </div>
 
           </div>
