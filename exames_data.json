@@ -36,7 +36,9 @@
       "alt": 26.0,
       "hba1c": 5.8,
       "glicemia_media_estimada": 5.8,
-      "ferritina": 66.6
+      "ferritina": 66.6,
+      "etfg": 90.0,
+      "t4_livre": 4.0
     }
   },
   {
@@ -74,7 +76,7 @@
     "label": "2023-10",
     "mes": 10,
     "ano": 2023,
-    "arquivo": "histórico",
+    "arquivo": "outubro_2023.pdf",
     "solicitante": "JOSE ALBUQUERQUE DE FIGUEIREDO NETO",
     "dados": {
       "eritrocitos": 4.85,
@@ -100,14 +102,20 @@
       "potassio": 3.5,
       "psa_total": 0.85,
       "vitamina_b12": 911.0,
-      "ferritina": 112.8
+      "ferritina": 112.8,
+      "etfg": 90.0,
+      "albumina_creatinina": 4.56,
+      "acido_folico": 12.47,
+      "t4_livre": 20.0,
+      "vhs": 5.0,
+      "ferro": 58.23
     }
   },
   {
     "label": "2024-03",
     "mes": 3,
     "ano": 2024,
-    "arquivo": "histórico",
+    "arquivo": "marco_2024.pdf",
     "solicitante": "JOSE ALBUQUERQUE DE FIGUEIREDO NETO",
     "dados": {
       "eritrocitos": 4.78,
@@ -128,6 +136,7 @@
       "vitamina_d": 36.6,
       "hba1c": 5.6,
       "glicemia_media_estimada": 5.6,
+      "etfg": 88.0,
       "acido_urico": 3.7,
       "creatinina": 0.88,
       "potassio": 4.71,
@@ -263,7 +272,7 @@
     "label": "2026-05",
     "mes": 5,
     "ano": 2026,
-    "arquivo": "maio_2026.pdf",
+    "arquivo": "histórico",
     "solicitante": "RIVADAVIA RAMOS NEIVA FILHO",
     "dados": {
       "glicose": 92.97,
