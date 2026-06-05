@@ -76,6 +76,8 @@ function updateSolicitante() {
 
 /* ── Render tudo com exame ativo ────────────────────────────────── */
 function renderAll() {
+  // Mostra todas as seções antes de avaliar — serão ocultadas se sem dados
+  document.querySelectorAll('.dyn-section').forEach(function(s) { s.style.display = ''; });
   const entry     = ALL_DATA[ACTIVE_IDX];
   const prev      = ACTIVE_IDX > 0 ? ALL_DATA[ACTIVE_IDX - 1] : null;
   const dados     = entry.dados;
@@ -99,7 +101,6 @@ function renderAll() {
   buildMarkersGrid('grid-other',    dados, prevDados, prevLabel, ['vhs']);
   buildSectionCards('cards-pancreas', dados, prevDados, prevLabel, ['amilase','lipase','lactose_basal','lactose_30min','lactose_60min','anti_transglutaminase_iga']);
   buildMarkersGrid('grid-pancreas',  dados, prevDados, prevLabel, ['anti_endomisio_iga']);
-  buildMarkersGrid('grid-celiaca',    dados, prevDados, prevLabel, ['anti_endomisio_iga']);
   buildEvoTable();
 }
 
@@ -419,9 +420,14 @@ function buildSectionCards(containerId, dados, prev, prevLabel, keys) {
     const prevVal = prev ? prev[key] : null;
     container.appendChild(buildCard(key, val, prevVal, prevLabel));
   });
-  // Não esconde a seção — mostra mesmo sem dados no exame atual
-  if (!any) {
-    container.innerHTML = '<p style="font-size:12px;color:var(--text3);padding:8px 4px;font-style:italic">Sem dados neste exame</p>';
+  if (!any) container.innerHTML = '';
+  // Mostra/esconde o dropdown pai inteiro
+  const panel = container.closest('[id$="-panel"]');
+  if (panel) {
+    const secId = panel.id.replace('-panel','');
+    const toggle = document.getElementById(secId + '-toggle');
+    const hasAny = panel.querySelectorAll('.gc-card, .marker-row').length > 0;
+    if (toggle) toggle.closest('.dyn-section').style.display = hasAny ? '' : 'none';
   }
 }
 
@@ -470,9 +476,13 @@ function buildMarkersGrid(id, dados, prev, prevLabel, keys) {
       '<div><div class="mr-val">' + fmtVal(key, val) + '</div><div class="mr-unit">' + m.unit + '</div>' + trendHtml + '</div>';
     container.appendChild(row);
   });
-  // Não esconde a seção — mostra mesmo sem dados no exame atual
-  if (!any) {
-    container.innerHTML = '<p style="font-size:12px;color:var(--text3);padding:8px 4px;font-style:italic">Sem dados neste exame</p>';
+  if (!any) container.innerHTML = '';
+  // Reavalia visibilidade do dropdown pai
+  const panel2 = container.closest('[id$="-panel"]');
+  if (panel2) {
+    const hasAny = panel2.querySelectorAll('.gc-card, .marker-row').length > 0;
+    const secToggle = document.getElementById(panel2.id.replace('-panel','-toggle'));
+    if (secToggle) secToggle.closest('.dyn-section').style.display = hasAny ? '' : 'none';
   }
 }
 
