@@ -1,77 +1,42 @@
 {
   "seg": {
-    "cafe": [
-      {
-        "name": "Anchovas",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "ter": {
-    "cafe": [
-      {
-        "name": "Anchovas",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "qua": {
-    "cafe": [
-      {
-        "name": "Anchovas",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "qui": {
-    "cafe": [
-      {
-        "name": "Anchovas",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "sex": {
-    "cafe": [
-      {
-        "name": "Anchovas",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "sab": {
-    "cafe": [
-      {
-        "name": "Anchovas",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "dom": {
-    "cafe": [
-      {
-        "name": "Anchovas",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
