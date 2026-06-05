@@ -8,6 +8,10 @@
       {
         "name": "Mamão",
         "group": "moderador"
+      },
+      {
+        "name": "Leite em pó",
+        "group": "retardador"
       }
     ],
     "almoco": [],
