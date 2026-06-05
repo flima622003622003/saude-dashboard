@@ -11,37 +11,67 @@
     "jantar": []
   },
   "ter": {
-    "cafe": [],
+    "cafe": [
+      {
+        "name": "Ovos (clara e gema)",
+        "group": "acelerador"
+      }
+    ],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "qua": {
-    "cafe": [],
+    "cafe": [
+      {
+        "name": "Ovos (clara e gema)",
+        "group": "acelerador"
+      }
+    ],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "qui": {
-    "cafe": [],
+    "cafe": [
+      {
+        "name": "Ovos (clara e gema)",
+        "group": "acelerador"
+      }
+    ],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "sex": {
-    "cafe": [],
+    "cafe": [
+      {
+        "name": "Ovos (clara e gema)",
+        "group": "acelerador"
+      }
+    ],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "sab": {
-    "cafe": [],
+    "cafe": [
+      {
+        "name": "Ovos (clara e gema)",
+        "group": "acelerador"
+      }
+    ],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "dom": {
-    "cafe": [],
+    "cafe": [
+      {
+        "name": "Ovos (clara e gema)",
+        "group": "acelerador"
+      }
+    ],
     "almoco": [],
     "lanche": [],
     "jantar": []
