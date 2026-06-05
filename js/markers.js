@@ -43,6 +43,15 @@ const MARKERS = {
   pcr_ultrasensivel:     { label:'Inflamação (PCR)',        unit:'mg/dL', warn_hi:0.10, danger_hi:0.30,           ref:'< 0,10',  section:'other'    },
   psa_total:             { label:'PSA — próstata',          unit:'ng/mL', warn_hi:4.0,                            ref:'< 4,0',   section:'other'    },
   vhs:                   { label:'VHS — inflamação',        unit:'mm/h',  warn_hi:20,                             ref:'< 20',    section:'other'    },
+
+  /* ── PÂNCREAS E DIGESTIVO ──────────────────────────────────────────── */
+  amilase:               { label:'Amilase',                  unit:'U/L',   warn_lo:30,  warn_hi:118,               ref:'30–118',  section:'pancreas' },
+  lipase:                { label:'Lipase',                   unit:'U/L',   warn_lo:12,  warn_hi:53,                ref:'12–53',   section:'pancreas' },
+  lactose_basal:         { label:'Lactose — basal',          unit:'mg/dL', warn_hi:99,  danger_hi:126,             ref:'60–99',   section:'pancreas' },
+  lactose_30min:         { label:'Lactose — 30 min',         unit:'mg/dL', warn_hi:125,                            ref:'< 125',   section:'pancreas' },
+  lactose_60min:         { label:'Lactose — 60 min',         unit:'mg/dL', warn_hi:125,                            ref:'< 125',   section:'pancreas' },
+  anti_transglutaminase_iga: { label:'Anti Transglutaminase IgA', unit:'U/mL', warn_hi:7.0, danger_hi:10.0,        ref:'< 7,0',   section:'pancreas' },
+  anti_endomisio_iga:    { label:'Anti Endomísio IgA',       unit:'',      warn_hi:0.5,                            ref:'Não Reagente', section:'pancreas' },
 };
 
 /* ── Utilitários ───────────────────────────────────────────────── */
