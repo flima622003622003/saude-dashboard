@@ -894,3 +894,6 @@ body {
 
 @keyframes ti-spin { to { transform: rotate(360deg); } }
 .ti-spin { display: inline-block; animation: ti-spin .8s linear infinite; }
+
+/* ── Food category toggle ── */
+.food-cat-toggle:hover { background: rgba(0,0,0,0.03); border-radius: 4px; }
