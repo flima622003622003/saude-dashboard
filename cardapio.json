@@ -1,23 +1,6 @@
 {
   "seg": {
-    "cafe": [
-      {
-        "name": "Ovos (clara e gema)",
-        "group": "acelerador"
-      },
-      {
-        "name": "Semente de abóbora",
-        "group": "acelerador"
-      },
-      {
-        "name": "Abacate",
-        "group": "acelerador"
-      },
-      {
-        "name": "Água com gás (natural)",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
