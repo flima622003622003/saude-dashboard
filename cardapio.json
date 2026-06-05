@@ -1,7 +1,52 @@
 {
   "seg": {
     "cafe": [],
-    "almoco": [],
+    "almoco": [
+      {
+        "name": "Anchovas",
+        "group": "acelerador"
+      },
+      {
+        "name": "Atum",
+        "group": "acelerador"
+      },
+      {
+        "name": "Bacon",
+        "group": "acelerador"
+      },
+      {
+        "name": "Camarão",
+        "group": "acelerador"
+      },
+      {
+        "name": "Caranguejo",
+        "group": "acelerador"
+      },
+      {
+        "name": "Carneiro",
+        "group": "acelerador"
+      },
+      {
+        "name": "Coelho",
+        "group": "acelerador"
+      },
+      {
+        "name": "Carne de Caça",
+        "group": "acelerador"
+      },
+      {
+        "name": "Fígado de Frango",
+        "group": "acelerador"
+      },
+      {
+        "name": "Frango",
+        "group": "acelerador"
+      },
+      {
+        "name": "Gado",
+        "group": "acelerador"
+      }
+    ],
     "lanche": [],
     "jantar": []
   },
