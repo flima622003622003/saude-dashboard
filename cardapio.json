@@ -17,6 +17,10 @@
       {
         "name": "Mariscos",
         "group": "acelerador"
+      },
+      {
+        "name": "Salmão",
+        "group": "acelerador"
       }
     ],
     "lanche": [],
