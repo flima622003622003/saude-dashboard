@@ -286,15 +286,15 @@ const CARD_CONFIG = {
                   labels:['60','99','126','140'],
                   zones:[{cls:'normal',name:'Normal',val:'60–99'},{cls:'pre',name:'Atenção',val:'100–125'},{cls:'dm',name:'Alto',val:'≥ 126'}] },
 
-  lactose_30min: { label:'Lactose — 30 min', unit:'mg/dL', footer:'Elevação esperada: 20–25 mg/dL acima do basal', footerIcon:'ti-droplet',
-                  scaleMin:60, scaleMax:200, okMax:125, warnMax:160,
-                  labels:['60','125','160','200'],
-                  zones:[{cls:'normal',name:'Normal',val:'< 125'},{cls:'pre',name:'Atenção',val:'125–160'},{cls:'dm',name:'Alto',val:'> 160'}] },
+  lactose_30min: { label:'Lactose — 30 min', unit:'mg/dL', footer:'Subida > 20 mg/dL acima do basal = absorção normal (sem intolerância)', footerIcon:'ti-droplet',
+                  scaleMin:60, scaleMax:200, invertida:true, okMin:113, warnMin:93,
+                  labels:['60','93','113','200'],
+                  zones:[{cls:'dm',name:'Intolerância',val:'< 20 de aumento'},{cls:'pre',name:'Duvidoso',val:'20–25 de aumento'},{cls:'normal',name:'Normal',val:'> 25 de aumento'}] },
 
-  lactose_60min: { label:'Lactose — 60 min', unit:'mg/dL', footer:'Avalia intolerância à lactose', footerIcon:'ti-droplet',
-                  scaleMin:60, scaleMax:200, okMax:125, warnMax:160,
-                  labels:['60','125','160','200'],
-                  zones:[{cls:'normal',name:'Normal',val:'< 125'},{cls:'pre',name:'Atenção',val:'125–160'},{cls:'dm',name:'Alto',val:'> 160'}] },
+  lactose_60min: { label:'Lactose — 60 min', unit:'mg/dL', footer:'Subida > 20 mg/dL acima do basal = absorção normal (sem intolerância)', footerIcon:'ti-droplet',
+                  scaleMin:60, scaleMax:200, invertida:true, okMin:113, warnMin:93,
+                  labels:['60','93','113','200'],
+                  zones:[{cls:'dm',name:'Intolerância',val:'< 20 de aumento'},{cls:'pre',name:'Duvidoso',val:'20–25 de aumento'},{cls:'normal',name:'Normal',val:'> 25 de aumento'}] },
 
   /* DOENÇA CELÍACA */
   anti_transglutaminase_iga: { label:'Anti Transglutaminase IgA', unit:'U/mL', footer:'Marcador de doença celíaca', footerIcon:'ti-microscope',
