@@ -3,7 +3,7 @@
     "cafe": [],
     "almoco": [
       {
-        "name": "Camarão",
+        "name": "CamarÃ£o",
         "group": "acelerador"
       },
       {
@@ -15,11 +15,19 @@
         "group": "acelerador"
       },
       {
-        "name": "Salmão",
+        "name": "SalmÃ£o",
         "group": "acelerador"
       },
       {
         "name": "Sardinhas",
+        "group": "acelerador"
+      },
+      {
+        "name": "Leão",
+        "group": "acelerador"
+      },
+      {
+        "name": "Pato",
         "group": "acelerador"
       }
     ],
