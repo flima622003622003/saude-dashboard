@@ -12,6 +12,10 @@
       {
         "name": "Abacate",
         "group": "acelerador"
+      },
+      {
+        "name": "Água com gás (natural)",
+        "group": "acelerador"
       }
     ],
     "almoco": [],
