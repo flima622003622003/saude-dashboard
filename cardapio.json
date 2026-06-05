@@ -1,77 +1,42 @@
 {
   "seg": {
-    "cafe": [
-      {
-        "name": "Frango",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "ter": {
-    "cafe": [
-      {
-        "name": "Frango",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "qua": {
-    "cafe": [
-      {
-        "name": "Frango",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "qui": {
-    "cafe": [
-      {
-        "name": "Frango",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "sex": {
-    "cafe": [
-      {
-        "name": "Frango",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "sab": {
-    "cafe": [
-      {
-        "name": "Frango",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
   },
   "dom": {
-    "cafe": [
-      {
-        "name": "Frango",
-        "group": "acelerador"
-      }
-    ],
+    "cafe": [],
     "almoco": [],
     "lanche": [],
     "jantar": []
