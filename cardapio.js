@@ -264,10 +264,29 @@ function buildFoodItems() {
   });
 }
 
+/* ── Toggle categoria de alimentos ─────────────────────────────── */
+function toggleFoodCat(id) {
+  var body    = document.getElementById('fcatbody-' + id);
+  var chevron = document.getElementById('fcat-' + id);
+  if (!body) return;
+  var open = body.style.display === 'none';
+  body.style.display    = open ? '' : 'none';
+  chevron.style.transform = open ? 'rotate(180deg)' : '';
+}
+
 function filterFoods(query) {
   const q = query.toLowerCase().trim();
   document.querySelectorAll('.food-item').forEach(function(chip) {
     chip.classList.toggle('hidden', !(!q || chip.getAttribute('data-name').toLowerCase().includes(q)));
+  });
+  // Ao buscar, abre todas as categorias com resultado e fecha as vazias
+  document.querySelectorAll('[id^="fcatbody-"]').forEach(function(body) {
+    if (!q) { body.style.display = 'none'; return; }
+    var hasVisible = body.querySelectorAll('.food-item:not(.hidden)').length > 0;
+    body.style.display = hasVisible ? '' : 'none';
+    var id = body.id.replace('fcatbody-','');
+    var chevron = document.getElementById('fcat-' + id);
+    if (chevron) chevron.style.transform = hasVisible ? 'rotate(180deg)' : '';
   });
 }
 
@@ -307,6 +326,7 @@ function buildCalendar() {
     const body = document.createElement('div');
     body.className = 'day-meals';
     body.id = 'meals-' + day.id;
+    body.style.display = 'none'; // começa fechado
 
     MEALS.forEach(function(meal) {
       if (!menu[day.id][meal.id]) menu[day.id][meal.id] = [];
