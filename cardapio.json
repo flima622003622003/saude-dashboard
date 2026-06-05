@@ -11,7 +11,12 @@
       }
     ],
     "almoco": [],
-    "lanche": [],
+    "lanche": [
+      {
+        "name": "Abacate",
+        "group": "acelerador"
+      }
+    ],
     "jantar": []
   },
   "ter": {
