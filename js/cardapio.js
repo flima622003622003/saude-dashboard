@@ -122,7 +122,12 @@ async function loadMenuFromGitHub() {
     if (res.ok) {
       const data = await res.json();
       fileSha = data.sha;
-      const decoded = JSON.parse(atob(data.content.replace(/\n/g, '')));
+      // Decoding UTF-8 correto para suportar acentos
+      const base64 = data.content.replace(/\n/g, '');
+      const binStr2 = atob(base64);
+      const bytes2 = new Uint8Array(binStr2.length);
+      for (var i = 0; i < binStr2.length; i++) bytes2[i] = binStr2.charCodeAt(i);
+      const decoded = JSON.parse(new TextDecoder().decode(bytes2));
       DAYS.forEach(function(d) {
         menu[d.id] = decoded[d.id] || {};
         MEALS.forEach(function(m) {
@@ -154,7 +159,11 @@ async function saveMenuToGitHub() {
     const toSave = {};
     DAYS.forEach(function(d) { toSave[d.id] = menu[d.id] || {}; });
 
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(toSave, null, 2))));
+    // Encoding UTF-8 correto para suportar acentos (ã, ç, ó, etc.)
+  const jsonStr = JSON.stringify(toSave, null, 2);
+  const bytes = new TextEncoder().encode(jsonStr);
+  const binStr = Array.from(bytes).map(function(b) { return String.fromCharCode(b); }).join('');
+  const content = btoa(binStr);
     const url = 'https://api.github.com/repos/' + ghRepo + '/contents/cardapio.json';
 
     const body = {
@@ -255,10 +264,29 @@ function buildFoodItems() {
   });
 }
 
+/* ── Toggle categoria de alimentos ─────────────────────────────── */
+function toggleFoodCat(id) {
+  var body    = document.getElementById('fcatbody-' + id);
+  var chevron = document.getElementById('fcat-' + id);
+  if (!body) return;
+  var open = body.style.display === 'none';
+  body.style.display    = open ? '' : 'none';
+  chevron.style.transform = open ? 'rotate(180deg)' : '';
+}
+
 function filterFoods(query) {
   const q = query.toLowerCase().trim();
   document.querySelectorAll('.food-item').forEach(function(chip) {
     chip.classList.toggle('hidden', !(!q || chip.getAttribute('data-name').toLowerCase().includes(q)));
+  });
+  // Ao buscar, abre todas as categorias com resultado e fecha as vazias
+  document.querySelectorAll('[id^="fcatbody-"]').forEach(function(body) {
+    if (!q) { body.style.display = 'none'; return; }
+    var hasVisible = body.querySelectorAll('.food-item:not(.hidden)').length > 0;
+    body.style.display = hasVisible ? '' : 'none';
+    var id = body.id.replace('fcatbody-','');
+    var chevron = document.getElementById('fcat-' + id);
+    if (chevron) chevron.style.transform = hasVisible ? 'rotate(180deg)' : '';
   });
 }
 
@@ -276,15 +304,29 @@ function buildCalendar() {
 
     const hdr = document.createElement('div');
     hdr.className = 'day-header';
+    var dayIdCopy = day.id;
+    var dayLabelCopy = day.label;
     hdr.innerHTML =
-      '<span>' + day.label + '</span>' +
-      '<span style="font-size:11px;color:var(--text3);font-weight:400" id="count-' + day.id + '"></span>';
+      '<span style="display:flex;align-items:center;gap:8px">' +
+        '<span>' + dayLabelCopy + '</span>' +
+        '<span style="font-size:11px;color:var(--text3);font-weight:400" id="count-' + dayIdCopy + '"></span>' +
+      '</span>';
+    var copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-day-btn';
+    copyBtn.title = 'Repetir este dia em outros dias';
+    copyBtn.innerHTML = '<i class="ti ti-copy" aria-hidden="true"></i> Repetir';
+    copyBtn.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;flex-shrink:0';
+    (function(did) {
+      copyBtn.addEventListener('click', function(e) { e.stopPropagation(); showCopyMenu(did, copyBtn); });
+    })(day.id);
+    hdr.appendChild(copyBtn);
     hdr.addEventListener('click', function() { toggleDay(day.id); });
     block.appendChild(hdr);
 
     const body = document.createElement('div');
     body.className = 'day-meals';
     body.id = 'meals-' + day.id;
+    body.style.display = 'none'; // começa fechado
 
     MEALS.forEach(function(meal) {
       if (!menu[day.id][meal.id]) menu[day.id][meal.id] = [];
@@ -387,3 +429,109 @@ function clearMenu() {
 }
 
 function printMenu() { window.print(); }
+
+/* ── Menu de cópia de dia ───────────────────────────────────────── */
+function showCopyMenu(fromDayId, btn) {
+  var existing = document.getElementById('copy-menu-popup');
+  if (existing) {
+    existing.remove();
+    if (existing.getAttribute('data-from') === fromDayId) return;
+  }
+
+  var fromDay = DAYS.find(function(d) { return d.id === fromDayId; });
+  var otherDays = DAYS.filter(function(d) { return d.id !== fromDayId; });
+
+  var popup = document.createElement('div');
+  popup.id = 'copy-menu-popup';
+  popup.setAttribute('data-from', fromDayId);
+  popup.style.cssText = 'position:absolute;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-lg);box-shadow:0 4px 20px rgba(0,0,0,.12);padding:12px;z-index:500;min-width:220px;right:0;top:100%;margin-top:4px;';
+
+  var title = document.createElement('p');
+  title.style.cssText = 'font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px';
+  title.textContent = 'Copiar ' + fromDay.label + ' para:';
+  popup.appendChild(title);
+
+  otherDays.forEach(function(d) {
+    var lbl = document.createElement('label');
+    lbl.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px;color:var(--text2)';
+    var chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.value = d.id;
+    chk.style.cursor = 'pointer';
+    lbl.appendChild(chk);
+    lbl.appendChild(document.createTextNode(' ' + d.label));
+    popup.appendChild(lbl);
+  });
+
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;margin-top:10px;border-top:1px solid var(--border);padding-top:10px';
+
+  var btnOk = document.createElement('button');
+  btnOk.textContent = 'Copiar';
+  btnOk.style.cssText = 'flex:1;padding:6px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer';
+  btnOk.addEventListener('click', function() { executeCopy(fromDayId, popup); });
+
+  var btnCancel = document.createElement('button');
+  btnCancel.textContent = 'Cancelar';
+  btnCancel.style.cssText = 'padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);font-family:inherit;font-size:12px;cursor:pointer';
+  btnCancel.addEventListener('click', function() { popup.remove(); });
+
+  row.appendChild(btnOk);
+  row.appendChild(btnCancel);
+  popup.appendChild(row);
+
+  var wrap = btn.closest('.day-block');
+  wrap.style.position = 'relative';
+  wrap.appendChild(popup);
+
+  setTimeout(function() {
+    document.addEventListener('click', function closePop(e) {
+      if (!popup.contains(e.target) && e.target !== btn) {
+        popup.remove();
+        document.removeEventListener('click', closePop);
+      }
+    });
+  }, 100);
+}
+
+function executeCopy(fromDayId, popup) {
+  const checks = popup.querySelectorAll('input[type=checkbox]:checked');
+  if (!checks.length) { popup.remove(); return; }
+
+  checks.forEach(function(cb) {
+    const toDayId = cb.value;
+    if (!menu[toDayId]) menu[toDayId] = {};
+    MEALS.forEach(function(meal) {
+      const src = (menu[fromDayId] && menu[fromDayId][meal.id]) ? menu[fromDayId][meal.id] : [];
+      // Mescla sem duplicar
+      if (!menu[toDayId][meal.id]) menu[toDayId][meal.id] = [];
+      src.forEach(function(item) {
+        if (!menu[toDayId][meal.id].some(function(i) { return i.name === item.name; })) {
+          menu[toDayId][meal.id].push({ name: item.name, group: item.group });
+        }
+      });
+      renderSlot(toDayId, meal.id);
+      updateDayCount(toDayId);
+    });
+  });
+
+  popup.remove();
+  scheduleSave();
+
+  // Feedback visual
+  const copied = Array.from(checks).map(function(cb) {
+    return DAYS.find(function(d) { return d.id === cb.value; }).label;
+  }).join(', ');
+  showToast('Copiado para: ' + copied);
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);' +
+    'background:var(--text);color:var(--bg);padding:10px 20px;border-radius:9999px;' +
+    'font-size:13px;font-weight:500;z-index:9999;animation:fadeIn .2s ease;' +
+    'box-shadow:0 4px 12px rgba(0,0,0,.2)';
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 2500);
+}
