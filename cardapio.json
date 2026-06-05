@@ -31,7 +31,12 @@
         "group": "acelerador"
       }
     ],
-    "lanche": [],
+    "lanche": [
+      {
+        "name": "Banana verde (de cozinhar)",
+        "group": "moderador"
+      }
+    ],
     "jantar": []
   },
   "ter": {
