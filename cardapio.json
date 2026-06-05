@@ -4,6 +4,10 @@
       {
         "name": "Ovos (clara e gema)",
         "group": "acelerador"
+      },
+      {
+        "name": "Mamão",
+        "group": "moderador"
       }
     ],
     "almoco": [],
