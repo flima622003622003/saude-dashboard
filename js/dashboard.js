@@ -99,9 +99,6 @@ function renderAll() {
   buildMarkersGrid('grid-other',    dados, prevDados, prevLabel, ['vhs']);
   buildSectionCards('cards-pancreas', dados, prevDados, prevLabel, ['amilase','lipase','lactose_basal','lactose_30min','lactose_60min','anti_transglutaminase_iga']);
   buildMarkersGrid('grid-pancreas',  dados, prevDados, prevLabel, ['anti_endomisio_iga']);
-  buildSectionCards('cards-pancreas', dados, prevDados, prevLabel, ['amilase','lipase']);
-  buildSectionCards('cards-lactose',  dados, prevDados, prevLabel, ['lactose_basal','lactose_30min','lactose_60min']);
-  buildSectionCards('cards-celiaca',  dados, prevDados, prevLabel, ['anti_transglutaminase_iga']);
   buildMarkersGrid('grid-celiaca',    dados, prevDados, prevLabel, ['anti_endomisio_iga']);
   buildEvoTable();
 }
