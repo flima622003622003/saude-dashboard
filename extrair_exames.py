@@ -239,7 +239,14 @@ def extract_history(text):
 
     # ── 4. Valores pontuais do exame atual (laudo individual) ────────────────
     SINGLE_RE = {
-        'glicose':               [r'GLICEMIA EM JEJUM\s+([\d,\.]+)', r'GLICOSE\s+([\d,\.]+)(?:\s|$)'],
+        'glicose':               [r'GLICEMIA EM JEJUM\s+([\d,\.]+)', r'GLICOSE\s+([\d,\.]+)(?:\s|$)', r'Glicose Basal[.\s]+:[\s]*([\d,\.]+)'],
+        'amilase':               [r'AMILASE\s+([\d,\.]+)\s*U', r'^AMILASE\s+([\d,\.]+)'],
+        'lipase':                [r'LIPASE\s+([\d,\.]+)\s*U', r'^LIPASE\s+([\d,\.]+)'],
+        'lactose_basal':         [r'Glicose Basal[.\s]+:\s*([\d,\.]+)'],
+        'lactose_30min':         [r'Glicose 30\s*Minutos[^:]+:\s*([\d,\.]+)', r'Glicose 30 Minutos[^:]+:\s*([\d,\.]+)'],
+        'lactose_60min':         [r'Glicose 60\s*Minutos[^:]+:\s*([\d,\.]+)', r'Glicose 60 Minutos[^:]+:\s*([\d,\.]+)'],
+        'anti_transglutaminase_iga': [r'ANTI TRANSGLUTAMINASE.*?(?:Inferior a\s+)?([\d,\.]+)\s*U/mL'],
+        'anti_endomisio_iga':    [r'IGA\n(N\u00e3o Reagente|N\xc3\xa3o Reagente|N.o Reagente|Reagente)'],
         'hba1c':                 [r'HEMOGLOBINA GLICADA \(A1C\)\s+([\d,\.]+)', r'HEMOGLOBINA GLICADA\s+([\d,\.]+)'],
         'glicemia_media_estimada':[r'Glicemia M[eé]dia Estimada\s+([\d,\.]+)'],
         'ttgo_basal':            [r'Glicemia Basal\s*[:\s]+([\d,\.]+)'],
@@ -274,9 +281,14 @@ def extract_history(text):
                 except: pass
         return None
 
-    # Detecta data principal do exame
+    # Detecta data principal do exame (vários formatos do Lab Cedro)
     main_date = None
-    m = re.search(r'Data/Hora da [Cc]oleta:\s*(\d{2}/\d{2}/\d{4})', text)
+    # Formato: "Data/Hora da Coleta: 28/05/2026 - 07:07" ou "Data/Hora da Coleta: 28/05/2026"
+    # Também: "Data/Hora de coleta: 28/05/2026"
+    m = re.search(r'Data/Hora d[ae] [Cc]oleta:\s*(\d{2}/\d{2}/\d{4})', text)
+    if not m:
+        # Tenta pegar a primeira data da tabela de resultados (linha "Exames DD/MM/YYYY ...")
+        m = re.search(r'Exames\s+(\d{2}/\d{2}/\d{4})', text)
     if m:
         ano, mes = parse_date_str(m.group(1))
         if ano:
