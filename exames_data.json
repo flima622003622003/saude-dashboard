@@ -267,5 +267,22 @@
       "vhs": 3.0,
       "ferro": 108.18
     }
+  },
+  {
+    "label": "2026-05",
+    "mes": 5,
+    "ano": 2026,
+    "arquivo": "histórico",
+    "solicitante": "RIVADAVIA RAMOS NEIVA FILHO",
+    "dados": {
+      "glicose": 92.97,
+      "amilase": 78.29,
+      "lipase": 42.67,
+      "lactose_basal": 92.97,
+      "lactose_30min": 114.05,
+      "lactose_60min": 137.65,
+      "anti_transglutaminase_iga": 0.2,
+      "anti_endomisio_iga": 0
+    }
   }
 ]
