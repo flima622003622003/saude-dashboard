@@ -2,204 +2,221 @@
   "seg": {
     "cafe": [
       {
-        "name": "Ovos (clara e gema)",
+        "name": "Aveia (1 colher de sopa)",
+        "group": "retardador"
+      },
+      {
+        "name": "Chia e Linhaça (1 colher de sopa de cada)",
         "group": "acelerador"
       },
       {
         "name": "Mamão",
         "group": "moderador"
-      },
-      {
-        "name": "Leite em pó",
-        "group": "retardador"
       }
     ],
-    "almoco": [],
-    "lanche": [
+    "almoco": [
       {
-        "name": "Abacate",
+        "name": "Alface",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
-        "group": "moderador"
-      },
+        "name": "Brócoli",
+        "group": "acelerador"
+      }
+    ],
+    "lanche": [
       {
-        "name": "Melão",
-        "group": "moderador"
-      },
-      {
-        "name": "Tangerina",
+        "name": "Kiwi",
         "group": "moderador"
       }
     ],
     "jantar": [
       {
-        "name": "Leite em pó",
-        "group": "retardador"
+        "name": "Tomates",
+        "group": "acelerador"
+      },
+      {
+        "name": "Abobrinha",
+        "group": "acelerador"
       }
     ]
   },
   "ter": {
     "cafe": [
       {
-        "name": "Ovos (clara e gema)",
+        "name": "Aveia (1 colher de sopa)",
+        "group": "retardador"
+      },
+      {
+        "name": "Chia e Linhaça (1 colher de sopa de cada)",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
+        "name": "Ameixa",
         "group": "moderador"
       }
     ],
-    "almoco": [],
-    "lanche": [
+    "almoco": [
       {
-        "name": "Abacate",
+        "name": "Espinafre",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
-        "group": "moderador"
-      },
+        "name": "Couve-de-folhas",
+        "group": "acelerador"
+      }
+    ],
+    "lanche": [
       {
-        "name": "Melão",
-        "group": "moderador"
-      },
-      {
-        "name": "Tangerina",
+        "name": "Maçã (com casca)",
         "group": "moderador"
       }
     ],
     "jantar": [
       {
-        "name": "Leite em pó",
-        "group": "retardador"
+        "name": "Berinjela",
+        "group": "acelerador"
+      },
+      {
+        "name": "Cenoura",
+        "group": "acelerador"
       }
     ]
   },
   "qua": {
     "cafe": [
       {
-        "name": "Ovos (clara e gema)",
+        "name": "Aveia (1 colher de sopa)",
+        "group": "retardador"
+      },
+      {
+        "name": "Chia e Linhaça (1 colher de sopa de cada)",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
+        "name": "Kiwi",
         "group": "moderador"
-      },
-      {
-        "name": "Leite em pó",
-        "group": "retardador"
       }
     ],
-    "almoco": [],
-    "lanche": [
+    "almoco": [
       {
-        "name": "Abacate",
+        "name": "Repolho",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
-        "group": "moderador"
-      },
+        "name": "Rúcula",
+        "group": "acelerador"
+      }
+    ],
+    "lanche": [
       {
-        "name": "Melão",
-        "group": "moderador"
-      },
-      {
-        "name": "Tangerina",
+        "name": "Pêra (com casca)",
         "group": "moderador"
       }
     ],
     "jantar": [
       {
-        "name": "Leite em pó",
-        "group": "retardador"
+        "name": "Pepino",
+        "group": "acelerador"
+      },
+      {
+        "name": "Agrião",
+        "group": "acelerador"
       }
     ]
   },
   "qui": {
     "cafe": [
       {
-        "name": "Ovos (clara e gema)",
+        "name": "Aveia (1 colher de sopa)",
+        "group": "retardador"
+      },
+      {
+        "name": "Chia e Linhaça (1 colher de sopa de cada)",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
+        "name": "Maçã (com casca)",
         "group": "moderador"
       }
     ],
-    "almoco": [],
-    "lanche": [
+    "almoco": [
       {
-        "name": "Abacate",
+        "name": "Tomates",
         "group": "acelerador"
       },
       {
+        "name": "Abobrinha",
+        "group": "acelerador"
+      }
+    ],
+    "lanche": [
+      {
         "name": "Mamão",
-        "group": "moderador"
-      },
-      {
-        "name": "Melão",
-        "group": "moderador"
-      },
-      {
-        "name": "Tangerina",
         "group": "moderador"
       }
     ],
     "jantar": [
       {
-        "name": "Leite em pó",
-        "group": "retardador"
+        "name": "Alface",
+        "group": "acelerador"
+      },
+      {
+        "name": "Brócoli",
+        "group": "acelerador"
       }
     ]
   },
   "sex": {
     "cafe": [
       {
-        "name": "Ovos (clara e gema)",
+        "name": "Aveia (1 colher de sopa)",
+        "group": "retardador"
+      },
+      {
+        "name": "Chia e Linhaça (1 colher de sopa de cada)",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
+        "name": "Pêra (com casca)",
         "group": "moderador"
-      },
-      {
-        "name": "Leite em pó",
-        "group": "retardador"
       }
     ],
-    "almoco": [],
-    "lanche": [
+    "almoco": [
       {
-        "name": "Abacate",
+        "name": "Berinjela",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
-        "group": "moderador"
-      },
+        "name": "Cenoura",
+        "group": "acelerador"
+      }
+    ],
+    "lanche": [
       {
-        "name": "Melão",
-        "group": "moderador"
-      },
-      {
-        "name": "Tangerina",
+        "name": "Ameixa",
         "group": "moderador"
       }
     ],
     "jantar": [
       {
-        "name": "Leite em pó",
-        "group": "retardador"
+        "name": "Espinafre",
+        "group": "acelerador"
+      },
+      {
+        "name": "Couve-de-folhas",
+        "group": "acelerador"
       }
     ]
   },
   "sab": {
     "cafe": [
       {
-        "name": "Ovos (clara e gema)",
+        "name": "Aveia (1 colher de sopa)",
+        "group": "retardador"
+      },
+      {
+        "name": "Chia e Linhaça (1 colher de sopa de cada)",
         "group": "acelerador"
       },
       {
@@ -207,70 +224,72 @@
         "group": "moderador"
       }
     ],
-    "almoco": [],
-    "lanche": [
+    "almoco": [
       {
-        "name": "Abacate",
+        "name": "Pepino",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
-        "group": "moderador"
-      },
+        "name": "Agrião",
+        "group": "acelerador"
+      }
+    ],
+    "lanche": [
       {
-        "name": "Melão",
-        "group": "moderador"
-      },
-      {
-        "name": "Tangerina",
+        "name": "Kiwi",
         "group": "moderador"
       }
     ],
     "jantar": [
       {
-        "name": "Leite em pó",
-        "group": "retardador"
+        "name": "Repolho",
+        "group": "acelerador"
+      },
+      {
+        "name": "Rúcula",
+        "group": "acelerador"
       }
     ]
   },
   "dom": {
     "cafe": [
       {
-        "name": "Ovos (clara e gema)",
+        "name": "Aveia (1 colher de sopa)",
+        "group": "retardador"
+      },
+      {
+        "name": "Chia e Linhaça (1 colher de sopa de cada)",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
+        "name": "Ameixa",
         "group": "moderador"
-      },
-      {
-        "name": "Leite em pó",
-        "group": "retardador"
       }
     ],
-    "almoco": [],
-    "lanche": [
+    "almoco": [
       {
-        "name": "Abacate",
+        "name": "Alface",
         "group": "acelerador"
       },
       {
-        "name": "Mamão",
-        "group": "moderador"
-      },
+        "name": "Brócoli",
+        "group": "acelerador"
+      }
+    ],
+    "lanche": [
       {
-        "name": "Melão",
-        "group": "moderador"
-      },
-      {
-        "name": "Tangerina",
+        "name": "Maçã (com casca)",
         "group": "moderador"
       }
     ],
     "jantar": [
       {
-        "name": "Leite em pó",
-        "group": "retardador"
+        "name": "Tomates",
+        "group": "acelerador"
+      },
+      {
+        "name": "Abobrinha",
+        "group": "acelerador"
       }
     ]
   }
