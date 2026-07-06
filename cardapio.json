@@ -16,22 +16,8 @@
         "group": "acelerador"
       }
     ],
-    "lanche": [
-      {
-        "name": "Kiwi",
-        "group": "moderador"
-      }
-    ],
-    "jantar": [
-      {
-        "name": "Tomates",
-        "group": "acelerador"
-      },
-      {
-        "name": "Abobrinha",
-        "group": "acelerador"
-      }
-    ]
+    "lanche": [],
+    "jantar": []
   },
   "ter": {
     "cafe": [
