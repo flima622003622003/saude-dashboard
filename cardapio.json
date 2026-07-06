@@ -1,16 +1,7 @@
 {
   "seg": {
-    "cafe": [
-      {
-        "name": "Mamão",
-        "group": "moderador"
-      }
-    ],
+    "cafe": [],
     "almoco": [
-      {
-        "name": "Alface",
-        "group": "acelerador"
-      },
       {
         "name": "Brócoli",
         "group": "acelerador"
