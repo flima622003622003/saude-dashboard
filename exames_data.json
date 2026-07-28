@@ -97,6 +97,7 @@
       "vitamina_d": 33.85,
       "hba1c": 5.7,
       "glicemia_media_estimada": 5.7,
+      "albumina_creatinina": 0.3,
       "acido_urico": 9.2,
       "creatinina": 0.7,
       "potassio": 3.5,
@@ -104,7 +105,6 @@
       "vitamina_b12": 911.0,
       "ferritina": 112.8,
       "etfg": 90.0,
-      "albumina_creatinina": 4.56,
       "acido_folico": 12.47,
       "t4_livre": 20.0,
       "vhs": 5.0,
@@ -171,7 +171,7 @@
       "hba1c": 5.9,
       "ggt": 55.63,
       "glicemia_media_estimada": 122.63,
-      "ttgo_60min": null,
+      "ttgo_60min": 1625.0,
       "acido_urico": 4.54,
       "creatinina": 0.86,
       "ferritina": 56.4,
@@ -226,6 +226,7 @@
     "arquivo": "marco_2026.pdf",
     "solicitante": "JOSE ALBUQUERQUE DE FIGUEIREDO NETO",
     "dados": {
+      "albumina_creatinina": 0.3,
       "eritrocitos": 4.74,
       "hemoglobina": 13.1,
       "hematocrito": 39.2,
@@ -259,7 +260,6 @@
       "apo_a1": 162.93,
       "apo_b": 47.55,
       "etfg": 68.0,
-      "albumina_creatinina": 3.24,
       "acido_folico": 11.89,
       "t4_livre": 1.76,
       "t3_livre": 3.15,
@@ -283,6 +283,19 @@
       "lactose_60min": 137.65,
       "anti_transglutaminase_iga": 0.2,
       "anti_endomisio_iga": 0
+    }
+  },
+  {
+    "label": "2026-07",
+    "mes": 7,
+    "ano": 2026,
+    "arquivo": "histórico",
+    "solicitante": "JOSE ALBUQUERQUE DE FIGUEIREDO NETO",
+    "dados": {
+      "glicose": 96.37,
+      "hba1c": 5.82,
+      "glicemia_media_estimada": 120.33,
+      "albumina_creatinina": 2.64
     }
   }
 ]
