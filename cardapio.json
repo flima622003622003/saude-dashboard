@@ -5,6 +5,22 @@
       {
         "name": "Brócoli",
         "group": "acelerador"
+      },
+      {
+        "name": "Cuscuz",
+        "group": "retardador"
+      },
+      {
+        "name": "Milho",
+        "group": "retardador"
+      },
+      {
+        "name": "Soja",
+        "group": "retardador"
+      },
+      {
+        "name": "Quinoa",
+        "group": "retardador"
       }
     ],
     "lanche": [],
